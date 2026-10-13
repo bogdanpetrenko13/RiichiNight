@@ -28,7 +28,8 @@ function compute(): Layout {
     // Hand must fit 14 tiles + drawn gap + melds, and stay modest on short screens.
     const hand = Math.max(26, Math.min(52, (w - 48) / 18, h / 10));
     // Rivals sit beside the board; buttons and hints float above the rack.
-    const board = Math.max(200, Math.min(h - pad - controlsHeight(hand, true), w * 0.46));
+    const topBar = 52;
+    const board = Math.max(200, Math.min(h - pad - topBar - controlsHeight(hand, true), w * 0.46));
     return { orientation: "landscape", vars: vars(hand, board, 13.5) };
   }
   // Portrait uses rival bands (Kemono-style rows) instead of a square board.

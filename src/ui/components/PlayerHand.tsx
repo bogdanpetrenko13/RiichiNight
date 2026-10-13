@@ -56,21 +56,27 @@ export function PlayerHand({
   };
 
   const selectedCode = selected !== null ? all[selected] : null;
-  const hint = selectedCode && settings.showWaitHints ? prompt?.hints?.[selectedCode] ?? findHint(prompt, selectedCode) : null;
+  const selectedHint = selectedCode && settings.showWaitHints ? prompt?.hints?.[selectedCode] ?? findHint(prompt, selectedCode) : null;
+  // Kemono-style wait info: while tenpai, the current waits stay visible.
+  const standingWaits =
+    !selectedHint && player.waits && player.waits.length
+      ? { waits: player.waits.map((tile) => ({ tile, remaining: -1 })), furiten: Boolean(player.furiten) }
+      : null;
+  const hint = selectedHint ?? standingWaits;
 
   return (
     <div className={styles.wrap} data-float={floatingHints || undefined}>
       <div className={styles.hintRow} aria-live="polite">
-        {player.furiten && <span className={styles.furiten}>{t("furiten")}</span>}
+        {player.furiten && !hint && <span className={styles.furiten}>{t("furiten")}</span>}
         {riichiMode ? (
           <span className={styles.hintText}>{t("chooseRiichiTile")}</span>
         ) : hint ? (
           <>
-            <span className={styles.hintText}>{hint.furiten ? t("furiten") : t("waits")}</span>
+            <span className={hint.furiten ? styles.furiten : styles.hintText}>{hint.furiten ? t("furiten") : t("waits")}</span>
             {hint.waits.map((w) => (
               <span key={w.tile} className={styles.wait}>
                 <Tile code={w.tile} size="mini" />
-                <small>×{w.remaining}</small>
+                {w.remaining >= 0 && <small>×{w.remaining}</small>}
               </span>
             ))}
           </>

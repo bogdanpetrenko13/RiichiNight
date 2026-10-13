@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { TileCode } from "../../engine/protocol";
-import { parseTile } from "../tiles";
-import { tileFace } from "../tileFaces";
+import { useApp } from "../../app/AppContext";
+import { faceFile, cornerIndex, parseTile } from "../tiles";
 import styles from "./Tile.module.css";
 
 interface TileProps {
@@ -20,6 +20,8 @@ interface TileProps {
 }
 
 export function Tile({ code, back, size = "hand", selected, dimmed, highlight, sideways, onClick, label, style }: TileProps) {
+  const { settings } = useApp();
+  const variant = settings.tileset === "dark" ? "black" : "regular";
   const classes = [
     styles.tile,
     styles[size],
@@ -38,10 +40,16 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
   }
 
   const t = parseTile(code);
+  const index = cornerIndex(t);
   const face = (
-    <svg className={styles.art} viewBox="0 0 60 80" aria-hidden="true">
-      {tileFace(t)}
-    </svg>
+    <>
+      <img className={styles.art} src={faceFile(t, variant)} alt="" draggable={false} decoding="async" />
+      {index && (
+        <span className={styles.idx} data-red={t.red || undefined}>
+          {index}
+        </span>
+      )}
+    </>
   );
 
   const Tag = onClick ? "button" : "span";

@@ -1,6 +1,7 @@
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { ACHIEVEMENTS } from "../../game/stats";
+import { AppBar } from "../components/Primitives";
 import styles from "./StatsScreen.module.css";
 
 const pct = (a: number, b: number) => (b > 0 ? `${((a / b) * 100).toFixed(1)}%` : "—");
@@ -30,12 +31,8 @@ export function StatsScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="screen">
-      <header className="screen-header">
-        <button className="btn btn-ghost" onClick={onBack}>
-          ← {t("back")}
-        </button>
-        <h1>{t("stats")}</h1>
-      </header>
+      <AppBar title={t("stats")} onBack={onBack} />
+      <div className="screen-body">
 
       <div className={styles.grid}>
         <section className={styles.card}>
@@ -106,6 +103,7 @@ export function StatsScreen({ onBack }: { onBack: () => void }) {
         >
           {t("resetStats")}
         </button>
+      </div>
       </div>
     </div>
   );

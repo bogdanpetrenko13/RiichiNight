@@ -3,6 +3,7 @@ import { useApp } from "../../app/AppContext";
 import { CHARACTERS, type CharacterDef } from "../../game/characters";
 import { Portrait } from "../components/Portrait";
 import { RewardScene } from "../components/RewardScene";
+import { AppBar } from "../components/Primitives";
 import styles from "./Menus.module.css";
 
 export function Gallery({ onBack }: { onBack: () => void }) {
@@ -11,12 +12,8 @@ export function Gallery({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="screen">
-      <header className="screen-header">
-        <button className="btn btn-ghost" onClick={onBack}>
-          ← {t("back")}
-        </button>
-        <h1>{t("gallery")}</h1>
-      </header>
+      <AppBar title={t("gallery")} onBack={onBack} />
+      <div className="screen-body">
       {!settings.rewardScenes ? (
         <p className="muted">{t("galleryDisabled")}</p>
       ) : (
@@ -57,6 +54,7 @@ export function Gallery({ onBack }: { onBack: () => void }) {
         </>
       )}
       {viewing && <RewardScene character={viewing.character} stage={viewing.stage} onDone={() => setViewing(null)} />}
+      </div>
     </div>
   );
 }

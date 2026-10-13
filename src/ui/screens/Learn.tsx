@@ -4,6 +4,7 @@ import type { StringKey } from "../../i18n/strings";
 import { LESSONS } from "../../learn/lessons";
 import { YAKU_GROUPS } from "../../learn/yaku";
 import { TileRow } from "../components/TileRow";
+import { AppBar } from "../components/Primitives";
 import menus from "./Menus.module.css";
 import styles from "./Learn.module.css";
 
@@ -18,12 +19,8 @@ export function Learn({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="screen">
-      <header className="screen-header">
-        <button className="btn btn-ghost" onClick={back}>
-          ← {t("back")}
-        </button>
-        <h1>{lesson !== null ? LESSONS[lesson].title[lang] : t("learn")}</h1>
-      </header>
+      <AppBar title={lesson !== null ? LESSONS[lesson].title[lang] : t("learn")} onBack={back} />
+      <div className="screen-body">
 
       {lesson === null && (
         <div className={menus.segmented} style={{ marginBottom: 16 }}>
@@ -96,6 +93,7 @@ export function Learn({ onBack }: { onBack: () => void }) {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

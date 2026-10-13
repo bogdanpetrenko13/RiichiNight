@@ -60,6 +60,12 @@ def tstr(tile: Optional[Tile]) -> Optional[str]:
     return None if tile is None else str(tile)
 
 
+def Tile_from(code: str) -> Tile:
+    from pyriichi import parse_tiles
+
+    return parse_tiles(code.lstrip("r"))[0]
+
+
 def tile_sort_key(tile: Tile):
     return (tile_index(tile), 0 if tile.is_red_dora else 1)
 
@@ -389,7 +395,10 @@ class Game:
                 "handCount": len(hand.tiles),
             }
             if seat == HUMAN:
-                entry["furiten"] = bool(hand.is_tenpai() and engine.is_furiten(HUMAN))
+                waits = hand.get_machi_tiles() if len(hand.tiles) % 3 == 1 else []
+                entry["furiten"] = bool(waits and engine.is_furiten(HUMAN))
+                # Current waits while it is not the player's discard (Kemono-style wait info).
+                entry["waits"] = sorted({tstr(t) for t in waits}, key=lambda c: (tile_index(Tile_from(c)), c))
             show = seat == HUMAN or (self.round_result is not None and seat in self.round_result.get("winnerSeats", []))
             if show:
                 tiles = list(hand.tiles)

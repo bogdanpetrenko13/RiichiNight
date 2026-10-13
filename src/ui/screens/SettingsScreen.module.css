@@ -1,0 +1,33 @@
+.slider {
+  width: min(180px, 40vw);
+  accent-color: var(--accent);
+}
+
+.preview {
+  margin-top: 10px;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swatch {
+  min-width: 72px;
+  height: 48px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.swatch[data-on] {
+  border-color: var(--accent);
+}

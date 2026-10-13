@@ -5,6 +5,7 @@ import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
 import { RewardChips } from "./RewardChips";
+import { Portrait } from "./Portrait";
 import styles from "./Overlay.module.css";
 
 interface RoundResultProps {
@@ -23,9 +24,23 @@ export function RoundResult({ view, cast, changes, busy, onNext, onWatch }: Roun
   const nameOf = (seat: number) => (seat === 0 ? t("you") : cast[seat - 1] ? charName(cast[seat - 1]) : `#${seat}`);
   const canWatch = settings.rewardScenes && changes.some((c) => c.to > c.from);
 
+  // Close-up: a heroine who won smiles; the one who dealt in to you frowns.
+  let featured: { seat: number; emotion: "happy" | "troubled" } | null = null;
+  if (result.type === "win") {
+    const rivalWinner = result.winners.find((w) => w.seat > 0);
+    if (rivalWinner) featured = { seat: rivalWinner.seat, emotion: "happy" };
+    else if (!result.tsumo && result.from !== null && result.from > 0) featured = { seat: result.from, emotion: "troubled" };
+  }
+  const featuredChar = featured ? cast[featured.seat - 1] : undefined;
+
   return (
     <div className={styles.backdrop}>
       <div className={`panel ${styles.card}`}>
+        {featured && featuredChar && (
+          <div className={styles.closeup} style={{ ["--c" as string]: featuredChar.color }}>
+            <Portrait character={featuredChar} emotion={featured.emotion} size={96} round />
+          </div>
+        )}
         {result.type === "win" ? (
           <WinBody result={result} nameOf={nameOf} yakuName={yakuName} />
         ) : (

@@ -33,3 +33,21 @@ export function doraFromIndicator(code: TileCode): TileCode {
   if (rank <= 4) return `${rank === 4 ? 1 : rank + 1}z`;
   return `${rank === 7 ? 5 : rank + 1}z`;
 }
+
+const HONOR_FILES = ["", "Ton", "Nan", "Shaa", "Pei", "Haku", "Hatsu", "Chun"];
+const SUIT_FILES: Record<Exclude<Suit, "z">, string> = { m: "Man", p: "Pin", s: "Sou" };
+const BASE = typeof window !== "undefined" ? new URL("./", window.location.href).href : "./";
+
+/** Face image from the CC0 FluffyStuff set (public/tiles/<variant>/<name>.svg). */
+export function faceFile(t: ParsedTile, variant: "regular" | "black"): string {
+  const name = t.suit === "z" ? HONOR_FILES[t.rank] : `${SUIT_FILES[t.suit]}${t.rank}${t.red ? "-Dora" : ""}`;
+  return `${BASE}tiles/${variant}/${name}.svg`;
+}
+
+const WIND_INDEX = ["", "E", "S", "W", "N"];
+
+/** Small corner index as on printed sets: rank for suits, letter for winds. */
+export function cornerIndex(t: ParsedTile): string {
+  if (t.suit === "z") return WIND_INDEX[t.rank] ?? "";
+  return String(t.rank);
+}

@@ -182,6 +182,10 @@ const en = {
   rule_agariYame: "Leading dealer may stop in the last hand",
   rule_kiriageMangan: "Round up to mangan (4 han 30 fu)",
   rule_openTanyao: "All simples in open hands (kuitan)",
+  rule_redFives: "Red fives (aka dora)",
+  menu: "Menu",
+  resume: "Resume",
+  savedNote: "The match is saved automatically.",
   rulesNote: "Rule changes apply to new matches.",
 };
 
@@ -368,6 +372,10 @@ const ru: Record<StringKey, string> = {
   rule_agariYame: "Лидирующий дилер может остановиться в последней раздаче",
   rule_kiriageMangan: "Округление до мангана (4 хана 30 фу)",
   rule_openTanyao: "Таняо в открытой руке (куитан)",
+  rule_redFives: "Красные пятёрки (ака-дора)",
+  menu: "Меню",
+  resume: "Продолжить партию",
+  savedNote: "Партия сохраняется автоматически.",
   rulesNote: "Изменения правил действуют в новых партиях.",
 };
 

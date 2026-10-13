@@ -3,7 +3,9 @@ import { useApp } from "../../app/AppContext";
 import { CHARACTERS, isUnlocked } from "../../game/characters";
 import type { StringKey } from "../../i18n/strings";
 import { Portrait } from "../components/Portrait";
-import styles from "./Menus.module.css";
+import { AppBar, IconButton, Segmented } from "../components/Primitives";
+import { Icon } from "../icons";
+import styles from "./Setup.module.css";
 
 interface SetupProps {
   initial: string[];
@@ -11,11 +13,11 @@ interface SetupProps {
   onStart: (cast: string[]) => void;
 }
 
-const SEAT_LABEL = ["", "→", "↑", "←"];
+const SEAT_KEY: StringKey[] = ["wind_south", "wind_west", "wind_north"];
 
-/** Pick three rivals; order of picking fills seats right, top, left. */
+/** Pick three rivals; picking order fills the seats after the player. */
 export function Setup({ initial, onBack, onStart }: SetupProps) {
-  const { t, lang, charName, unlocks, settings, stats } = useApp();
+  const { t, lang, charName, unlocks, settings, stats, updateSettings } = useApp();
   const firstPlaces = stats.placements[0];
   const available = CHARACTERS.filter((c) => isUnlocked(c, firstPlaces));
   const [cast, setCast] = useState<string[]>(() => {
@@ -38,57 +40,75 @@ export function Setup({ initial, onBack, onStart }: SetupProps) {
 
   return (
     <div className="screen">
-      <header className="screen-header">
-        <button className="btn btn-ghost" onClick={onBack}>
-          ← {t("back")}
-        </button>
-        <h1>{t("chooseRivals")}</h1>
-        <button className="btn" onClick={randomize}>
-          🎲 {t("random")}
-        </button>
-      </header>
-      <p className="muted">{t("rivalsHint")}</p>
-      <div className={styles.roster}>
-        {CHARACTERS.map((c) => {
-          const open = isUnlocked(c, firstPlaces);
-          const seatIndex = cast.indexOf(c.id);
-          const progress = unlocks[c.id]?.unlocked ?? 0;
-          return (
-            <button
-              key={c.id}
-              className={styles.card}
-              data-picked={seatIndex >= 0 || undefined}
-              data-locked={!open || undefined}
-              disabled={!open}
-              onClick={() => toggle(c.id)}
-              style={{ ["--c" as string]: c.color }}
-            >
-              <div className={styles.cardPortrait}>
-                <Portrait character={c} size={84} />
-                {!open && <span className={styles.padlock}>🔒</span>}
-              </div>
-              <div className={styles.cardBody}>
-                <div className={styles.cardName}>
-                  {charName(c)}
-                  {seatIndex >= 0 && <span className={styles.seat}>{SEAT_LABEL[seatIndex + 1]}</span>}
+      <AppBar title={t("chooseRivals")} onBack={onBack} right={<IconButton icon="dice" label={t("random")} onClick={randomize} />} />
+      <div className="screen-body">
+        <div className={styles.list}>
+          {CHARACTERS.map((c) => {
+            const open = isUnlocked(c, firstPlaces);
+            const seat = cast.indexOf(c.id);
+            const progress = unlocks[c.id]?.unlocked ?? 0;
+            return (
+              <button
+                key={c.id}
+                className={styles.card}
+                data-picked={seat >= 0 || undefined}
+                data-locked={!open || undefined}
+                disabled={!open}
+                onClick={() => toggle(c.id)}
+                style={{ ["--c" as string]: c.color }}
+              >
+                <div className={styles.portrait}>
+                  <Portrait character={c} size={76} round />
+                  {!open && (
+                    <span className={styles.lock}>
+                      <Icon name="lock" />
+                    </span>
+                  )}
                 </div>
-                <div className={styles.cardMeta}>
-                  {c.title[lang]} · {t("age")} {c.age} · {t(`level_${c.level}` as StringKey)}
+                <div className={styles.body}>
+                  <div className={styles.name}>{charName(c)}</div>
+                  <div className={styles.meta}>
+                    <span className={styles.chip} data-level={c.level}>
+                      {t(`level_${c.level}` as StringKey)}
+                    </span>
+                    <span>{c.title[lang]}</span>
+                    <span>· {c.age}</span>
+                  </div>
+                  <p className={styles.bio}>{open ? c.bio[lang] : t("unlockFirstPlaces")}</p>
+                  {open && settings.rewardScenes && (
+                    <div className={styles.progress}>
+                      <i style={{ width: `${(progress / (c.stages - 1)) * 100}%` }} />
+                    </div>
+                  )}
                 </div>
-                <p className={styles.cardBio}>{open ? c.bio[lang] : t("unlockFirstPlaces")}</p>
-                {open && settings.rewardScenes && (
-                  <div className={styles.cardProgress}>{t("stageOf", { n: progress, total: c.stages - 1 })}</div>
-                )}
-              </div>
-            </button>
-          );
-        })}
+                <span className={styles.badge}>
+                  {seat >= 0 ? (
+                    <>
+                      <Icon name="check" size={16} />
+                      {t(SEAT_KEY[seat])}
+                    </>
+                  ) : null}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
-      <div className={styles.footer}>
-        <button className="btn btn-primary" disabled={cast.length !== 3} onClick={() => onStart(cast)}>
+
+      <footer className={styles.footer}>
+        <Segmented
+          value={settings.gameRules.gameLength}
+          options={[
+            { value: "east", label: t("length_east") },
+            { value: "hanchan", label: t("length_hanchan") },
+          ]}
+          onChange={(v) => updateSettings({ gameRules: { ...settings.gameRules, gameLength: v } })}
+        />
+        <button className="btn btn-primary btn-lg" disabled={cast.length !== 3} onClick={() => onStart(cast)}>
+          <Icon name="play" />
           {t("start")}
         </button>
-      </div>
+      </footer>
     </div>
   );
 }

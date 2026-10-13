@@ -37,44 +37,58 @@ button {
 }
 
 .btn {
-  min-height: var(--touch);
-  padding: 0 18px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.06);
+  min-height: 48px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
   color: var(--ink);
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.01em;
   cursor: pointer;
   transition:
     transform 120ms var(--ease-out),
     background 160ms,
-    border-color 160ms;
+    box-shadow 160ms;
 }
 
 .btn:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 .btn:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   pointer-events: none;
 }
 
 .btn-primary {
-  background: linear-gradient(180deg, #ff8fb2, var(--sakura));
+  background: linear-gradient(180deg, #ff86a9, var(--accent));
   border-color: transparent;
-  color: #2a0f19;
+  color: var(--accent-ink);
+  box-shadow: 0 8px 22px rgba(255, 111, 152, 0.28);
 }
 
 .btn-gold {
-  background: linear-gradient(180deg, #ffd978, var(--gold));
+  background: linear-gradient(180deg, #ffdc7d, var(--gold));
   border-color: transparent;
   color: #2b1e00;
+  box-shadow: 0 8px 22px rgba(242, 193, 78, 0.3);
 }
 
 .btn-ghost {
   background: transparent;
+  border-color: transparent;
+}
+
+.btn-lg {
+  min-height: 58px;
+  font-size: 18px;
+  border-radius: 18px;
 }
 
 .panel {
@@ -91,6 +105,11 @@ button {
     calc(16px + var(--safe-left));
   display: flex;
   flex-direction: column;
+}
+
+.screen-body {
+  width: min(720px, 100%);
+  margin: 0 auto;
 }
 
 .screen-header {

@@ -120,6 +120,17 @@ def test_rules_reach_engine():
     assert cfg.tobi_enabled is False and cfg.kiriage_mangan is True and cfg.open_tanyao_enabled is False
 
 
+def test_no_red_fives():
+    bridge.new_game(json.dumps({"seed": 4, "rules": {"redFives": False}}))
+    engine = bridge._game.engine
+    tiles = list(engine.tileset._tiles) + [t for p in range(4) for t in engine.get_hand(p).tiles]
+    assert not any(t.is_red_dora for t in tiles)
+    bridge.new_game(json.dumps({"seed": 4}))
+    engine = bridge._game.engine
+    tiles = list(engine.tileset._tiles) + list(engine.tileset._wall) + [t for p in range(4) for t in engine.get_hand(p).tiles]
+    assert sum(1 for t in tiles if t.is_red_dora) == 3
+
+
 def test_stepwise_matches_batch():
     """Driving the AI one action at a time must not change the game."""
     _, wins_a, view_a = play_full_game(5)

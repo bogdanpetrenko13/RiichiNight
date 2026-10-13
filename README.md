@@ -82,6 +82,10 @@ Pyodide. Патч отвечает на те же вопросы через та
 
 ## Арт и озвучка
 
+Лица тайлов взяты из набора [FluffyStuff/riichi-mahjong-tiles](https://github.com/FluffyStuff/riichi-mahjong-tiles)
+(CC0, общественное достояние). Их импортирует `scripts/import-tiles.py` в `public/tiles/`
+(варианты `regular` и `black`), тело тайла рисует CSS.
+
 Сейчас у героинь временный арт из демо-игр движка Ren'Py (лицензия MIT). Его собирает
 `scripts/import-renpy-art.py`, а источники и текст лицензии перечислены в
 `public/characters/CREDITS.md`. Чтобы заменить арт, положите свои файлы с теми же именами.

@@ -28,6 +28,7 @@ export interface GameRules {
   agariYame: boolean;
   kiriageMangan: boolean;
   openTanyao: boolean;
+  redFives: boolean;
 }
 
 export const DEFAULT_GAME_RULES: GameRules = {
@@ -36,6 +37,7 @@ export const DEFAULT_GAME_RULES: GameRules = {
   agariYame: true,
   kiriageMangan: false,
   openTanyao: true,
+  redFives: true,
 };
 
 export interface Meld {
@@ -59,6 +61,8 @@ export interface PlayerView {
   drawn?: TileCode | null;
   /** Human seat only: tenpai but furiten (cannot ron). */
   furiten?: boolean;
+  /** Human seat only: tiles that complete the hand right now (13-tile hand). */
+  waits?: TileCode[];
 }
 
 export interface WaitHint {

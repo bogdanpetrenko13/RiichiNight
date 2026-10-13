@@ -41,11 +41,29 @@
 }
 
 .art {
-  width: 88%;
-  height: 90%;
+  width: 92%;
+  height: 92%;
   display: block;
+  object-fit: contain;
   pointer-events: none;
-  overflow: visible;
+  user-select: none;
+}
+
+.idx {
+  position: absolute;
+  top: calc(var(--tw) * 0.04);
+  left: calc(var(--tw) * 0.07);
+  font-family: var(--font-ui);
+  font-size: calc(var(--tw) * 0.2);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--honor-ink);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.idx[data-red] {
+  color: var(--suit-man);
 }
 
 .back {
@@ -93,3 +111,8 @@
   background: var(--tile-back);
 }
 
+
+/* Corner index is unreadable on the smallest tiles. */
+.mini .idx {
+  display: none;
+}

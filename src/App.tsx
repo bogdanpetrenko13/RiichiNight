@@ -27,6 +27,12 @@ export default function App() {
   const [bootError, setBootError] = useState<string | null>(null);
   const [saved, setSaved] = useState<SavedGame | null>(null);
   const [lastCast, setLastCast] = useState<string[]>(CHARACTERS.slice(0, 3).map((c) => c.id));
+  // Screens opened from the in-game menu return to the table.
+  const [returnTo, setReturnTo] = useState<Screen>("title");
+  const back = () => {
+    setScreen(returnTo);
+    setReturnTo("title");
+  };
 
   const boot = useCallback(() => {
     setBootError(null);
@@ -94,16 +100,26 @@ export default function App() {
       content = <Setup initial={lastCast} onBack={() => setScreen("title")} onStart={startGame} />;
       break;
     case "table":
-      content = <Table game={game} onTitle={toTitle} onAgain={() => startGame(lastCast)} />;
+      content = (
+        <Table
+          game={game}
+          onTitle={toTitle}
+          onAgain={() => startGame(lastCast)}
+          onOpen={(target) => {
+            setReturnTo("table");
+            setScreen(target);
+          }}
+        />
+      );
       break;
     case "gallery":
       content = <Gallery onBack={() => setScreen("title")} />;
       break;
     case "settings":
-      content = <SettingsScreen onBack={() => setScreen("title")} />;
+      content = <SettingsScreen onBack={back} />;
       break;
     case "learn":
-      content = <Learn onBack={() => setScreen("title")} />;
+      content = <Learn onBack={back} />;
       break;
     case "stats":
       content = <StatsScreen onBack={() => setScreen("title")} />;

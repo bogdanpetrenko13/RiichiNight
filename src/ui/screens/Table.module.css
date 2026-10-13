@@ -3,97 +3,79 @@
   height: 100%;
   display: grid;
   overflow: hidden;
-  padding: calc(6px + var(--safe-top)) calc(6px + var(--safe-right)) var(--safe-bottom) calc(6px + var(--safe-left));
-  gap: 6px;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
 
 .table[data-orientation="portrait"] {
   grid-template-columns: 1fr;
   grid-template-rows: auto 1fr auto;
   grid-template-areas:
-    "header"
+    "top"
     "bands"
-    "controls";
-  padding-left: var(--safe-left);
-  padding-right: var(--safe-right);
+    "dock";
 }
 
-/* In portrait the board cell only hosts the player's callout bubble. */
-.table[data-orientation="portrait"] .board {
-  position: absolute;
-  inset: auto 0 30% 0;
-  height: 0;
-  pointer-events: none;
+.table[data-orientation="landscape"] {
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "top top top"
+    "left board right"
+    "dock dock dock";
 }
 
-.header {
-  grid-area: header;
-  min-height: 44px;
-  display: flex;
+/* ---- top bar --------------------------------------------------------------- */
+.topBar {
+  grid-area: top;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
   align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 17px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 6px;
+  background: linear-gradient(180deg, rgba(6, 10, 10, 0.75), rgba(6, 10, 10, 0.35));
+  border-bottom: 1px solid var(--line);
 }
 
+.roundInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+}
+
+.roundInfo b {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.roundInfo span {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* ---- rows (portrait) ------------------------------------------------------- */
 .bands {
   grid-area: bands;
   min-height: 0;
   display: grid;
   grid-template-rows: 1fr 1fr 1fr auto;
-  gap: 10px;
+  gap: 8px;
+  padding-top: 8px;
   overflow: hidden;
 }
 
-.table[data-orientation="landscape"] {
-  grid-template-columns: 1fr auto 1fr;
-  grid-template-rows: 1fr auto;
-  grid-template-areas:
-    "left board right"
-    "controls controls controls";
-}
-
-.menu {
-  position: absolute;
-  top: calc(6px + var(--safe-top));
-  left: calc(6px + var(--safe-left));
-  z-index: 5;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  border: 1px solid var(--felt-line);
-  background: rgba(0, 0, 0, 0.3);
-  color: var(--ink-soft);
-  font-size: 18px;
-}
-
-.rivals {
-  grid-area: rivals;
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  padding-left: 46px;
-}
-
-.top {
-  grid-area: top;
-  position: relative;
-  z-index: 2;
-  display: flex;
-  justify-content: center;
-}
-
+/* ---- landscape ------------------------------------------------------------- */
 .left,
 .right {
   position: relative;
   z-index: 2;
   display: flex;
   align-items: center;
+  padding: 0 10px;
 }
 
 .left {
@@ -118,15 +100,17 @@
   min-height: 0;
 }
 
+/* ---- player's callout ------------------------------------------------------ */
 .myCallout {
   position: absolute;
-  bottom: 8%;
   left: 50%;
+  bottom: 30%;
+  z-index: 6;
   transform: translateX(-50%);
-  padding: 6px 18px;
+  padding: 6px 20px;
   border-radius: 999px;
-  background: var(--sakura);
-  color: #2a0f19;
+  background: var(--accent);
+  color: var(--accent-ink);
   font-weight: 900;
   font-size: 22px;
   animation: pop 1.3s var(--ease-out) forwards;
@@ -150,45 +134,59 @@
   }
 }
 
-.controls {
-  grid-area: controls;
-  /* Always paint above the board, even if the board ever overflows its cell. */
+/* ---- dock: actions + hand -------------------------------------------------- */
+.dock {
+  grid-area: dock;
   position: relative;
-  z-index: 2;
+  z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
   min-width: 0;
 }
 
-.controls {
-  margin: 0 -6px;
+.dockTop {
+  width: 100%;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 4px 8px;
 }
 
 .status {
-  min-height: 18px;
-  font-size: 13px;
+  min-height: 16px;
+  font-size: 12.5px;
+  font-weight: 600;
   color: var(--ink-soft);
 }
 
-/* Landscape: buttons float over the felt above the rack, the status line hides. */
-.actions {
-  width: 100%;
-}
-
-.table[data-orientation="landscape"] .controls {
-  position: relative;
+.table[data-orientation="landscape"] .dockTop {
+  position: absolute;
+  right: 8px;
+  bottom: calc(100% + 4px);
+  width: auto;
+  max-width: 62%;
+  min-height: 0;
+  align-items: flex-end;
 }
 
 .table[data-orientation="landscape"] .status {
   display: none;
 }
 
-.table[data-orientation="landscape"] .actions {
-  position: absolute;
-  right: 12px;
-  bottom: calc(100% + 6px);
-  width: auto;
-  max-width: 60%;
+/* ---- in-game menu ---------------------------------------------------------- */
+.menuList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.menuNote {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-faint);
 }
