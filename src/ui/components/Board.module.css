@@ -22,7 +22,7 @@
 
 .river {
   position: absolute;
-  top: calc(50% + var(--board) * 0.19);
+  top: calc(50% + var(--board) * 0.21);
   left: 50%;
   width: calc(var(--river-tile) * 6 + 5px);
   transform: translateX(-50%);
@@ -35,15 +35,21 @@
 
 .seatLabel {
   position: absolute;
-  top: calc(50% + var(--board) * 0.115);
+  top: calc(50% + var(--board) * 0.158);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: calc(var(--board) * 0.032);
+  font-size: calc(var(--board) * 0.03);
   color: var(--ink-soft);
   white-space: nowrap;
+}
+
+.upright {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .seatLabel[data-current] .wind {
@@ -84,8 +90,8 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: calc(var(--board) * 0.36);
-  height: calc(var(--board) * 0.2);
+  width: calc(var(--board) * 0.29);
+  height: calc(var(--board) * 0.29);
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
@@ -95,18 +101,21 @@
   border-radius: calc(var(--board) * 0.03);
   background: rgba(5, 14, 12, 0.6);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-  font-size: calc(var(--board) * 0.03);
+  font-size: calc(var(--board) * 0.028);
+  text-align: center;
 }
 
 .roundName {
   font-weight: 700;
-  font-size: 1.3em;
+  font-size: 1.35em;
   letter-spacing: 0.04em;
 }
 
 .counters {
   display: flex;
-  gap: 0.9em;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2em;
   color: var(--ink-soft);
 }
 

@@ -90,8 +90,9 @@
 }
 
 .haku {
-  width: 58%;
-  height: 62%;
+  display: block;
+  width: calc(var(--tw) * 0.56);
+  height: calc(var(--tw) * 0.8);
   border: calc(var(--tw) * 0.06) solid #5d86a6;
   border-radius: calc(var(--tw) * 0.06);
 }

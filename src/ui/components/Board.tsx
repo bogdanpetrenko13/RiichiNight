@@ -41,9 +41,12 @@ export function Board({ view, claimFrom }: BoardProps) {
             data-current={view.current === p.seat && view.status !== "round_over" ? "" : undefined}
             data-dealer={round.dealer === p.seat ? "" : undefined}
           >
-            <span className={styles.wind}>{WIND_GLYPH[p.wind]}</span>
-            <span className={styles.score}>{p.score.toLocaleString()}</span>
             {p.riichi && <span className={styles.stick} aria-label="riichi" />}
+            {/* Counter-rotated so the glyph and score always read upright. */}
+            <span className={styles.upright} style={{ transform: `rotate(${-ROTATION[p.seat]}deg)` }}>
+              <span className={styles.wind}>{WIND_GLYPH[p.wind]}</span>
+              {p.seat === 0 && <span className={styles.score}>{p.score.toLocaleString()}</span>}
+            </span>
           </div>
         </div>
       ))}

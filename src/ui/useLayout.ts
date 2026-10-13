@@ -5,21 +5,35 @@ export interface Layout {
   vars: CSSProperties;
 }
 
+/**
+ * Height taken below the board: status line, action bar, wait-hint row, the
+ * hand (tile height + 3D edge) and the lift of a selected tile, plus gaps.
+ */
+function controlsHeight(hand: number): number {
+  const status = 18;
+  const actions = 56;
+  const hint = 34;
+  const tiles = hand * 1.36 + hand * 0.16;
+  const lift = hand * 0.36;
+  const gaps = 20;
+  return status + actions + hint + tiles + lift + gaps;
+}
+
 function compute(): Layout {
   const w = window.innerWidth;
   const h = window.innerHeight;
+  const pad = 12;
   const landscape = w > h * 1.05;
   if (landscape) {
-    const hand = Math.max(26, Math.min(54, (w - 48) / 18));
-    const board = Math.max(220, Math.min(h - hand * 1.36 - 96, w * 0.5));
-    return {
-      orientation: "landscape",
-      vars: vars(hand, board),
-    };
+    // Hand must fit 14 tiles + drawn gap + melds, and stay modest on short screens.
+    const hand = Math.max(26, Math.min(52, (w - 48) / 18, h / 13));
+    const topPanel = 104; // the opposite rival sits above the board
+    const board = Math.max(200, Math.min(h - pad - topPanel - controlsHeight(hand), w * 0.5));
+    return { orientation: "landscape", vars: vars(hand, board) };
   }
   const hand = Math.max(22, Math.min(50, (w - 20) / 15.2));
-  const reserved = 104 /* rivals strip */ + hand * 1.36 + 128 /* actions + gaps */;
-  const board = Math.max(220, Math.min(w - 12, h - reserved));
+  const rivals = 164; // three compact rival cards
+  const board = Math.max(200, Math.min(w - 12, h - pad - rivals - controlsHeight(hand)));
   return { orientation: "portrait", vars: vars(hand, board) };
 }
 
