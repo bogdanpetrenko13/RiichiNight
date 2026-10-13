@@ -37,42 +37,60 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+      - id: deps
+        name: Install dependencies
+        run: |
+          set -o pipefail
+          npm install --no-audit --no-fund 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
-      - name: Engine inside Pyodide (full hanchan)
-        run: npm run test:pyodide
+      - id: smoke
+        name: Engine inside Pyodide (full hanchan)
+        run: |
+          set -o pipefail
+          npm run test:pyodide 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
-      - name: Type-check and build web app
-        run: npm run build
+      - id: web
+        name: Type-check and build web app
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
-      - uses: actions/setup-java@v5
+      - id: java
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
 
-      - uses: android-actions/setup-android@v3
+      - id: sdk
+        uses: android-actions/setup-android@v3
 
-      - name: Add Android platform (first run) and sync
+      - id: cap
+        name: Add Android platform (first run) and sync
         run: |
           set -o pipefail
-          { if [ ! -d android ]; then npx cap add android; fi; npx cap sync android; } 2>&1 | tee "$RUNNER_TEMP/android.log"
+          { if [ ! -d android ]; then npx cap add android; fi; npx cap sync android; } 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
-      - name: Build debug APK
+      - id: gradle
+        name: Build debug APK
         working-directory: android
         run: |
           set -o pipefail
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon 2>&1 | tee -a "$RUNNER_TEMP/android.log"
+          ./gradlew assembleDebug --no-daemon 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
-      # Surfaces the end of the Android log as an annotation, readable without raw logs.
-      - name: Report Android build failure
+      # Raw logs are not always reachable; this puts the step outcomes and the
+      # end of the log into an annotation on the run page.
+      - name: Report failure
         if: failure()
+        env:
+          STEPS: ${{ toJSON(steps) }}
         run: |
-          if [ -f "$RUNNER_TEMP/android.log" ]; then
-            msg=$(grep -v '^\s*$' "$RUNNER_TEMP/android.log" | tail -n 60 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
-            echo "::error title=Android build log (tail)::$msg"
+          outcomes=$(echo "$STEPS" | jq -r 'to_entries[] | "\(.key)=\(.value.outcome)"' | tr '\n' ' ')
+          tail_log=""
+          if [ -f "$RUNNER_TEMP/ci.log" ]; then
+            tail_log=$(grep -v '^\s*$' "$RUNNER_TEMP/ci.log" | tail -n 60 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
           fi
+          echo "::error title=CI failure::steps: ${outcomes}%0A${tail_log}"
 
       # Optional signed release: add ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD,
       # ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD as repository secrets.
