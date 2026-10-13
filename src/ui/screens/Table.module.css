@@ -42,6 +42,8 @@
 
 .rivals {
   grid-area: rivals;
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
@@ -50,12 +52,16 @@
 
 .top {
   grid-area: top;
+  position: relative;
+  z-index: 2;
   display: flex;
   justify-content: center;
 }
 
 .left,
 .right {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
 }
@@ -73,6 +79,7 @@
 .board {
   grid-area: board;
   position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
   min-height: 0;
@@ -112,6 +119,9 @@
 
 .controls {
   grid-area: controls;
+  /* Always paint above the board, even if the board ever overflows its cell. */
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
