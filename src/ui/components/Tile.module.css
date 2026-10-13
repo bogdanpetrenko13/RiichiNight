@@ -139,3 +139,20 @@
   transform: rotate(90deg);
   margin: 0 calc(var(--tw) * 0.18);
 }
+
+/* Flat tile set: no 3D edge, crisp outline. */
+:global(:root[data-tileset="flat"]) .tile {
+  background: var(--bone-50);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.18),
+    0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+:global(:root[data-tileset="flat"]) .back {
+  background: var(--tile-back);
+}
+
+/* Dark tile set: the white dragon frame stays visible. */
+:global(:root[data-tileset="dark"]) .haku {
+  border-color: #8fb4d6;
+}

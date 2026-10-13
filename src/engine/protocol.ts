@@ -21,6 +21,23 @@ export type ActionName =
 
 export type CallKind = "riichi" | "tsumo" | "ron" | "pon" | "chi" | "kan";
 
+/** Rule options (mirrors public/py/rules.py). Apply to new games only. */
+export interface GameRules {
+  gameLength: "east" | "hanchan";
+  tobi: boolean;
+  agariYame: boolean;
+  kiriageMangan: boolean;
+  openTanyao: boolean;
+}
+
+export const DEFAULT_GAME_RULES: GameRules = {
+  gameLength: "hanchan",
+  tobi: true,
+  agariYame: true,
+  kiriageMangan: false,
+  openTanyao: true,
+};
+
 export interface Meld {
   type: "chi_meld" | "pon_meld" | "open_kan" | "closed_kan";
   tiles: TileCode[];
@@ -40,6 +57,8 @@ export interface PlayerView {
   /** Only for the human seat, or a winner when the round is over. */
   hand?: TileCode[];
   drawn?: TileCode | null;
+  /** Human seat only: tenpai but furiten (cannot ron). */
+  furiten?: boolean;
 }
 
 export interface WaitHint {
@@ -104,6 +123,7 @@ export interface GameView {
   status: GameStatus;
   seed: number;
   levels: Level[];
+  rules: GameRules;
   round: {
     wind: Wind;
     number: number;
@@ -144,6 +164,7 @@ export interface HumanCommand {
 export interface NewGameConfig {
   seed?: number;
   levels: Level[];
+  rules?: GameRules;
 }
 
 // ---- worker messages -------------------------------------------------------

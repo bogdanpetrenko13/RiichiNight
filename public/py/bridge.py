@@ -22,9 +22,11 @@ from pyriichi import GameAction, GamePhase, RuleEngine, RuleError, RyuukyokuType
 from pyriichi.player import PublicInfo  # noqa: F401  (kept for future AI variants)
 
 import fastpatch
+import rules as game_rules
 from ai import Brain, tile_index
 
 fastpatch.apply()
+game_rules.apply_patches()
 
 SAVE_VERSION = 1
 HUMAN = 0
@@ -73,8 +75,10 @@ class Game:
             levels.append("normal")
         self.levels = levels[: NUM_PLAYERS - 1]
         self.brains = {i + 1: Brain(self.levels[i], self.rng) for i in range(NUM_PLAYERS - 1)}
+        self.rules = game_rules.normalize(config.get("rules"))
         self.engine = RuleEngine(num_players=NUM_PLAYERS)
         self.engine.start_game()
+        self.engine._game_state = game_rules.make_game_state(self.rules, NUM_PLAYERS)
         self.round_result: Optional[dict] = None
         self.round_start_scores: List[int] = []
         self.events: List[dict] = []
@@ -384,6 +388,8 @@ class Game:
                 "melds": self._melds(seat),
                 "handCount": len(hand.tiles),
             }
+            if seat == HUMAN:
+                entry["furiten"] = bool(hand.is_tenpai() and engine.is_furiten(HUMAN))
             show = seat == HUMAN or (self.round_result is not None and seat in self.round_result.get("winnerSeats", []))
             if show:
                 tiles = list(hand.tiles)
@@ -406,6 +412,7 @@ class Game:
             "status": status,
             "seed": self.seed,
             "levels": self.levels,
+            "rules": self.rules,
             "round": {
                 "wind": gs.round_wind.value,
                 "number": gs.round_number,

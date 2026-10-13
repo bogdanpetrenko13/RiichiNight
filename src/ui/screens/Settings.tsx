@@ -1,14 +1,37 @@
 import { useApp } from "../../app/AppContext";
 import { LANGS, type StringKey } from "../../i18n/strings";
+import type { GameRules } from "../../engine/protocol";
 import type { RewardRules } from "../../game/rewards";
-import type { AiSpeed } from "../../game/storage";
+import { TABLE_THEMES, TILESETS, type AiSpeed, type Settings, type TableTheme } from "../../game/storage";
+import { TileRow } from "../components/TileRow";
 import styles from "./Menus.module.css";
 
 const SPEEDS: AiSpeed[] = ["fast", "normal", "slow"];
-const RULES: (keyof RewardRules)[] = ["tsumoAdvancesAll", "bigHandBonus", "regressOnLoss", "firstPlaceBonus"];
+const REWARD_RULES: (keyof RewardRules)[] = ["tsumoAdvancesAll", "bigHandBonus", "regressOnLoss", "firstPlaceBonus"];
+const GAME_TOGGLES: (keyof Omit<GameRules, "gameLength">)[] = ["tobi", "agariYame", "kiriageMangan", "openTanyao"];
+
+/** Swatch colours for the table themes (mirrors --felt-600 in tokens.css). */
+const FELT: Record<TableTheme, string> = {
+  jade: "#1d3d35",
+  night: "#1a2a52",
+  wine: "#4a1a2a",
+  walnut: "#3f2a18",
+  slate: "#2b3036",
+};
+
+type BoolKey = { [K in keyof Settings]: Settings[K] extends boolean ? K : never }[keyof Settings];
 
 export function SettingsScreen({ onBack }: { onBack: () => void }) {
   const { t, settings, updateSettings, setUnlocks } = useApp();
+
+  const check = (key: BoolKey, label: StringKey) => (
+    <label className={styles.check}>
+      <input type="checkbox" checked={settings[key]} onChange={(e) => updateSettings({ [key]: e.target.checked })} />
+      <span>{t(label)}</span>
+    </label>
+  );
+
+  const setRules = (patch: Partial<GameRules>) => updateSettings({ gameRules: { ...settings.gameRules, ...patch } });
 
   return (
     <div className="screen">
@@ -31,6 +54,38 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
+        {/* ---- appearance ---- */}
+        <h2 className={styles.section}>{t("appearance")}</h2>
+        <div className={styles.field}>
+          <span>{t("tileset")}</span>
+          <div className={styles.segmented}>
+            {TILESETS.map((ts) => (
+              <button key={ts} data-on={settings.tileset === ts || undefined} onClick={() => updateSettings({ tileset: ts })}>
+                {t(`tileset_${ts}` as StringKey)}
+              </button>
+            ))}
+          </div>
+          <TileRow text="123m 5p 9s 1567z" size={30} />
+        </div>
+        <div className={styles.field}>
+          <span>{t("tableTheme")}</span>
+          <div className={styles.swatches}>
+            {TABLE_THEMES.map((th) => (
+              <button
+                key={th}
+                className={styles.swatch}
+                data-on={settings.table === th || undefined}
+                style={{ background: FELT[th] }}
+                onClick={() => updateSettings({ table: th })}
+              >
+                {t(`table_${th}` as StringKey)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ---- gameplay ---- */}
+        <h2 className={styles.section}>{t("gameplay")}</h2>
         <div className={styles.field}>
           <span>{t("aiSpeed")}</span>
           <div className={styles.segmented}>
@@ -41,6 +96,10 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
             ))}
           </div>
         </div>
+        {check("showWaitHints", "waitHints")}
+        {check("autoDiscardRiichi", "autoDiscardRiichi")}
+        {check("dealAnimation", "dealAnimation")}
+        {check("speechBubbles", "speechBubbles")}
 
         <label className={styles.field}>
           <span>{t("voiceVolume")}</span>
@@ -53,16 +112,47 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
             onChange={(e) => updateSettings({ voiceVolume: Number(e.target.value) })}
           />
         </label>
-
-        <label className={styles.check}>
+        <label className={styles.field}>
+          <span>{t("musicVolume")}</span>
           <input
-            type="checkbox"
-            checked={settings.showWaitHints}
-            onChange={(e) => updateSettings({ showWaitHints: e.target.checked })}
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={settings.musicVolume}
+            onChange={(e) => updateSettings({ musicVolume: Number(e.target.value) })}
           />
-          <span>{t("waitHints")}</span>
         </label>
 
+        {/* ---- rules ---- */}
+        <h2 className={styles.section}>{t("gameRules")}</h2>
+        <p className={styles.note}>{t("rulesNote")}</p>
+        <div className={styles.field}>
+          <span>{t("gameLength")}</span>
+          <div className={styles.segmented}>
+            {(["east", "hanchan"] as const).map((len) => (
+              <button
+                key={len}
+                data-on={settings.gameRules.gameLength === len || undefined}
+                onClick={() => setRules({ gameLength: len })}
+              >
+                {t(`length_${len}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+        {GAME_TOGGLES.map((key) => (
+          <label key={key} className={styles.check}>
+            <input
+              type="checkbox"
+              checked={settings.gameRules[key]}
+              onChange={(e) => setRules({ [key]: e.target.checked })}
+            />
+            <span>{t(`rule_${key}` as StringKey)}</span>
+          </label>
+        ))}
+
+        {/* ---- rewards ---- */}
         <label className={styles.check}>
           <input
             type="checkbox"
@@ -84,7 +174,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
         {settings.rewardScenes && (
           <fieldset className={styles.fieldset}>
             <legend>{t("rewardRules")}</legend>
-            {RULES.map((key) => (
+            {REWARD_RULES.map((key) => (
               <label key={key} className={styles.check}>
                 <input
                   type="checkbox"

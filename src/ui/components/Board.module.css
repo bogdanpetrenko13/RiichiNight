@@ -142,3 +142,19 @@
   color: var(--ink-faint);
   font-size: 0.85em;
 }
+
+.river > * {
+  animation: drop 260ms var(--ease-out) both;
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-40%) scale(1.15);
+  }
+}
+
+/* Riichi tile keeps its sideways rotation through the drop. */
+.river > [class*="sideways"] {
+  animation: none;
+}

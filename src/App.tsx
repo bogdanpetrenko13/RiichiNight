@@ -13,8 +13,11 @@ import { Table } from "./ui/screens/Table";
 import { Gallery } from "./ui/screens/Gallery";
 import { SettingsScreen } from "./ui/screens/Settings";
 import { AgeGate } from "./ui/screens/AgeGate";
+import { Learn } from "./ui/screens/Learn";
+import { StatsScreen } from "./ui/screens/StatsScreen";
+import { AchievementToast } from "./ui/components/AchievementToast";
 
-type Screen = "boot" | "title" | "setup" | "table" | "gallery" | "settings";
+type Screen = "boot" | "title" | "setup" | "table" | "gallery" | "settings" | "learn" | "stats";
 
 export default function App() {
   const { ready, settings } = useApp();
@@ -82,6 +85,8 @@ export default function App() {
           }}
           onGallery={() => setScreen("gallery")}
           onSettings={() => setScreen("settings")}
+          onLearn={() => setScreen("learn")}
+          onStats={() => setScreen("stats")}
         />
       );
       break;
@@ -97,11 +102,18 @@ export default function App() {
     case "settings":
       content = <SettingsScreen onBack={() => setScreen("title")} />;
       break;
+    case "learn":
+      content = <Learn onBack={() => setScreen("title")} />;
+      break;
+    case "stats":
+      content = <StatsScreen onBack={() => setScreen("title")} />;
+      break;
   }
 
   return (
     <>
       {content}
+      <AchievementToast />
       {ready && settings.adultConfirmed === null && screen !== "boot" && <AgeGate />}
     </>
   );

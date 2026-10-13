@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ActionName, CallKind, TileCode } from "../../engine/protocol";
 import type { GameController } from "../../game/useGameController";
 import type { CharacterDef } from "../../game/characters";
@@ -13,6 +13,7 @@ import { ActionBar } from "../components/ActionBar";
 import { RoundResult } from "../components/RoundResult";
 import { GameOver } from "../components/GameOver";
 import { RewardScene } from "../components/RewardScene";
+import { CallCutaway } from "../components/CallCutaway";
 import styles from "./Table.module.css";
 
 interface TableProps {
@@ -40,7 +41,11 @@ function scenesFor(changes: StageChange[], cast: CharacterDef[]): Scene[] {
 export function Table({ game, onTitle, onAgain }: TableProps) {
   const { t, settings } = useApp();
   const layout = useLayout();
-  const { view, cast, session, emotions, callouts, roundChanges, endChanges, busy, error } = game;
+  const { view, cast, session, emotions, callouts, speech, cutaway, roundChanges, endChanges, busy, error } = game;
+
+  // Stable handle for timers: the controller object changes identity every render.
+  const gameRef = useRef(game);
+  gameRef.current = game;
 
   const [selected, setSelected] = useState<number | null>(null);
   const [riichiMode, setRiichiMode] = useState(false);
@@ -55,6 +60,37 @@ export function Table({ game, onTitle, onAgain }: TableProps) {
     setRiichiMode(false);
     setChiPicker(false);
   }, [promptKey]);
+
+  // Tiles fly in for a moment after each new deal.
+  const roundIndex = view?.round.index ?? 0;
+  const [dealing, setDealing] = useState(false);
+  useEffect(() => {
+    if (!settings.dealAnimation || !roundIndex) return;
+    setDealing(true);
+    const timer = window.setTimeout(() => setDealing(false), 1100);
+    return () => window.clearTimeout(timer);
+  }, [roundIndex, settings.dealAnimation]);
+
+  // In riichi the only legal move is discarding the drawn tile: do it for the player.
+  const onlyDiscard =
+    view?.status === "human" &&
+    view.players[0].riichi &&
+    view.prompt?.actions.length === 1 &&
+    view.prompt.actions[0] === "discard";
+  const drawnTile = view?.players[0].drawn ?? null;
+  useEffect(() => {
+    if (!settings.autoDiscardRiichi || !onlyDiscard || !drawnTile || busy) return;
+    const timer = window.setTimeout(() => void gameRef.current.act({ action: "discard", tile: drawnTile }), 550);
+    return () => window.clearTimeout(timer);
+  }, [settings.autoDiscardRiichi, onlyDiscard, drawnTile, busy, promptKey]);
+
+  // A rival comments when the player takes a long time.
+  const waitingForHuman = view?.status === "human";
+  useEffect(() => {
+    if (!waitingForHuman) return;
+    const timer = window.setTimeout(() => gameRef.current.sayIdle(), 25000);
+    return () => window.clearTimeout(timer);
+  }, [waitingForHuman, promptKey]);
 
   const calloutBySeat = useMemo(() => {
     const map: Record<number, CallKind> = {};
@@ -86,6 +122,7 @@ export function Table({ game, onTitle, onAgain }: TableProps) {
         callout={calloutBySeat[seat] ?? null}
         active={view.current === seat && view.status === "ai"}
         compact={compact}
+        speech={speech[seat]?.text ?? null}
       />
     );
   };
@@ -148,8 +185,11 @@ export function Table({ game, onTitle, onAgain }: TableProps) {
           onSelect={setSelected}
           onDiscard={(tile) => act("discard", { tile })}
           onRiichi={(tile) => act("riichi", { tile })}
+          dealing={dealing}
         />
       </div>
+
+      {cutaway && <CallCutaway key={cutaway.id} cutaway={cutaway} cast={cast} />}
 
       {showRound && (
         <RoundResult

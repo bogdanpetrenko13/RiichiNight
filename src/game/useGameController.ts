@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getEngine } from "../engine/EngineClient";
 import type { CallKind, GameView, HumanCommand, StepResult } from "../engine/protocol";
 import { useApp } from "../app/AppContext";
-import { voice } from "./audio";
-import { getCharacter, type CharacterDef, type Emotion } from "./characters";
+import { music, voice } from "./audio";
+import { getCharacter, pickLine, type CharacterDef, type Emotion, type SpeechKind } from "./characters";
 import { applyGameEnd, applyRound, freshSession, mergeUnlocks, type SessionStages, type StageChange } from "./rewards";
+import { applyEvents } from "./stats";
 import { clearGame, saveGame, type SavedGame } from "./storage";
 
 export interface Callout {
@@ -13,9 +14,24 @@ export interface Callout {
   kind: CallKind;
 }
 
+export interface Speech {
+  id: number;
+  text: string;
+}
+
+/** Big slanted banner for Ron / Tsumo / Riichi. */
+export interface Cutaway {
+  id: number;
+  seat: number;
+  kind: "ron" | "tsumo" | "riichi";
+}
+
 const STEP_DELAY = { fast: 160, normal: 420, slow: 750 } as const;
 const CALL_PAUSE = 650;
+const CUTAWAY_PAUSE = 1300;
+const SPEECH_MS = 3200;
 const PLAYER_VOICE = "player";
+const MANGAN = 8000;
 
 export interface GameController {
   view: GameView | null;
@@ -23,6 +39,8 @@ export interface GameController {
   session: SessionStages;
   emotions: Record<number, Emotion>;
   callouts: Callout[];
+  speech: Record<number, Speech>;
+  cutaway: Cutaway | null;
   /** Reward changes caused by the last finished hand (shown in the result panel). */
   roundChanges: StageChange[];
   /** Changes from the final placement bonus. */
@@ -33,10 +51,12 @@ export interface GameController {
   resume: (saved: SavedGame) => Promise<void>;
   act: (command: HumanCommand) => Promise<void>;
   nextRound: () => Promise<void>;
+  /** A heroine comments on the human taking long (called by the table). */
+  sayIdle: () => void;
 }
 
 export function useGameController(): GameController {
-  const { settings, unlocks, setUnlocks } = useApp();
+  const { settings, unlocks, setUnlocks, stats, commitStats, lang } = useApp();
   const engine = getEngine();
 
   const [view, setView] = useState<GameView | null>(null);
@@ -44,6 +64,8 @@ export function useGameController(): GameController {
   const [session, setSession] = useState<SessionStages>({});
   const [emotions, setEmotions] = useState<Record<number, Emotion>>({});
   const [callouts, setCallouts] = useState<Callout[]>([]);
+  const [speech, setSpeech] = useState<Record<number, Speech>>({});
+  const [cutaway, setCutaway] = useState<Cutaway | null>(null);
   const [roundChanges, setRoundChanges] = useState<StageChange[]>([]);
   const [endChanges, setEndChanges] = useState<StageChange[]>([]);
   const [busy, setBusy] = useState(false);
@@ -53,18 +75,44 @@ export function useGameController(): GameController {
   const castRef = useRef<CharacterDef[]>([]);
   const sessionRef = useRef<SessionStages>({});
   const unlocksRef = useRef(unlocks);
+  const statsRef = useRef(stats);
+  const settingsRef = useRef(settings);
+  const langRef = useRef(lang);
+  const matchDealIns = useRef(0);
   const busyRef = useRef(false);
-  const calloutId = useRef(1);
-  const lastCallRef = useRef(false);
+  const nextId = useRef(1);
+  const pauseRef = useRef(0);
   unlocksRef.current = unlocks;
+  statsRef.current = stats;
+  settingsRef.current = settings;
+  langRef.current = lang;
 
   const voiceIdFor = (seat: number) => (seat === 0 ? PLAYER_VOICE : castRef.current[seat - 1]?.id);
-
   const setEmotion = (seat: number, e: Emotion) => setEmotions((prev) => ({ ...prev, [seat]: e }));
+
+  const say = useCallback((seat: number, kind: SpeechKind) => {
+    const c = castRef.current[seat - 1];
+    if (!c || !settingsRef.current.speechBubbles) return;
+    const id = nextId.current++;
+    setSpeech((prev) => ({ ...prev, [seat]: { id, text: pickLine(c, langRef.current, kind) } }));
+    window.setTimeout(
+      () =>
+        setSpeech((prev) => {
+          if (prev[seat]?.id !== id) return prev;
+          const next = { ...prev };
+          delete next[seat];
+          return next;
+        }),
+      SPEECH_MS,
+    );
+  }, []);
+
+  const randomRival = () => 1 + Math.floor(Math.random() * Math.max(1, castRef.current.length));
 
   const handleStep = useCallback(
     async (step: StepResult): Promise<void> => {
-      let hadCall = false;
+      let pause = 0;
+      const result = step.view.result;
       for (const ev of step.events) {
         switch (ev.t) {
           case "round_start":
@@ -72,30 +120,51 @@ export function useGameController(): GameController {
             setRoundChanges([]);
             break;
           case "call": {
-            hadCall = true;
-            const id = calloutId.current++;
+            pause = Math.max(pause, CALL_PAUSE);
+            const id = nextId.current++;
             setCallouts((prev) => [...prev, { id, seat: ev.seat, kind: ev.kind }]);
             window.setTimeout(() => setCallouts((prev) => prev.filter((c) => c.id !== id)), 1400);
+            if (ev.kind === "ron" || ev.kind === "tsumo" || ev.kind === "riichi") {
+              pause = CUTAWAY_PAUSE;
+              setCutaway({ id, seat: ev.seat, kind: ev.kind });
+              window.setTimeout(() => setCutaway((c) => (c?.id === id ? null : c)), 1250);
+            }
             const vid = voiceIdFor(ev.seat);
             if (vid) void voice.play(vid, ev.kind);
             if (ev.seat === 0) {
               if (ev.kind === "riichi") for (let s = 1; s <= 3; s++) setEmotion(s, "surprised");
-            } else if (ev.kind === "riichi") setEmotion(ev.seat, "confident");
+            } else if (ev.kind === "riichi") {
+              setEmotion(ev.seat, "confident");
+              if (Math.random() < 0.6) say(ev.seat, "riichi");
+            }
             break;
           }
           case "win": {
-            if (ev.winners.includes(0)) {
-              if (ev.tsumo) for (let s = 1; s <= 3; s++) setEmotion(s, "troubled");
-              else if (ev.from !== null && ev.from > 0) setEmotion(ev.from, "troubled");
+            const humanWin = ev.winners.includes(0);
+            if (humanWin) {
+              const points = result?.type === "win" ? result.winners.find((w) => w.seat === 0)?.points ?? 0 : 0;
+              if (ev.tsumo) {
+                for (let s = 1; s <= 3; s++) setEmotion(s, "troubled");
+                say(randomRival(), "lossTsumo");
+              } else if (ev.from !== null && ev.from > 0) {
+                setEmotion(ev.from, "troubled");
+                say(ev.from, points >= MANGAN ? "lossBig" : "lossRon");
+              }
+            } else if (!ev.tsumo && ev.from !== null && ev.from > 0) {
+              setEmotion(ev.from, "troubled");
+              say(ev.from, "lossRon");
             }
-            for (const w of ev.winners) if (w > 0) setEmotion(w, "happy");
-            const result = step.view.result;
+            for (const w of ev.winners)
+              if (w > 0) {
+                setEmotion(w, "happy");
+                say(w, "pleased");
+              }
             if (result) {
               const { session: next, changes } = applyRound(
                 sessionRef.current,
                 result,
                 castRef.current,
-                settings.rewardRules,
+                settingsRef.current.rewardRules,
               );
               sessionRef.current = next;
               setSession(next);
@@ -104,12 +173,15 @@ export function useGameController(): GameController {
             }
             break;
           }
+          case "draw_game":
+            if (ev.kind === "exhaustive_draw") say(randomRival(), "wallGame");
+            break;
           case "game_end": {
             const { session: next, changes } = applyGameEnd(
               sessionRef.current,
               ev.placement,
               castRef.current,
-              settings.rewardRules,
+              settingsRef.current.rewardRules,
             );
             sessionRef.current = next;
             setSession(next);
@@ -121,7 +193,20 @@ export function useGameController(): GameController {
             break;
         }
       }
-      lastCallRef.current = hadCall;
+
+      if (step.events.length) {
+        const { stats: nextStats, matchDealIns: d } = applyEvents(
+          statsRef.current,
+          step.events,
+          result,
+          matchDealIns.current,
+        );
+        matchDealIns.current = d;
+        statsRef.current = nextStats;
+        commitStats(nextStats);
+      }
+
+      pauseRef.current = pause;
       setView(step.view);
 
       const status = step.view.status;
@@ -135,12 +220,13 @@ export function useGameController(): GameController {
           cast: castRef.current.map((c) => c.id),
           levels: step.view.levels,
           session: sessionRef.current,
+          dealIns: matchDealIns.current,
           blob,
         });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [settings.rewardRules, setUnlocks],
+    [setUnlocks, commitStats, say],
   );
 
   const run = useCallback(
@@ -164,31 +250,37 @@ export function useGameController(): GameController {
   // Opponents move one action at a time so discards are readable.
   useEffect(() => {
     if (!view || view.status !== "ai" || busy) return;
-    const delay = STEP_DELAY[settings.aiSpeed] + (lastCallRef.current ? CALL_PAUSE : 0);
+    const delay = STEP_DELAY[settings.aiSpeed] + pauseRef.current;
     const timer = window.setTimeout(() => {
       void run(() => engine.aiStep());
     }, delay);
     return () => window.clearTimeout(timer);
   }, [view, busy, settings.aiSpeed, run, engine]);
 
-  const begin = (chars: CharacterDef[], stages: SessionStages) => {
+  const begin = (chars: CharacterDef[], stages: SessionStages, dealIns: number) => {
     castRef.current = chars;
     sessionRef.current = stages;
+    matchDealIns.current = dealIns;
     setCast(chars);
     setSession(stages);
     setRoundChanges([]);
     setEndChanges([]);
     setEmotions({});
+    setSpeech({});
+    setCutaway(null);
     voice.unlock();
     voice.preload(PLAYER_VOICE);
     chars.forEach((c) => voice.preload(c.id));
+    music.play("table");
   };
 
   const start = useCallback(
     async (castIds: string[]) => {
       const chars = castIds.map((id) => getCharacter(id)).filter((c): c is CharacterDef => Boolean(c));
-      begin(chars, freshSession(chars));
-      await run(() => engine.newGame({ levels: chars.map((c) => c.level) }));
+      begin(chars, freshSession(chars), 0);
+      await run(() =>
+        engine.newGame({ levels: chars.map((c) => c.level), rules: settingsRef.current.gameRules }),
+      );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [run, engine],
@@ -197,7 +289,7 @@ export function useGameController(): GameController {
   const resume = useCallback(
     async (saved: SavedGame) => {
       const chars = saved.cast.map((id) => getCharacter(id)).filter((c): c is CharacterDef => Boolean(c));
-      begin(chars, saved.session ?? freshSession(chars));
+      begin(chars, saved.session ?? freshSession(chars), saved.dealIns ?? 0);
       await run(() => engine.load(saved.blob));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -207,14 +299,19 @@ export function useGameController(): GameController {
   const act = useCallback(
     async (command: HumanCommand) => {
       voice.unlock();
+      music.resume();
+      pauseRef.current = 0;
       await run(() => engine.act(command));
     },
     [run, engine],
   );
 
   const nextRound = useCallback(async () => {
+    pauseRef.current = 0;
     await run(() => engine.nextRound());
   }, [run, engine]);
+
+  const sayIdle = useCallback(() => say(randomRival(), "idle"), [say]);
 
   return {
     view,
@@ -222,6 +319,8 @@ export function useGameController(): GameController {
     session,
     emotions,
     callouts,
+    speech,
+    cutaway,
     roundChanges,
     endChanges,
     busy,
@@ -230,5 +329,6 @@ export function useGameController(): GameController {
     resume,
     act,
     nextRound,
+    sayIdle,
   };
 }

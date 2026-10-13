@@ -53,10 +53,13 @@ def human_command(game: bridge.Game, brain: Brain):
     return cmd
 
 
-def play_full_game(seed: int, levels=("easy", "normal", "hard"), stepwise: bool = False):
+def play_full_game(seed: int, levels=("easy", "normal", "hard"), stepwise: bool = False, rules=None):
     """stepwise=True drives opponents with ai_step() exactly like the UI does."""
     run = not stepwise
-    step = json.loads(bridge.new_game(json.dumps({"seed": seed, "levels": list(levels)}), run))
+    config = {"seed": seed, "levels": list(levels)}
+    if rules:
+        config["rules"] = rules
+    step = json.loads(bridge.new_game(json.dumps(config), run))
     brain = Brain("normal", random.Random(seed))
     rounds = 0
     wins = []
@@ -101,6 +104,20 @@ def test_full_games():
         rounds, wins, view = play_full_game(seed)
         assert rounds >= 4
         assert view["gameOver"]
+
+
+def test_east_only_game_stays_in_east():
+    for seed in (11, 12, 13):
+        rounds, _, view = play_full_game(seed, rules={"gameLength": "east"})
+        assert view["round"]["wind"] == "east", view["round"]
+        assert view["rules"]["gameLength"] == "east"
+        assert rounds >= 1
+
+
+def test_rules_reach_engine():
+    bridge.new_game(json.dumps({"seed": 1, "rules": {"tobi": False, "kiriageMangan": True, "openTanyao": False}}))
+    cfg = bridge._game.engine.game_state.ruleset
+    assert cfg.tobi_enabled is False and cfg.kiriage_mangan is True and cfg.open_tanyao_enabled is False
 
 
 def test_stepwise_matches_batch():

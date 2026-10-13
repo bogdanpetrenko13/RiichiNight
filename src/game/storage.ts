@@ -2,18 +2,31 @@
 // localStorage on the web). Everything is JSON; the engine snapshot is an
 // opaque base64 string produced by bridge.save().
 import { Preferences } from "@capacitor/preferences";
-import type { Level } from "../engine/protocol";
+import { DEFAULT_GAME_RULES, type GameRules, type Level } from "../engine/protocol";
 import type { Lang } from "../i18n/strings";
 import { DEFAULT_RULES, type RewardRules, type SessionStages, type Unlocks } from "./rewards";
+import { emptyStats, type Stats } from "./stats";
 
 export type AiSpeed = "fast" | "normal" | "slow";
+export type Tileset = "classic" | "ivory" | "dark" | "flat";
+export type TableTheme = "jade" | "night" | "wine" | "walnut" | "slate";
+
+export const TILESETS: Tileset[] = ["classic", "ivory", "dark", "flat"];
+export const TABLE_THEMES: TableTheme[] = ["jade", "night", "wine", "walnut", "slate"];
 
 export interface Settings {
   lang: Lang;
   voiceVolume: number;
   sfxVolume: number;
+  musicVolume: number;
   aiSpeed: AiSpeed;
   showWaitHints: boolean;
+  autoDiscardRiichi: boolean;
+  dealAnimation: boolean;
+  speechBubbles: boolean;
+  tileset: Tileset;
+  table: TableTheme;
+  gameRules: GameRules;
   /** null until the age gate has been answered. */
   adultConfirmed: boolean | null;
   rewardScenes: boolean;
@@ -26,13 +39,20 @@ export interface SavedGame {
   cast: string[];
   levels: Level[];
   session: SessionStages;
+  /** Deal-ins by the human in this match (for the "clean match" achievement). */
+  dealIns?: number;
   blob: string;
 }
+
+/** Achievement id -> unlock timestamp. */
+export type AchievementLog = Record<string, number>;
 
 const KEYS = {
   settings: "settings.v1",
   unlocks: "unlocks.v1",
   game: "game.v1",
+  stats: "stats.v1",
+  achievements: "achievements.v1",
 };
 
 export function defaultSettings(): Settings {
@@ -41,8 +61,15 @@ export function defaultSettings(): Settings {
     lang: ru ? "ru" : "en",
     voiceVolume: 0.9,
     sfxVolume: 0.7,
+    musicVolume: 0.4,
     aiSpeed: "normal",
     showWaitHints: true,
+    autoDiscardRiichi: true,
+    dealAnimation: true,
+    speechBubbles: true,
+    tileset: "classic",
+    table: "jade",
+    gameRules: { ...DEFAULT_GAME_RULES },
     adultConfirmed: null,
     rewardScenes: false,
     rewardRules: { ...DEFAULT_RULES },
@@ -69,6 +96,7 @@ export async function loadSettings(): Promise<Settings> {
     ...base,
     ...stored,
     rewardRules: { ...base.rewardRules, ...(stored?.rewardRules ?? {}) },
+    gameRules: { ...base.gameRules, ...(stored?.gameRules ?? {}) },
   };
 }
 
@@ -79,6 +107,18 @@ export async function loadUnlocks(): Promise<Unlocks> {
 }
 
 export const saveUnlocks = (u: Unlocks) => setJson(KEYS.unlocks, u);
+
+export async function loadStats(): Promise<Stats> {
+  return { ...emptyStats(), ...((await getJson<Partial<Stats>>(KEYS.stats)) ?? {}) };
+}
+
+export const saveStats = (s: Stats) => setJson(KEYS.stats, s);
+
+export async function loadAchievements(): Promise<AchievementLog> {
+  return (await getJson<AchievementLog>(KEYS.achievements)) ?? {};
+}
+
+export const saveAchievements = (a: AchievementLog) => setJson(KEYS.achievements, a);
 
 export async function loadGame(): Promise<SavedGame | null> {
   const g = await getJson<SavedGame>(KEYS.game);

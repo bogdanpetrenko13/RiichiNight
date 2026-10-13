@@ -1,0 +1,117 @@
+.lessonList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 640px;
+}
+
+.lessonList button {
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  border-radius: var(--radius-l);
+  border: 1px solid var(--felt-line);
+  background: rgba(0, 0, 0, 0.25);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.num {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--sakura);
+  color: #2a0f19;
+  font-weight: 900;
+  flex: none;
+}
+
+.lesson {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 640px;
+}
+
+.block p {
+  margin: 0 0 10px;
+  line-height: 1.5;
+  font-size: 16px;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.yaku {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 700px;
+}
+
+.groupTitle {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: var(--sakura);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.yakuItem {
+  border-bottom: 1px solid var(--felt-line);
+  padding: 4px 0;
+}
+
+.yakuItem summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.yakuItem summary::-webkit-details-marker {
+  display: none;
+}
+
+.yakuName {
+  font-weight: 700;
+}
+
+.yakuName small {
+  margin-left: 6px;
+  font-family: var(--font-tile);
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+.han {
+  color: var(--ink-soft);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.yakuItem p {
+  margin: 4px 0 10px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+.yakuItem[open] {
+  padding-bottom: 12px;
+}

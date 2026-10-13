@@ -59,3 +59,43 @@ class VoicePlayer {
 }
 
 export const voice = new VoicePlayer();
+
+/**
+ * Background music by file convention: public/audio/music/<track>.mp3
+ * (e.g. "title", "table"). Missing files simply stay silent.
+ */
+class MusicPlayer {
+  private el: HTMLAudioElement | null = null;
+  private track: string | null = null;
+  private volume = 0.4;
+  private missing = new Set<string>();
+
+  setVolume(v: number) {
+    this.volume = v;
+    if (this.el) this.el.volume = v;
+    if (v <= 0) this.el?.pause();
+    else if (this.el?.paused && this.track) void this.el.play().catch(() => undefined);
+  }
+
+  play(track: string) {
+    if (track === this.track || this.missing.has(track)) return;
+    this.track = track;
+    this.el?.pause();
+    const el = new Audio(`${new URL("./", window.location.href).href}audio/music/${track}.mp3`);
+    el.loop = true;
+    el.volume = this.volume;
+    el.onerror = () => {
+      this.missing.add(track);
+      if (this.el === el) this.el = null;
+    };
+    this.el = el;
+    if (this.volume > 0) void el.play().catch(() => undefined); // autoplay may wait for a tap
+  }
+
+  /** Retry playback after a user gesture (autoplay policies). */
+  resume() {
+    if (this.el && this.el.paused && this.volume > 0) void this.el.play().catch(() => undefined);
+  }
+}
+
+export const music = new MusicPlayer();

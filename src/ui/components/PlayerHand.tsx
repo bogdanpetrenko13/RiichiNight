@@ -12,6 +12,8 @@ interface PlayerHandProps {
   onSelect: (index: number | null) => void;
   onDiscard: (code: TileCode) => void;
   onRiichi: (code: TileCode) => void;
+  /** True for a moment after a new deal: tiles fly in. */
+  dealing?: boolean;
 }
 
 const contains = (list: TileCode[] | undefined, code: TileCode) => Boolean(list?.some((c) => sameType(c, code)));
@@ -20,7 +22,7 @@ const contains = (list: TileCode[] | undefined, code: TileCode) => Boolean(list?
  * The human's hand. Tap a tile to lift it (and see its waits), tap again to
  * discard. In riichi mode only tiles that keep tenpai can be picked.
  */
-export function PlayerHand({ player, prompt, riichiMode, selected, onSelect, onDiscard, onRiichi }: PlayerHandProps) {
+export function PlayerHand({ player, prompt, riichiMode, selected, onSelect, onDiscard, onRiichi, dealing }: PlayerHandProps) {
   const { t, settings } = useApp();
   const tiles = player.hand ?? [];
   const drawn = player.drawn ?? null;
@@ -47,6 +49,7 @@ export function PlayerHand({ player, prompt, riichiMode, selected, onSelect, onD
   return (
     <div className={styles.wrap}>
       <div className={styles.hintRow} aria-live="polite">
+        {player.furiten && <span className={styles.furiten}>{t("furiten")}</span>}
         {riichiMode ? (
           <span className={styles.hintText}>{t("chooseRiichiTile")}</span>
         ) : hint ? (
@@ -62,7 +65,7 @@ export function PlayerHand({ player, prompt, riichiMode, selected, onSelect, onD
         ) : null}
       </div>
       <div className={styles.row}>
-        <div className={styles.tiles}>
+        <div className={styles.tiles} data-dealing={dealing || undefined}>
           {all.map((code, i) => {
             const isDrawn = drawn !== null && i === all.length - 1;
             const ok = allowed(code);
@@ -76,7 +79,10 @@ export function PlayerHand({ player, prompt, riichiMode, selected, onSelect, onD
                 dimmed={(riichiMode || canDiscard) && !ok}
                 highlight={riichiMode ? ok : showsWait}
                 onClick={canDiscard || riichiMode ? () => tap(i) : undefined}
-                style={isDrawn ? { marginLeft: "calc(var(--hand-tile) * 0.4)" } : undefined}
+                style={{
+                  ...(isDrawn ? { marginLeft: "calc(var(--hand-tile) * 0.4)" } : null),
+                  ...(dealing ? { animationDelay: `${i * 40}ms` } : null),
+                }}
               />
             );
           })}

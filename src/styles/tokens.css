@@ -49,3 +49,70 @@
 
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
+/* ---- table themes (data-table on <html>) --------------------------------- */
+:root[data-table="night"] {
+  --felt-900: #070b17;
+  --felt-800: #0c1426;
+  --felt-700: #121d38;
+  --felt-600: #1a2a52;
+  --felt-500: #263a6e;
+}
+
+:root[data-table="wine"] {
+  --felt-900: #14070b;
+  --felt-800: #220c13;
+  --felt-700: #33121d;
+  --felt-600: #4a1a2a;
+  --felt-500: #63263a;
+}
+
+:root[data-table="walnut"] {
+  --felt-900: #120b06;
+  --felt-800: #1e130a;
+  --felt-700: #2c1c10;
+  --felt-600: #3f2a18;
+  --felt-500: #5a3d23;
+}
+
+:root[data-table="slate"] {
+  --felt-900: #0c0e10;
+  --felt-800: #15181b;
+  --felt-700: #1e2226;
+  --felt-600: #2b3036;
+  --felt-500: #3b4249;
+}
+
+/* ---- tile sets (data-tileset on <html>) ----------------------------------- */
+:root[data-tileset="ivory"] {
+  --bone-50: #fff8e6;
+  --bone-100: #f7ebcd;
+  --bone-200: #ebd9ae;
+  --bone-300: #d8c08a;
+  --bone-shadow: #a8884f;
+  --tile-back: #c8642c;
+  --tile-back-edge: #8e4319;
+}
+
+:root[data-tileset="dark"] {
+  --bone-50: #3a3f48;
+  --bone-100: #2f343c;
+  --bone-200: #272b32;
+  --bone-300: #1c1f24;
+  --bone-shadow: #0d0f12;
+  --tile-back: #6b4fa0;
+  --tile-back-edge: #4a3473;
+  --honor-ink: #f1ece2;
+  --suit-man: #ff7a6b;
+  --suit-pin: #6fb3ff;
+  --suit-sou: #63d993;
+}
+
+:root[data-tileset="flat"] {
+  --bone-50: #ffffff;
+  --bone-100: #ffffff;
+  --bone-200: #f2f2f2;
+  --bone-300: #d9d9d9;
+  --bone-shadow: #bdbdbd;
+  --tile-back: #2f6fb0;
+}
