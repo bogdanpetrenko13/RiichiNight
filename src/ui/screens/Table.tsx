@@ -152,8 +152,11 @@ export function Table({ game, onTitle, onAgain }: TableProps) {
         <div className={styles.rivals}>{[3, 2, 1].map((s) => panel(s, true))}</div>
       ) : (
         <>
-          <div className={styles.top}>{panel(2, false)}</div>
-          <div className={styles.left}>{panel(3, false)}</div>
+          {/* Landscape: the opposite rival sits above the left one; wind badges keep seats clear. */}
+          <div className={styles.left}>
+            {panel(2, false)}
+            {panel(3, false)}
+          </div>
           <div className={styles.right}>{panel(1, false)}</div>
         </>
       )}
@@ -165,6 +168,7 @@ export function Table({ game, onTitle, onAgain }: TableProps) {
 
       <div className={styles.controls}>
         <div className={styles.status}>{error ? t("engineError", { msg: error }) : statusText}</div>
+        <div className={styles.actions}>
         <ActionBar
           prompt={prompt}
           riichiMode={riichiMode}
@@ -177,6 +181,7 @@ export function Table({ game, onTitle, onAgain }: TableProps) {
           }}
           onChiPicker={setChiPicker}
         />
+        </div>
         <PlayerHand
           player={me}
           prompt={prompt}
@@ -186,6 +191,7 @@ export function Table({ game, onTitle, onAgain }: TableProps) {
           onDiscard={(tile) => act("discard", { tile })}
           onRiichi={(tile) => act("riichi", { tile })}
           dealing={dealing}
+          floatingHints={!portrait}
         />
       </div>
 

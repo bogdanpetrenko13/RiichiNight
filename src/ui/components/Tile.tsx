@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { TileCode } from "../../engine/protocol";
-import { HONOR_GLYPHS, SUIT_GLYPHS, parseTile } from "../tiles";
+import { parseTile } from "../tiles";
+import { tileFace } from "../tileFaces";
 import styles from "./Tile.module.css";
 
 interface TileProps {
@@ -37,21 +38,11 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
   }
 
   const t = parseTile(code);
-  const face =
-    t.suit === "z" ? (
-      t.rank === 5 ? (
-        <span className={styles.haku} />
-      ) : (
-        <span className={styles.honor} data-rank={t.rank}>
-          {HONOR_GLYPHS[t.rank]}
-        </span>
-      )
-    ) : (
-      <>
-        <span className={styles.num}>{t.rank}</span>
-        <span className={styles.suit}>{SUIT_GLYPHS[t.suit]}</span>
-      </>
-    );
+  const face = (
+    <svg className={styles.art} viewBox="0 0 60 80" aria-hidden="true">
+      {tileFace(t)}
+    </svg>
+  );
 
   const Tag = onClick ? "button" : "span";
   return (
@@ -64,8 +55,7 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
       style={style}
       type={onClick ? "button" : undefined}
     >
-      <span className={styles.face}>{face}</span>
-      {t.red && <span className={styles.redDot} />}
+      {face}
     </Tag>
   );
 }

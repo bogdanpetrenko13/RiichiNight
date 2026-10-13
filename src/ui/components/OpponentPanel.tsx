@@ -6,6 +6,8 @@ import { Portrait } from "./Portrait";
 import { Tile } from "./Tile";
 import styles from "./OpponentPanel.module.css";
 
+const WIND_GLYPH = { east: "東", south: "南", west: "西", north: "北" } as const;
+
 interface OpponentPanelProps {
   character: CharacterDef;
   player: PlayerView;
@@ -30,6 +32,7 @@ export function OpponentPanel({ character, player, stage, emotion, callout, acti
       )}
       <div className={styles.portraitWrap}>
         <Portrait character={character} emotion={emotion} size={compact ? 52 : 68} />
+        <span className={styles.wind}>{WIND_GLYPH[player.wind]}</span>
         {player.riichi && <span className={styles.riichi}>立直</span>}
         {callout && (
           <span key={callout} className={styles.callout} style={{ ["--c" as string]: character.color }}>
@@ -40,28 +43,32 @@ export function OpponentPanel({ character, player, stage, emotion, callout, acti
       <div className={styles.info}>
         <div className={styles.name}>{charName(character)}</div>
         <div className={styles.score}>{player.score.toLocaleString()}</div>
-        {settings.rewardScenes && (
-          <div className={styles.pips} aria-label={t("stageOf", { n: stage, total: pips })}>
-            {Array.from({ length: pips }, (_, i) => (
-              <span key={i} className={styles.pip} data-on={i < stage || undefined} />
-            ))}
-          </div>
-        )}
-        {player.melds.length > 0 && (
-          <div className={styles.melds}>
-            {player.melds.map((m, i) => (
-              <span key={i} className={styles.meld}>
-                {m.tiles.map((code, j) => (
-                  <Tile
-                    key={j}
-                    code={code}
-                    size="mini"
-                    back={m.type === "closed_kan" && (j === 0 || j === 3)}
-                    style={{ ["--tw" as string]: "15px" }}
-                  />
+        {(settings.rewardScenes || player.melds.length > 0) && (
+          <div className={styles.plate}>
+            {settings.rewardScenes && (
+              <div className={styles.pips} aria-label={t("stageOf", { n: stage, total: pips })}>
+                {Array.from({ length: pips }, (_, i) => (
+                  <span key={i} className={styles.pip} data-on={i < stage || undefined} />
                 ))}
-              </span>
-            ))}
+              </div>
+            )}
+            {player.melds.length > 0 && (
+              <div className={styles.melds}>
+                {player.melds.map((m, i) => (
+                  <span key={i} className={styles.meld}>
+                    {m.tiles.map((code, j) => (
+                      <Tile
+                        key={j}
+                        code={code}
+                        size="mini"
+                        back={m.type === "closed_kan" && (j === 0 || j === 3)}
+                        style={{ ["--tw" as string]: "15px" }}
+                      />
+                    ))}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

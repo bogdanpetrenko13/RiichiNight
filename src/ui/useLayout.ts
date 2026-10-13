@@ -9,10 +9,10 @@ export interface Layout {
  * Height taken below the board: status line, action bar, wait-hint row, the
  * hand (tile height + 3D edge) and the lift of a selected tile, plus gaps.
  */
-function controlsHeight(hand: number): number {
-  const status = 18;
-  const actions = 56;
-  const hint = 34;
+function controlsHeight(hand: number, floating = false): number {
+  const status = floating ? 0 : 18;
+  const actions = floating ? 0 : 56;
+  const hint = floating ? 0 : 34;
   const tiles = hand * 1.36 + hand * 0.16;
   const lift = hand * 0.36;
   const gaps = 20;
@@ -26,23 +26,23 @@ function compute(): Layout {
   const landscape = w > h * 1.05;
   if (landscape) {
     // Hand must fit 14 tiles + drawn gap + melds, and stay modest on short screens.
-    const hand = Math.max(26, Math.min(52, (w - 48) / 18, h / 13));
-    const topPanel = 104; // the opposite rival sits above the board
-    const board = Math.max(200, Math.min(h - pad - topPanel - controlsHeight(hand), w * 0.5));
-    return { orientation: "landscape", vars: vars(hand, board) };
+    const hand = Math.max(26, Math.min(52, (w - 48) / 18, h / 10));
+    // Rivals sit beside the board; buttons and hints float above the rack.
+    const board = Math.max(200, Math.min(h - pad - controlsHeight(hand, true), w * 0.46));
+    return { orientation: "landscape", vars: vars(hand, board, 13.5) };
   }
   const hand = Math.max(22, Math.min(50, (w - 20) / 15.2));
   const rivals = 164; // three compact rival cards
   const board = Math.max(200, Math.min(w - 12, h - pad - rivals - controlsHeight(hand)));
-  return { orientation: "portrait", vars: vars(hand, board) };
+  return { orientation: "portrait", vars: vars(hand, board, 14) };
 }
 
-function vars(hand: number, board: number): CSSProperties {
+function vars(hand: number, board: number, riverDiv: number): CSSProperties {
   return {
     ["--hand-tile" as string]: `${hand.toFixed(1)}px`,
     ["--meld-tile" as string]: `${(hand * 0.72).toFixed(1)}px`,
     ["--board" as string]: `${board.toFixed(0)}px`,
-    ["--river-tile" as string]: `${(board / 16.5).toFixed(1)}px`,
+    ["--river-tile" as string]: `${(board / riverDiv).toFixed(1)}px`,
   };
 }
 

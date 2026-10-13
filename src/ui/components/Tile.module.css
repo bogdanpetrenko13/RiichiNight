@@ -40,71 +40,12 @@
   --tw: 20px;
 }
 
-.face {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: calc(var(--tw) * 0.04);
-  pointer-events: none;
-}
-
-.num {
-  font-size: calc(var(--tw) * 0.58);
-  font-weight: 700;
-}
-
-.suit {
-  font-size: calc(var(--tw) * 0.36);
-  font-weight: 600;
-}
-
-[data-suit="m"] .num {
-  color: var(--honor-ink);
-}
-[data-suit="m"] .suit {
-  color: var(--suit-man);
-}
-[data-suit="p"] .num,
-[data-suit="p"] .suit {
-  color: var(--suit-pin);
-}
-[data-suit="s"] .num,
-[data-suit="s"] .suit {
-  color: var(--suit-sou);
-}
-[data-red] .num,
-[data-red] .suit {
-  color: var(--suit-man);
-}
-
-.honor {
-  font-size: calc(var(--tw) * 0.72);
-  font-weight: 700;
-}
-.honor[data-rank="6"] {
-  color: var(--suit-sou);
-}
-.honor[data-rank="7"] {
-  color: var(--suit-man);
-}
-
-.haku {
+.art {
+  width: 88%;
+  height: 90%;
   display: block;
-  width: calc(var(--tw) * 0.56);
-  height: calc(var(--tw) * 0.8);
-  border: calc(var(--tw) * 0.06) solid #5d86a6;
-  border-radius: calc(var(--tw) * 0.06);
-}
-
-.redDot {
-  position: absolute;
-  top: calc(var(--tw) * 0.08);
-  right: calc(var(--tw) * 0.08);
-  width: calc(var(--tw) * 0.14);
-  height: calc(var(--tw) * 0.14);
-  border-radius: 50%;
-  background: var(--suit-man);
+  pointer-events: none;
+  overflow: visible;
 }
 
 .back {
@@ -152,7 +93,3 @@
   background: var(--tile-back);
 }
 
-/* Dark tile set: the white dragon frame stays visible. */
-:global(:root[data-tileset="dark"]) .haku {
-  border-color: #8fb4d6;
-}

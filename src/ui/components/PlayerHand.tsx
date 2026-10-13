@@ -14,6 +14,8 @@ interface PlayerHandProps {
   onRiichi: (code: TileCode) => void;
   /** True for a moment after a new deal: tiles fly in. */
   dealing?: boolean;
+  /** Landscape: wait hints float above the rack instead of taking a row. */
+  floatingHints?: boolean;
 }
 
 const contains = (list: TileCode[] | undefined, code: TileCode) => Boolean(list?.some((c) => sameType(c, code)));
@@ -22,7 +24,17 @@ const contains = (list: TileCode[] | undefined, code: TileCode) => Boolean(list?
  * The human's hand. Tap a tile to lift it (and see its waits), tap again to
  * discard. In riichi mode only tiles that keep tenpai can be picked.
  */
-export function PlayerHand({ player, prompt, riichiMode, selected, onSelect, onDiscard, onRiichi, dealing }: PlayerHandProps) {
+export function PlayerHand({
+  player,
+  prompt,
+  riichiMode,
+  selected,
+  onSelect,
+  onDiscard,
+  onRiichi,
+  dealing,
+  floatingHints,
+}: PlayerHandProps) {
   const { t, settings } = useApp();
   const tiles = player.hand ?? [];
   const drawn = player.drawn ?? null;
@@ -47,7 +59,7 @@ export function PlayerHand({ player, prompt, riichiMode, selected, onSelect, onD
   const hint = selectedCode && settings.showWaitHints ? prompt?.hints?.[selectedCode] ?? findHint(prompt, selectedCode) : null;
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} data-float={floatingHints || undefined}>
       <div className={styles.hintRow} aria-live="polite">
         {player.furiten && <span className={styles.furiten}>{t("furiten")}</span>}
         {riichiMode ? (
