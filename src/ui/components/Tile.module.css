@@ -1,0 +1,140 @@
+/* Tiles are drawn with CSS + glyphs: no image assets, crisp at any size.
+   Size comes from --tw (tile width); height follows a 3:4 ratio. */
+.tile {
+  --tw: 40px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--tw);
+  height: calc(var(--tw) * 1.36);
+  padding: 0;
+  border: none;
+  border-radius: calc(var(--tw) * 0.14);
+  background: linear-gradient(180deg, var(--bone-50) 0%, var(--bone-100) 70%, var(--bone-200) 100%);
+  box-shadow:
+    0 calc(var(--tw) * -0.06) 0 inset rgba(255, 255, 255, 0.6),
+    0 calc(var(--tw) * 0.1) 0 var(--bone-300),
+    0 calc(var(--tw) * 0.12) 0 var(--bone-shadow),
+    0 calc(var(--tw) * 0.16) calc(var(--tw) * 0.2) rgba(0, 0, 0, 0.35);
+  color: var(--honor-ink);
+  font-family: var(--font-tile);
+  line-height: 1;
+  transition:
+    transform 140ms var(--ease-out),
+    filter 160ms,
+    opacity 160ms;
+}
+
+.hand {
+  --tw: var(--hand-tile, 44px);
+}
+.river {
+  --tw: var(--river-tile, 24px);
+}
+.meld {
+  --tw: var(--meld-tile, 28px);
+}
+.mini {
+  --tw: 20px;
+}
+
+.face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--tw) * 0.04);
+  pointer-events: none;
+}
+
+.num {
+  font-size: calc(var(--tw) * 0.58);
+  font-weight: 700;
+}
+
+.suit {
+  font-size: calc(var(--tw) * 0.36);
+  font-weight: 600;
+}
+
+[data-suit="m"] .num {
+  color: var(--honor-ink);
+}
+[data-suit="m"] .suit {
+  color: var(--suit-man);
+}
+[data-suit="p"] .num,
+[data-suit="p"] .suit {
+  color: var(--suit-pin);
+}
+[data-suit="s"] .num,
+[data-suit="s"] .suit {
+  color: var(--suit-sou);
+}
+[data-red] .num,
+[data-red] .suit {
+  color: var(--suit-man);
+}
+
+.honor {
+  font-size: calc(var(--tw) * 0.72);
+  font-weight: 700;
+}
+.honor[data-rank="6"] {
+  color: var(--suit-sou);
+}
+.honor[data-rank="7"] {
+  color: var(--suit-man);
+}
+
+.haku {
+  width: 58%;
+  height: 62%;
+  border: calc(var(--tw) * 0.06) solid #5d86a6;
+  border-radius: calc(var(--tw) * 0.06);
+}
+
+.redDot {
+  position: absolute;
+  top: calc(var(--tw) * 0.08);
+  right: calc(var(--tw) * 0.08);
+  width: calc(var(--tw) * 0.14);
+  height: calc(var(--tw) * 0.14);
+  border-radius: 50%;
+  background: var(--suit-man);
+}
+
+.back {
+  background: linear-gradient(180deg, #3b9478, var(--tile-back));
+  box-shadow:
+    0 calc(var(--tw) * 0.1) 0 var(--bone-200),
+    0 calc(var(--tw) * 0.12) 0 var(--bone-shadow),
+    0 calc(var(--tw) * 0.16) calc(var(--tw) * 0.2) rgba(0, 0, 0, 0.35);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:active {
+  transform: translateY(-2px) scale(0.98);
+}
+
+.selected {
+  transform: translateY(calc(var(--tw) * -0.32));
+}
+
+.highlight {
+  filter: drop-shadow(0 0 calc(var(--tw) * 0.18) var(--gold));
+}
+
+.dimmed {
+  filter: grayscale(0.7) brightness(0.55);
+}
+
+.sideways {
+  transform: rotate(90deg);
+  margin: 0 calc(var(--tw) * 0.18);
+}

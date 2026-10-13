@@ -1,0 +1,108 @@
+import { useCallback, useEffect, useState } from "react";
+import { App as CapApp } from "@capacitor/app";
+import { useApp } from "./app/AppContext";
+import { getEngine } from "./engine/EngineClient";
+import type { BootStage } from "./engine/protocol";
+import { useGameController } from "./game/useGameController";
+import { loadGame, type SavedGame } from "./game/storage";
+import { CHARACTERS } from "./game/characters";
+import { Boot } from "./ui/screens/Boot";
+import { Title } from "./ui/screens/Title";
+import { Setup } from "./ui/screens/Setup";
+import { Table } from "./ui/screens/Table";
+import { Gallery } from "./ui/screens/Gallery";
+import { SettingsScreen } from "./ui/screens/Settings";
+import { AgeGate } from "./ui/screens/AgeGate";
+
+type Screen = "boot" | "title" | "setup" | "table" | "gallery" | "settings";
+
+export default function App() {
+  const { ready, settings } = useApp();
+  const game = useGameController();
+  const [screen, setScreen] = useState<Screen>("boot");
+  const [stage, setStage] = useState<BootStage | null>(null);
+  const [bootError, setBootError] = useState<string | null>(null);
+  const [saved, setSaved] = useState<SavedGame | null>(null);
+  const [lastCast, setLastCast] = useState<string[]>(CHARACTERS.slice(0, 3).map((c) => c.id));
+
+  const boot = useCallback(() => {
+    setBootError(null);
+    const engine = getEngine();
+    engine.onProgress = setStage;
+    engine
+      .init()
+      .then(loadGame)
+      .then((g) => {
+        setSaved(g);
+        setScreen("title");
+      })
+      .catch((err: unknown) => setBootError(err instanceof Error ? err.message : String(err)));
+  }, []);
+
+  useEffect(boot, [boot]);
+
+  const toTitle = useCallback(() => {
+    void loadGame().then(setSaved);
+    setScreen("title");
+  }, []);
+
+  // Android back button: leave sub-screens, never kill a game silently.
+  useEffect(() => {
+    let remove: (() => void) | undefined;
+    void CapApp.addListener("backButton", () => {
+      setScreen((s) => (s === "title" || s === "boot" ? s : "title"));
+      void loadGame().then(setSaved);
+    })
+      .then((h) => (remove = () => void h.remove()))
+      .catch(() => undefined);
+    return () => remove?.();
+  }, []);
+
+  const startGame = (cast: string[]) => {
+    setLastCast(cast);
+    setScreen("table");
+    void game.start(cast);
+  };
+
+  let content;
+  switch (screen) {
+    case "boot":
+      content = <Boot stage={stage} error={bootError} onRetry={boot} />;
+      break;
+    case "title":
+      content = (
+        <Title
+          saved={saved}
+          onNew={() => setScreen("setup")}
+          onContinue={() => {
+            if (!saved) return;
+            setLastCast(saved.cast);
+            setScreen("table");
+            void game.resume(saved);
+          }}
+          onGallery={() => setScreen("gallery")}
+          onSettings={() => setScreen("settings")}
+        />
+      );
+      break;
+    case "setup":
+      content = <Setup initial={lastCast} onBack={() => setScreen("title")} onStart={startGame} />;
+      break;
+    case "table":
+      content = <Table game={game} onTitle={toTitle} onAgain={() => startGame(lastCast)} />;
+      break;
+    case "gallery":
+      content = <Gallery onBack={() => setScreen("title")} />;
+      break;
+    case "settings":
+      content = <SettingsScreen onBack={() => setScreen("title")} />;
+      break;
+  }
+
+  return (
+    <>
+      {content}
+      {ready && settings.adultConfirmed === null && screen !== "boot" && <AgeGate />}
+    </>
+  );
+}

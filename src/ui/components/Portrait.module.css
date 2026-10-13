@@ -1,0 +1,38 @@
+.frame {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  border-radius: 22%;
+  background: var(--a);
+  box-shadow:
+    0 0 0 2px var(--c),
+    var(--shadow-1);
+  transition: transform 200ms var(--ease-out);
+}
+
+.frame img,
+.placeholder {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.frame[data-emotion="happy"],
+.frame[data-emotion="confident"] {
+  transform: scale(1.05);
+}
+
+.frame[data-emotion="troubled"] {
+  filter: saturate(0.75);
+}
+
+.frame[data-emotion="surprised"] {
+  animation: jolt 380ms var(--ease-out);
+}
+
+@keyframes jolt {
+  30% {
+    transform: translateY(-4px) scale(1.04);
+  }
+}

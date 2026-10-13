@@ -1,0 +1,63 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.hintRow {
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.28);
+  font-size: 13px;
+}
+
+.hintRow:empty {
+  background: transparent;
+}
+
+.hintText {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.wait {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.wait small {
+  color: var(--ink-faint);
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 100%;
+}
+
+.tiles {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding-top: calc(var(--hand-tile) * 0.36);
+}
+
+.melds {
+  display: flex;
+  gap: 6px;
+}
+
+.meld {
+  display: inline-flex;
+  gap: 1px;
+}

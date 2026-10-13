@@ -1,0 +1,327 @@
+/* ---- title ---------------------------------------------------------------- */
+.title {
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  gap: 24px;
+}
+
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.portraits {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.portraits > * {
+  margin: 0 -6px;
+}
+
+.p0 {
+  transform: rotate(-8deg) translateY(6px);
+}
+.p1 {
+  transform: rotate(-3deg);
+  z-index: 1;
+}
+.p2 {
+  transform: rotate(3deg);
+  z-index: 1;
+}
+.p3 {
+  transform: rotate(8deg) translateY(6px);
+}
+
+.logo {
+  margin: 0;
+  font-size: clamp(30px, 8vw, 54px);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.05;
+}
+
+.logoJa {
+  font-family: var(--font-tile);
+  font-size: 0.55em;
+  color: var(--sakura);
+  letter-spacing: 0.4em;
+  margin-right: -0.4em;
+}
+
+.menu {
+  width: min(360px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.menu .btn {
+  min-height: 52px;
+  font-size: 17px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.savedAt {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+/* ---- setup ---------------------------------------------------------------- */
+.roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.card {
+  display: flex;
+  gap: 12px;
+  text-align: left;
+  padding: 12px;
+  border-radius: var(--radius-l);
+  border: 1px solid var(--felt-line);
+  background: rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition:
+    box-shadow 160ms,
+    transform 120ms var(--ease-out);
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+.card[data-picked] {
+  box-shadow: 0 0 0 2px var(--c);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.cardBody {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardName {
+  font-weight: 800;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.seat {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--c);
+  color: white;
+  font-size: 13px;
+}
+
+.cardMeta {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.cardBio {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.35;
+}
+
+.cardProgress {
+  font-size: 12px;
+  color: var(--sakura);
+  font-weight: 700;
+}
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  padding: 14px 0 4px;
+  margin-top: auto;
+}
+
+.footer .btn {
+  min-width: 200px;
+  min-height: 52px;
+  font-size: 17px;
+}
+
+/* ---- gallery -------------------------------------------------------------- */
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.galleryRow {
+  padding: 12px;
+  border-radius: var(--radius-l);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--felt-line);
+}
+
+.galleryHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.stages {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+}
+
+.stageTile {
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--c);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 22px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.stageTile small {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.stageTile:disabled {
+  opacity: 0.4;
+  border-style: dashed;
+  cursor: default;
+}
+
+/* ---- settings ------------------------------------------------------------- */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 560px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+  align-self: flex-start;
+}
+
+.segmented button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.segmented button[data-on] {
+  background: var(--sakura);
+  color: #2a0f19;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--touch);
+}
+
+.check input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--sakura);
+}
+
+.fieldset {
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-l);
+  padding: 8px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldset legend {
+  padding: 0 6px;
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+
+input[type="range"] {
+  accent-color: var(--sakura);
+  max-width: 320px;
+}
+
+/* ---- boot ----------------------------------------------------------------- */
+.boot {
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.progress {
+  width: min(260px, 70vw);
+  height: 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.progress > div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sakura), var(--gold));
+  transition: width 400ms var(--ease-out);
+}
+
+.error {
+  max-width: 90vw;
+  font-size: 12px;
+  color: var(--danger);
+  word-break: break-word;
+  user-select: text;
+}

@@ -1,0 +1,136 @@
+.panel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px 8px 8px;
+  border-radius: var(--radius-m);
+  background: rgba(6, 16, 14, 0.55);
+  border: 1px solid var(--felt-line);
+  transition:
+    box-shadow 200ms,
+    background 200ms;
+  min-width: 0;
+}
+
+.panel[data-active] {
+  box-shadow: 0 0 0 2px var(--gold);
+}
+
+.panel[data-compact] {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  padding: 6px;
+}
+
+.portraitWrap {
+  position: relative;
+}
+
+.riichi {
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  transform: translateX(-50%);
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--danger);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-tile);
+}
+
+.callout {
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--c);
+  color: white;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  box-shadow: var(--shadow-1);
+  animation: pop 1.3s var(--ease-out) forwards;
+  z-index: 3;
+}
+
+@keyframes pop {
+  0% {
+    transform: translate(-50%, 6px) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(-50%, 0) scale(1.15);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -6px) scale(1);
+    opacity: 0;
+  }
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.panel[data-compact] .info {
+  align-items: center;
+}
+
+.name {
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 14ch;
+}
+
+.score {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.pips {
+  display: flex;
+  gap: 3px;
+}
+
+.pip {
+  width: 9px;
+  height: 9px;
+  transform: rotate(45deg);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.pip[data-on] {
+  background: var(--sakura);
+  box-shadow: 0 0 6px var(--sakura);
+}
+
+.melds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.meld {
+  display: inline-flex;
+  gap: 1px;
+}

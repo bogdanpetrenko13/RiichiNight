@@ -1,0 +1,135 @@
+/* --board is the side of the square; --river-tile is set from it in Table. */
+.board {
+  position: relative;
+  width: var(--board);
+  height: var(--board);
+  border-radius: calc(var(--board) * 0.06);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05), transparent 65%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.012) 0 2px, transparent 2px 6px),
+    var(--felt-600);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    inset 0 0 calc(var(--board) * 0.12) rgba(0, 0, 0, 0.45),
+    var(--shadow-2);
+}
+
+.slot {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.river {
+  position: absolute;
+  top: calc(50% + var(--board) * 0.19);
+  left: 50%;
+  width: calc(var(--river-tile) * 6 + 5px);
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  row-gap: calc(var(--river-tile) * 0.18);
+  align-content: flex-start;
+}
+
+.seatLabel {
+  position: absolute;
+  top: calc(50% + var(--board) * 0.115);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: calc(var(--board) * 0.032);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.seatLabel[data-current] .wind {
+  background: var(--gold);
+  color: #2b1e00;
+}
+
+.seatLabel[data-dealer] .wind {
+  box-shadow: 0 0 0 2px var(--sakura);
+}
+
+.wind {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  font-family: var(--font-tile);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.stick {
+  width: 2.2em;
+  height: 0.38em;
+  border-radius: 1em;
+  background: linear-gradient(90deg, var(--bone-50) 40%, var(--danger) 40% 60%, var(--bone-50) 60%);
+}
+
+.center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--board) * 0.36);
+  height: calc(var(--board) * 0.2);
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--board) * 0.008);
+  border-radius: calc(var(--board) * 0.03);
+  background: rgba(5, 14, 12, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  font-size: calc(var(--board) * 0.03);
+}
+
+.roundName {
+  font-weight: 700;
+  font-size: 1.3em;
+  letter-spacing: 0.04em;
+}
+
+.counters {
+  display: flex;
+  gap: 0.9em;
+  color: var(--ink-soft);
+}
+
+.sticks {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.stickIcon {
+  width: 1.6em;
+  height: 0.32em;
+  border-radius: 1em;
+  background: linear-gradient(90deg, var(--bone-50) 40%, var(--danger) 40% 60%, var(--bone-50) 60%);
+}
+
+.dora {
+  display: flex;
+  gap: 2px;
+  margin-bottom: calc(var(--board) * 0.008);
+}
+
+.wall {
+  color: var(--ink-faint);
+  font-size: 0.85em;
+}

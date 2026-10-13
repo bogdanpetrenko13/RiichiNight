@@ -1,0 +1,13 @@
+{
+  "appId": "com.animeriichi.game",
+  "appName": "Anime Riichi",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

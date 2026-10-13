@@ -1,0 +1,11 @@
+node_modules/
+dist/
+public/pyodide/
+__pycache__/
+*.pyc
+.pytest_cache/
+android/app/build/
+android/build/
+android/.gradle/
+*.keystore
+.DS_Store
