@@ -197,6 +197,82 @@ export const ROSTER: CharacterDef[] = [
       },
     },
   },
+  {
+    id: "reiko",
+    name: { en: "Reiko Shirase", ru: "Рэйко Сирасэ" },
+    title: { en: "Project manager", ru: "Руководитель проектов" },
+    age: 33,
+    bio: {
+      en: "Runs a team of thirty and plays mahjong after work to unwind. Patient, strategic, ruthless at the right moment.",
+      ru: "Руководит командой из тридцати человек, а после работы отдыхает за маджонгом. Терпеливая, расчётливая, беспощадная в нужный момент.",
+    },
+    level: "hard",
+    color: "#6d5dfc",
+    accent: "#e3e0ff",
+    stages: 5,
+    stageLines: {
+      en: ["Not in the plan. Noted.", "Fine, the meeting can wait.", "You're making me work overtime.", "Deadline missed. You win."],
+      ru: ["Этого не было в плане. Учту.", "Ладно, совещание подождёт.", "Из-за тебя у меня переработка.", "Дедлайн сорван. Ты победил."],
+    },
+    lines: {
+      en: {
+        pleased: ["Delivered on schedule.", "That's how a project closes."],
+        lossRon: ["A risk I accepted. Moving on.", "I'll add that to the retrospective."],
+        lossBig: ["That blew the whole budget.", "...I need a coffee."],
+        lossTsumo: ["Outside my control. Annoying.", "Well executed."],
+        wallGame: ["No result. Reschedule.", "A draw is still a status update."],
+        idle: ["Do you need more time for this decision?", "Let's keep the meeting short."],
+        riichi: ["Riichi. Final stage.", "Commit and ship."],
+      },
+      ru: {
+        pleased: ["Сдано точно в срок.", "Вот так закрываются проекты."],
+        lossRon: ["Риск был принят. Идём дальше.", "Внесу это в ретроспективу."],
+        lossBig: ["Это съело весь бюджет.", "...Мне нужен кофе."],
+        lossTsumo: ["От меня не зависело. Досадно.", "Чисто сработано."],
+        wallGame: ["Результата нет. Переносим.", "Ничья — тоже статус."],
+        idle: ["Тебе нужно больше времени на решение?", "Давай не затягивать совещание."],
+        riichi: ["Риичи. Финальный этап.", "Фиксируем и выпускаем."],
+      },
+    },
+  },
+  {
+    id: "nanami",
+    name: { en: "Nanami Aoki", ru: "Нанами Аоки" },
+    title: { en: "Freelance illustrator", ru: "Иллюстратор-фрилансер" },
+    age: 25,
+    bio: {
+      en: "Draws book covers by day and collects pretty hands by night. Loves honitsu and hates folding.",
+      ru: "Днём рисует обложки книг, ночью собирает красивые руки. Обожает хоницу и терпеть не может сбрасываться.",
+    },
+    level: "easy",
+    color: "#2fb5a0",
+    accent: "#d6f5ef",
+    stages: 5,
+    stageLines: {
+      en: ["Hey, that hand was pretty!", "Okay, I'm sketching your face as the villain.", "One more! I'm warmed up now.", "You win. I'll draw you a trophy."],
+      ru: ["Эй, красивая была рука!", "Всё, рисую тебя злодеем.", "Ещё одну! Я только разогрелась.", "Ты победил. Нарисую тебе кубок."],
+    },
+    lines: {
+      en: {
+        pleased: ["Look at those colours!", "That one's going in my sketchbook."],
+        lossRon: ["Wait, that was the dangerous one?", "Ugh, I liked that composition."],
+        lossBig: ["That's a whole commission gone!", "I'm going to need a new palette."],
+        lossTsumo: ["Drew it yourself? Show-off.", "Hmph. Nice shading."],
+        wallGame: ["Nobody finished? Same as my drafts.", "Blank canvas. Again."],
+        idle: ["Are you sketching too?", "Take your time, I'm doodling."],
+        riichi: ["Riichi! Final lineart!", "It's coming together!"],
+      },
+      ru: {
+        pleased: ["Смотри, какие цвета!", "Это я зарисую в скетчбук."],
+        lossRon: ["Стоп, это был опасный тайл?", "Эх, а мне нравилась композиция."],
+        lossBig: ["Это же целый заказ!", "Придётся покупать новую палитру."],
+        lossTsumo: ["Сам вытянул? Выпендрёжник.", "Хм. Красиво затенил."],
+        wallGame: ["Никто не закончил? Как мои черновики.", "Опять чистый холст."],
+        idle: ["Ты там тоже рисуешь?", "Не спеши, я пока порисую."],
+        riichi: ["Риичи! Финальный лайн!", "Картинка складывается!"],
+      },
+    },
+  },
 ];
 
 export function validateRoster(roster: CharacterDef[]): CharacterDef[] {

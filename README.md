@@ -91,6 +91,19 @@ Pyodide. Патч отвечает на те же вопросы через та
 `scripts/import-renpy-art.py`, а источники и текст лицензии перечислены в
 `public/characters/CREDITS.md`. Чтобы заменить арт, положите свои файлы с теми же именами.
 
+Рэйко и Нанами собраны из многослойных спрайтов автора Sutemo с itch.io
+([Female Mature Sprite](https://sutemo.itch.io/female-mature-anime-sprite),
+[Female Character Sprite](https://sutemo.itch.io/female-character)) скриптом
+`scripts/import-sutemo-art.py` (нужен ImageMagick):
+
+```
+python scripts/import-sutemo-art.py Anime_Mature_Woman_Free.psd Female_Sprite_by_Sutemo.psd
+```
+
+Автор разрешает использовать спрайты в личных и коммерческих проектах, но не
+распространять их отдельно, поэтому в репозитории лежат только готовые картинки,
+без PSD и слоёв. Используются только взрослые наряды.
+
 Файлы подхватываются по соглашению об именах; пока файла нет, показывается
 аккуратная заглушка с ожидаемым путём.
 
@@ -102,7 +115,7 @@ public/voice/<id>/<kind>.mp3                    riichi | pon | chi | kan | ron |
 public/voice/player/<kind>.mp3                  голос игрока (необязательно)
 ```
 
-`<id>` — идентификатор из `src/game/characters.ts` (`hikari`, `rin`, `mai`, `yuzu`).
+`<id>` — идентификатор из `src/game/characters.ts` (`hikari`, `rin`, `mai`, `yuzu`, `reiko`, `nanami`).
 Новая героиня = новая запись в `ROSTER` + папка с файлами.
 
 ## Возможности

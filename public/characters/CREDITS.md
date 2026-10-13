@@ -43,4 +43,18 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
+## Reiko and Nanami (Sutemo sprites)
+
+| Heroine | Source sprite |
+|---|---|
+| Reiko | "Female Mature Character Sprite for VN" by Sutemo — https://sutemo.itch.io/female-mature-anime-sprite |
+| Nanami | "Female Character Sprite for Visual Novel" by Sutemo — https://sutemo.itch.io/female-character |
+
+Built by `scripts/import-sutemo-art.py` from the author's layered PSDs
+(hairstyle, adult outfits and expressions picked from the layers, composited
+over generated backgrounds). The author's terms allow use in personal and
+commercial projects but not reselling or redistributing the sprite on its own
+(including as a character creator), so only these finished images are kept
+here; the PSDs and individual layers are not part of the repository.
+
 Replace any file with your own art of the same name to swap a heroine's look.
