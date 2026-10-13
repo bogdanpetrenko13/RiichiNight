@@ -20,7 +20,7 @@ const SWATCH: Record<TableTheme, string> = {
   mono: "linear-gradient(135deg, #19191e, #4a4a55 60%, #9a9aa6)",
 };
 
-type BoolKey = { [K in keyof Settings]: Settings[K] extends boolean ? K : never }[keyof Settings];
+type BoolKey = { [K in keyof Settings]-?: Settings[K] extends boolean ? K : never }[keyof Settings];
 
 export function SettingsScreen({ onBack }: { onBack: () => void }) {
   const { t, settings, updateSettings, setUnlocks } = useApp();
