@@ -61,8 +61,10 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      # The Android SDK ships with GitHub's Ubuntu runners; just accept its licenses.
       - id: sdk
-        uses: android-actions/setup-android@v3
+        name: Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
       - id: cap
         name: Add Android platform (first run) and sync
