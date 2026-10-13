@@ -95,7 +95,7 @@
 
 .yakuName small {
   margin-left: 6px;
-  font-family: var(--font-tile);
+  font-family: var(--font-display);
   color: var(--ink-faint);
   font-weight: 500;
 }

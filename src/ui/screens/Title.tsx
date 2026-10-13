@@ -40,7 +40,7 @@ export function Title({ saved, onNew, onContinue, onGallery, onSettings, onLearn
           ))}
         </div>
         <h1 className={styles.logo}>
-          <span>麻雀</span>
+          <span>Riichi Mahjong</span>
           {t("appTitle")}
         </h1>
         <p className={styles.tagline}>{t("subtitle")}</p>

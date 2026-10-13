@@ -1,56 +1,70 @@
-/* Design tokens: evening mahjong parlor — deep felt, warm bone tiles,
-   sakura accent for everything that belongs to the heroines. */
+/* Design tokens: modern night UI — deep ink background with soft aurora
+   glows, glass surfaces, crisp white tiles and a pink→violet accent.
+   --felt-* names are kept for the table surfaces; they hold plain dark tints. */
 :root {
-  --felt-900: #0b1715;
-  --felt-800: #10201d;
-  --felt-700: #163029;
-  --felt-600: #1d3d35;
-  --felt-500: #275145;
+  /* Table/background tints (default theme "aurora"). */
+  --felt-900: #08070f;
+  --felt-800: #0e0c1a;
+  --felt-700: #151227;
+  --felt-600: #1d1936;
+  --felt-500: #2a2450;
   --felt-line: rgba(255, 255, 255, 0.08);
+  --glow-1: rgba(139, 92, 246, 0.42);
+  --glow-2: rgba(255, 92, 160, 0.3);
+  --glow-3: rgba(56, 189, 248, 0.2);
 
-  /* Classic set: light face, amber edge, golden backs. */
-  --bone-50: #fdfcf8;
-  --bone-100: #f1efe8;
-  --bone-200: #e3e0d7;
-  --bone-300: #f2a93b;
-  --bone-shadow: #b9711b;
-  --tile-back: #e5a92c;
-  --tile-back-hi: #ffe08a;
-  --tile-back-edge: #b9711b;
+  /* Modern tile body: white face, cool grey edge, accent-coloured backs. */
+  --bone-50: #ffffff;
+  --bone-100: #f7f7fa;
+  --bone-200: #e8e8ef;
+  --bone-300: #c9cad8;
+  --bone-shadow: #8e90a8;
+  --tile-back: #7c4dff;
+  --tile-back-hi: #ff6fae;
+  --tile-back-edge: #4b2aa8;
 
-  --ink: #f4efe4;
-  --ink-soft: rgba(244, 239, 228, 0.72);
-  --ink-faint: rgba(244, 239, 228, 0.45);
-  --ink-dark: #1d1a16;
+  --ink: #f5f3ff;
+  --ink-soft: rgba(245, 243, 255, 0.72);
+  --ink-faint: rgba(245, 243, 255, 0.45);
+  --ink-dark: #15131f;
 
-  /* Surfaces of the redesigned UI (glass layers over the felt). */
-  --surface-1: rgba(12, 20, 19, 0.72);
+  /* Glass layers. */
+  --surface-1: rgba(17, 15, 30, 0.66);
   --surface-2: rgba(255, 255, 255, 0.07);
   --surface-3: rgba(255, 255, 255, 0.14);
-  --surface-solid: #121b1a;
-  --line: rgba(255, 255, 255, 0.09);
-  --accent: #ff6f98;
-  --accent-ink: #2b0c17;
+  --surface-solid: #141225;
+  --line: rgba(255, 255, 255, 0.1);
+  --blur: blur(18px) saturate(140%);
 
-  --sakura: #ff7aa2;
-  --sakura-soft: #ffd3e0;
-  --gold: #f2c14e;
-  --danger: #ff6b5e;
-  --ok: #64d6a2;
+  --accent: #ff5c9e;
+  --accent-2: #8b5cf6;
+  --accent-ink: #ffffff;
+  --grad-accent: linear-gradient(135deg, #ff5c9e 0%, #a855f7 55%, #6d5dfc 100%);
+  --grad-gold: linear-gradient(135deg, #ffd166 0%, #ff9f43 100%);
+  --grad-cool: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
 
-  --suit-man: #c23a2b;
+  --sakura: #ff7ab0;
+  --sakura-soft: #ffd3e6;
+  --gold: #ffc542;
+  --danger: #ff5d6c;
+  --ok: #34d399;
+
+  --suit-man: #d23a2b;
   --suit-pin: #1f6fa8;
   --suit-sou: #2f8a4c;
-  --honor-ink: #1d1a16;
+  --honor-ink: #15131f;
 
-  --radius-s: 6px;
-  --radius-m: 12px;
-  --radius-l: 20px;
-  --shadow-1: 0 2px 6px rgba(0, 0, 0, 0.35);
-  --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 16px 40px rgba(0, 0, 0, 0.45);
 
-  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans JP", sans-serif;
-  --font-tile: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", serif;
+  --font-ui: "Inter", "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  /* Headings: heavy geometric sans instead of brush/mincho lettering. */
+  --font-display: "Manrope", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Tile glyph fallback only (faces are SVG). */
+  --font-tile: var(--font-display);
 
   --touch: 44px;
   --safe-top: env(safe-area-inset-top, 0px);
@@ -62,39 +76,63 @@
 }
 
 /* ---- table themes (data-table on <html>) --------------------------------- */
-:root[data-table="night"] {
-  --felt-900: #070b17;
-  --felt-800: #0c1426;
-  --felt-700: #121d38;
-  --felt-600: #1a2a52;
-  --felt-500: #263a6e;
+:root[data-table="ocean"] {
+  --felt-900: #050b14;
+  --felt-800: #0a1424;
+  --felt-700: #0f1d34;
+  --felt-600: #15284a;
+  --felt-500: #1e3a66;
+  --glow-1: rgba(56, 189, 248, 0.38);
+  --glow-2: rgba(99, 102, 241, 0.3);
+  --glow-3: rgba(45, 212, 191, 0.18);
 }
 
-:root[data-table="wine"] {
-  --felt-900: #14070b;
-  --felt-800: #220c13;
-  --felt-700: #33121d;
-  --felt-600: #4a1a2a;
-  --felt-500: #63263a;
+:root[data-table="mint"] {
+  --felt-900: #05100e;
+  --felt-800: #091a17;
+  --felt-700: #0e2622;
+  --felt-600: #133630;
+  --felt-500: #1b4a42;
+  --glow-1: rgba(45, 212, 191, 0.34);
+  --glow-2: rgba(132, 204, 22, 0.16);
+  --glow-3: rgba(56, 189, 248, 0.2);
 }
 
-:root[data-table="walnut"] {
-  --felt-900: #120b06;
-  --felt-800: #1e130a;
-  --felt-700: #2c1c10;
-  --felt-600: #3f2a18;
-  --felt-500: #5a3d23;
+:root[data-table="sunset"] {
+  --felt-900: #12070b;
+  --felt-800: #1d0c12;
+  --felt-700: #2a111a;
+  --felt-600: #3a1724;
+  --felt-500: #522036;
+  --glow-1: rgba(251, 113, 133, 0.38);
+  --glow-2: rgba(251, 146, 60, 0.28);
+  --glow-3: rgba(168, 85, 247, 0.22);
 }
 
-:root[data-table="slate"] {
-  --felt-900: #0c0e10;
-  --felt-800: #15181b;
-  --felt-700: #1e2226;
-  --felt-600: #2b3036;
-  --felt-500: #3b4249;
+:root[data-table="mono"] {
+  --felt-900: #09090b;
+  --felt-800: #111114;
+  --felt-700: #19191e;
+  --felt-600: #232329;
+  --felt-500: #32323a;
+  --glow-1: rgba(255, 255, 255, 0.1);
+  --glow-2: rgba(255, 92, 158, 0.14);
+  --glow-3: rgba(255, 255, 255, 0.05);
 }
 
 /* ---- tile sets (data-tileset on <html>) ----------------------------------- */
+/* Traditional look: warm face, amber edge, golden backs. */
+:root[data-tileset="classic"] {
+  --bone-50: #fdfcf8;
+  --bone-100: #f1efe8;
+  --bone-200: #e3e0d7;
+  --bone-300: #f2a93b;
+  --bone-shadow: #b9711b;
+  --tile-back: #e5a92c;
+  --tile-back-hi: #ffe08a;
+  --tile-back-edge: #b9711b;
+}
+
 :root[data-tileset="ivory"] {
   --tile-back-hi: #e9925a;
   --bone-50: #fff8e6;

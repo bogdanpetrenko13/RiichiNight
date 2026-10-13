@@ -22,10 +22,12 @@ from pyriichi import GameAction, GamePhase, RuleEngine, RuleError, RyuukyokuType
 from pyriichi.player import PublicInfo  # noqa: F401  (kept for future AI variants)
 
 import fastpatch
+import yakufix
 import rules as game_rules
 from ai import Brain, tile_index
 
 fastpatch.apply()
+yakufix.apply()
 game_rules.apply_patches()
 
 SAVE_VERSION = 1

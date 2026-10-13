@@ -21,7 +21,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(180deg, #ffd978, var(--gold));
+  background: var(--grad-gold);
   font-size: 20px;
 }
 

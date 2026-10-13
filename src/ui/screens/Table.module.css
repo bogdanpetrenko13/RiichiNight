@@ -34,8 +34,7 @@
   gap: 8px;
   min-height: 52px;
   padding: 0 6px;
-  background: linear-gradient(180deg, rgba(6, 10, 10, 0.75), rgba(6, 10, 10, 0.35));
-  border-bottom: 1px solid var(--line);
+  background: transparent;
 }
 
 .roundInfo {
@@ -46,10 +45,10 @@
 }
 
 .roundInfo b {
+  font-family: var(--font-display);
   font-size: 16px;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .roundInfo span {

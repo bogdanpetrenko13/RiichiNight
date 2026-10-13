@@ -7,7 +7,7 @@
   border-radius: 10px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, rgba(255, 255, 255, 0) 2px),
-    linear-gradient(180deg, rgba(18, 20, 20, 0.84) 0%, rgba(44, 48, 48, 0.84) 100%);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)), var(--surface-1);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
   transition: box-shadow 200ms;
   min-width: 0;
@@ -42,7 +42,7 @@
   color: white;
   font-size: 11px;
   font-weight: 700;
-  font-family: var(--font-tile);
+  font-family: var(--font-display);
 }
 
 .callout {
@@ -217,7 +217,7 @@
   border-radius: 6px;
   background: var(--bone-50);
   color: var(--ink-dark);
-  font-family: var(--font-tile);
+  font-family: var(--font-display);
   font-weight: 800;
   font-size: 13px;
   box-shadow: var(--shadow-1);

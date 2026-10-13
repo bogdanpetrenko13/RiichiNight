@@ -8,11 +8,14 @@ import { DEFAULT_RULES, type RewardRules, type SessionStages, type Unlocks } fro
 import { emptyStats, type Stats } from "./stats";
 
 export type AiSpeed = "fast" | "normal" | "slow";
-export type Tileset = "classic" | "ivory" | "dark" | "flat";
-export type TableTheme = "jade" | "night" | "wine" | "walnut" | "slate";
+export type Tileset = "modern" | "classic" | "ivory" | "dark" | "flat";
+export type TableTheme = "aurora" | "ocean" | "mint" | "sunset" | "mono";
 
-export const TILESETS: Tileset[] = ["classic", "ivory", "dark", "flat"];
-export const TABLE_THEMES: TableTheme[] = ["jade", "night", "wine", "walnut", "slate"];
+export const TILESETS: Tileset[] = ["modern", "classic", "ivory", "dark", "flat"];
+export const TABLE_THEMES: TableTheme[] = ["aurora", "ocean", "mint", "sunset", "mono"];
+
+/** Bumped when the look changes so old theme choices are replaced once. */
+const STYLE_VERSION = 2;
 
 export interface Settings {
   lang: Lang;
@@ -26,6 +29,7 @@ export interface Settings {
   speechBubbles: boolean;
   tileset: Tileset;
   table: TableTheme;
+  styleVersion?: number;
   gameRules: GameRules;
   /** null until the age gate has been answered. */
   adultConfirmed: boolean | null;
@@ -67,8 +71,9 @@ export function defaultSettings(): Settings {
     autoDiscardRiichi: true,
     dealAnimation: true,
     speechBubbles: true,
-    tileset: "classic",
-    table: "jade",
+    tileset: "modern",
+    table: "aurora",
+    styleVersion: STYLE_VERSION,
     gameRules: { ...DEFAULT_GAME_RULES },
     adultConfirmed: null,
     rewardScenes: false,
@@ -92,9 +97,15 @@ async function setJson(key: string, value: unknown): Promise<void> {
 export async function loadSettings(): Promise<Settings> {
   const stored = await getJson<Partial<Settings>>(KEYS.settings);
   const base = defaultSettings();
+  // Settings from the old felt-table design: switch to the new default look once.
+  const look =
+    stored?.styleVersion === STYLE_VERSION && TABLE_THEMES.includes(stored.table as TableTheme)
+      ? {}
+      : { tileset: base.tileset, table: base.table, styleVersion: STYLE_VERSION };
   return {
     ...base,
     ...stored,
+    ...look,
     rewardRules: { ...base.rewardRules, ...(stored?.rewardRules ?? {}) },
     gameRules: { ...base.gameRules, ...(stored?.gameRules ?? {}) },
   };

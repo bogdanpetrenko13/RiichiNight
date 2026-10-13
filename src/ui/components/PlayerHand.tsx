@@ -1,6 +1,7 @@
 import type { PlayerView, Prompt, TileCode } from "../../engine/protocol";
 import { useApp } from "../../app/AppContext";
 import { sameType } from "../tiles";
+import { HAND_UNITS_BASE } from "../useLayout";
 import { Tile } from "./Tile";
 import styles from "./PlayerHand.module.css";
 
@@ -64,6 +65,13 @@ export function PlayerHand({
       : null;
   const hint = selectedHint ?? standingWaits;
 
+  // Size tiles so concealed tiles + melds always fit one row. Each meld
+  // replaces 3 hand slots with 3–4 smaller tiles and a separator.
+  const meldTiles = player.melds.reduce((n, m) => n + m.tiles.length, 0);
+  const units =
+    HAND_UNITS_BASE - player.melds.length * 3 + meldTiles * (MELD_SCALE + 0.02) + player.melds.length * 0.3;
+  const rowStyle = { ["--hand-tile" as string]: `min(var(--hand-max), calc(var(--hand-avail) / ${units.toFixed(2)}))` };
+
   return (
     <div className={styles.wrap} data-float={floatingHints || undefined}>
       <div className={styles.hintRow} aria-live="polite">
@@ -82,7 +90,7 @@ export function PlayerHand({
           </>
         ) : null}
       </div>
-      <div className={styles.row}>
+      <div className={styles.row} style={rowStyle}>
         <div className={styles.tiles} data-dealing={dealing || undefined}>
           {all.map((code, i) => {
             const isDrawn = drawn !== null && i === all.length - 1;
@@ -98,7 +106,7 @@ export function PlayerHand({
                 highlight={riichiMode ? ok : showsWait}
                 onClick={canDiscard || riichiMode ? () => tap(i) : undefined}
                 style={{
-                  ...(isDrawn ? { marginLeft: "calc(var(--hand-tile) * 0.4)" } : null),
+                  ...(isDrawn ? { marginLeft: "calc(var(--hand-tile) * 0.3)" } : null),
                   ...(dealing ? { animationDelay: `${i * 40}ms` } : null),
                 }}
               />
@@ -120,6 +128,9 @@ export function PlayerHand({
     </div>
   );
 }
+
+/** Meld tiles relative to hand tiles (matches --meld-tile in Tile.module.css). */
+const MELD_SCALE = 0.72;
 
 function findHint(prompt: Prompt | null | undefined, code: TileCode) {
   if (!prompt?.hints) return null;

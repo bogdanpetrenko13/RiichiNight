@@ -6,7 +6,7 @@ import { Portrait } from "./Portrait";
 import { Tile } from "./Tile";
 import styles from "./OpponentPanel.module.css";
 
-const WIND_GLYPH = { east: "東", south: "南", west: "西", north: "北" } as const;
+const WIND_GLYPH = { east: "E", south: "S", west: "W", north: "N" } as const;
 
 interface OpponentPanelProps {
   character: CharacterDef;

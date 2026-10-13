@@ -5,7 +5,7 @@ import { Tile } from "./Tile";
 import styles from "./Board.module.css";
 
 const ROTATION = [0, -90, 180, 90]; // seat 0 bottom, 1 right, 2 top, 3 left
-const WIND_GLYPH = { east: "東", south: "南", west: "西", north: "北" } as const;
+const WIND_GLYPH = { east: "E", south: "S", west: "W", north: "N" } as const;
 
 interface BoardProps {
   view: GameView;

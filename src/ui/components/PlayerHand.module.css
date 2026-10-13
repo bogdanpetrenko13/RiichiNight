@@ -13,12 +13,18 @@
   gap: 8px;
   padding: 0 12px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.28);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
   font-size: 13px;
 }
 
 .hintRow:empty {
   background: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .hintText {
@@ -40,33 +46,24 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 12px;
+  flex-wrap: nowrap;
+  gap: calc(var(--hand-tile) * 0.3);
   width: 100%;
-  padding: 0 8px calc(var(--hand-tile) * 0.22);
-  border-radius: 12px 12px 0 0;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0, rgba(255, 255, 255, 0) 2px),
-    linear-gradient(
-      180deg,
-      rgba(18, 20, 20, 0.55) 0%,
-      rgba(40, 44, 44, 0.65) 64%,
-      rgba(222, 222, 218, 0.95) 64.5%,
-      rgba(168, 168, 164, 0.95) 100%
-    );
-  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.35);
+  padding: 0 2px calc(var(--hand-tile) * 0.18);
+  /* Melds use the hand size of this row. */
+  --meld-tile: calc(var(--hand-tile) * 0.72);
 }
 
 .tiles {
   display: flex;
   align-items: flex-end;
-  gap: 2px;
-  padding-top: calc(var(--hand-tile) * 0.36);
+  gap: 0;
+  padding-top: calc(var(--hand-tile) * 0.34);
 }
 
 .melds {
   display: flex;
-  gap: 6px;
+  gap: calc(var(--hand-tile) * 0.3);
 }
 
 .meld {

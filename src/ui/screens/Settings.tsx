@@ -11,13 +11,13 @@ const SPEEDS: AiSpeed[] = ["fast", "normal", "slow"];
 const REWARD_RULES: (keyof RewardRules)[] = ["tsumoAdvancesAll", "bigHandBonus", "regressOnLoss", "firstPlaceBonus"];
 const GAME_TOGGLES: (keyof Omit<GameRules, "gameLength">)[] = ["redFives", "openTanyao", "tobi", "agariYame", "kiriageMangan"];
 
-/** Swatch colours for the table themes (mirrors --felt-600 in tokens.css). */
-const FELT: Record<TableTheme, string> = {
-  jade: "#1d3d35",
-  night: "#1a2a52",
-  wine: "#4a1a2a",
-  walnut: "#3f2a18",
-  slate: "#2b3036",
+/** Swatch gradients for the table themes (mirror the glows in tokens.css). */
+const SWATCH: Record<TableTheme, string> = {
+  aurora: "linear-gradient(135deg, #2a2450, #8b5cf6 60%, #ff5c9e)",
+  ocean: "linear-gradient(135deg, #15284a, #38bdf8 60%, #6366f1)",
+  mint: "linear-gradient(135deg, #133630, #2dd4bf 60%, #84cc16)",
+  sunset: "linear-gradient(135deg, #3a1724, #fb7185 60%, #fb923c)",
+  mono: "linear-gradient(135deg, #19191e, #4a4a55 60%, #9a9aa6)",
 };
 
 type BoolKey = { [K in keyof Settings]: Settings[K] extends boolean ? K : never }[keyof Settings];
@@ -79,7 +79,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
                   key={th}
                   className={styles.swatch}
                   data-on={settings.table === th || undefined}
-                  style={{ background: FELT[th] }}
+                  style={{ background: SWATCH[th] }}
                   onClick={() => updateSettings({ table: th })}
                 >
                   {t(`table_${th}` as StringKey)}
