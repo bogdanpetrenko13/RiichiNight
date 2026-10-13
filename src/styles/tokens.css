@@ -8,13 +8,15 @@
   --felt-500: #275145;
   --felt-line: rgba(255, 255, 255, 0.08);
 
-  --bone-50: #fbf7ee;
-  --bone-100: #f3ecdc;
-  --bone-200: #e6dcc6;
-  --bone-300: #d3c6aa;
-  --bone-shadow: #9c8b6a;
-  --tile-back: #2f7a63;
-  --tile-back-edge: #1f5545;
+  /* Classic set: light face, amber edge, golden backs. */
+  --bone-50: #fdfcf8;
+  --bone-100: #f1efe8;
+  --bone-200: #e3e0d7;
+  --bone-300: #f2a93b;
+  --bone-shadow: #b9711b;
+  --tile-back: #e5a92c;
+  --tile-back-hi: #ffe08a;
+  --tile-back-edge: #b9711b;
 
   --ink: #f4efe4;
   --ink-soft: rgba(244, 239, 228, 0.72);
@@ -85,6 +87,7 @@
 
 /* ---- tile sets (data-tileset on <html>) ----------------------------------- */
 :root[data-tileset="ivory"] {
+  --tile-back-hi: #e9925a;
   --bone-50: #fff8e6;
   --bone-100: #f7ebcd;
   --bone-200: #ebd9ae;
@@ -95,6 +98,7 @@
 }
 
 :root[data-tileset="dark"] {
+  --tile-back-hi: #9478c8;
   --bone-50: #3a3f48;
   --bone-100: #2f343c;
   --bone-200: #272b32;
@@ -109,6 +113,7 @@
 }
 
 :root[data-tileset="flat"] {
+  --tile-back-hi: #5b93cc;
   --bone-50: #ffffff;
   --bone-100: #ffffff;
   --bone-200: #f2f2f2;

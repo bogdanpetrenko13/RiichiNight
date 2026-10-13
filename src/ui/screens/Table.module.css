@@ -11,9 +11,41 @@
   grid-template-columns: 1fr;
   grid-template-rows: auto 1fr auto;
   grid-template-areas:
-    "rivals"
-    "board"
+    "header"
+    "bands"
     "controls";
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* In portrait the board cell only hosts the player's callout bubble. */
+.table[data-orientation="portrait"] .board {
+  position: absolute;
+  inset: auto 0 30% 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.header {
+  grid-area: header;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 17px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.bands {
+  grid-area: bands;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr auto;
+  gap: 10px;
+  overflow: hidden;
 }
 
 .table[data-orientation="landscape"] {

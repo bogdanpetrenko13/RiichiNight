@@ -248,7 +248,28 @@ function honorFace(rank: number): ReactNode {
   );
 }
 
-export function tileFace(t: ParsedTile): ReactNode {
+const WIND_INDEX = ["", "E", "S", "W", "N"];
+
+/** Small corner index, as on classic printed sets: rank for suits, letter for winds. */
+function cornerIndex(t: ParsedTile): ReactNode {
+  const label = t.suit === "z" ? WIND_INDEX[t.rank] ?? "" : String(t.rank);
+  if (!label) return null;
+  return (
+    <text
+      x={1}
+      y={9}
+      fontSize={10}
+      fontWeight={800}
+      fontFamily="var(--font-ui)"
+      fill={t.red ? RED : INK}
+      opacity={0.85}
+    >
+      {label}
+    </text>
+  );
+}
+
+function face(t: ParsedTile): ReactNode {
   switch (t.suit) {
     case "p":
       return pinFace(t.rank, t.red);
@@ -259,4 +280,13 @@ export function tileFace(t: ParsedTile): ReactNode {
     default:
       return honorFace(t.rank);
   }
+}
+
+export function tileFace(t: ParsedTile, withIndex = true): ReactNode {
+  return (
+    <>
+      {face(t)}
+      {withIndex && cornerIndex(t)}
+    </>
+  );
 }

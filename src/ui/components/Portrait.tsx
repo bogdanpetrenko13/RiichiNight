@@ -10,10 +10,12 @@ interface PortraitProps {
   emotion?: Emotion;
   size?: number;
   className?: string;
+  /** Circular frame (rival bands). */
+  round?: boolean;
 }
 
 /** Character portrait: emotion art → base portrait → generated placeholder. */
-export function Portrait({ character, emotion = "neutral", size = 72, className }: PortraitProps) {
+export function Portrait({ character, emotion = "neutral", size = 72, className, round }: PortraitProps) {
   const candidates = [assetPaths.emotion(character.id, emotion), assetPaths.portrait(character.id)].filter(
     (src) => !missing.has(src),
   );
@@ -25,6 +27,7 @@ export function Portrait({ character, emotion = "neutral", size = 72, className 
       className={[styles.frame, className].filter(Boolean).join(" ")}
       style={{ width: size, height: size, ["--c" as string]: character.color, ["--a" as string]: character.accent }}
       data-emotion={emotion}
+      data-round={round || undefined}
     >
       {src ? (
         <img

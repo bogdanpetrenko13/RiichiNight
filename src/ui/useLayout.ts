@@ -31,10 +31,23 @@ function compute(): Layout {
     const board = Math.max(200, Math.min(h - pad - controlsHeight(hand, true), w * 0.46));
     return { orientation: "landscape", vars: vars(hand, board, 13.5) };
   }
-  const hand = Math.max(22, Math.min(50, (w - 20) / 15.2));
-  const rivals = 164; // three compact rival cards
-  const board = Math.max(200, Math.min(w - 12, h - pad - rivals - controlsHeight(hand)));
-  return { orientation: "portrait", vars: vars(hand, board, 14) };
+  // Portrait uses rival bands (Kemono-style rows) instead of a square board.
+  const hand = Math.max(22, Math.min(50, (w - 20) / 15.4));
+  const side = Math.max(78, Math.round(w * 0.21));
+  const portrait = Math.max(78, Math.round(w * 0.235));
+  const field = w - side - portrait - 14;
+  const bandTile = Math.max(14, Math.min(36, field / 8.6));
+  return {
+    orientation: "portrait",
+    vars: {
+      ...vars(hand, 300, 14),
+      ["--band-side" as string]: `${side}px`,
+      ["--band-portrait" as string]: `${portrait}px`,
+      ["--band-tile" as string]: `${bandTile.toFixed(1)}px`,
+      // Closed hand backs: 13 tiles + melds must fit the field width.
+      ["--band-back" as string]: `${Math.min(bandTile * 0.8, field / 14.8).toFixed(1)}px`,
+    },
+  };
 }
 
 function vars(hand: number, board: number, riverDiv: number): CSSProperties {

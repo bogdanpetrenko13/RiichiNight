@@ -49,7 +49,7 @@
 }
 
 .back {
-  background: linear-gradient(180deg, #3b9478, var(--tile-back));
+  background: linear-gradient(180deg, var(--tile-back-hi), var(--tile-back));
   box-shadow:
     0 calc(var(--tw) * 0.1) 0 var(--bone-200),
     0 calc(var(--tw) * 0.12) 0 var(--bone-shadow),

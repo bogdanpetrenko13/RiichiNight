@@ -14,6 +14,8 @@ import { RoundResult } from "../components/RoundResult";
 import { GameOver } from "../components/GameOver";
 import { RewardScene } from "../components/RewardScene";
 import { CallCutaway } from "../components/CallCutaway";
+import { RivalBand } from "../components/RivalBand";
+import { PlayerBand } from "../components/PlayerBand";
 import styles from "./Table.module.css";
 
 interface TableProps {
@@ -149,7 +151,37 @@ export function Table({ game, onTitle, onAgain }: TableProps) {
       </button>
 
       {portrait ? (
-        <div className={styles.rivals}>{[3, 2, 1].map((s) => panel(s, true))}</div>
+        <>
+          <header className={styles.header}>
+            <span>
+              {t("roundLabel", { wind: t(`wind_${view.round.wind}` as StringKey), n: view.round.number })}
+              {" · "}
+              {t("honba", { n: view.round.honba })}
+            </span>
+          </header>
+          {/* Kemono-style rows: kamicha, toimen, shimocha, then the player. */}
+          <div className={styles.bands}>
+            {[3, 2, 1].map((seat) => {
+              const character = cast[seat - 1];
+              if (!character) return null;
+              return (
+                <RivalBand
+                  key={seat}
+                  character={character}
+                  player={view.players[seat]}
+                  stage={session[seat] ?? 0}
+                  emotion={emotions[seat]}
+                  callout={calloutBySeat[seat] ?? null}
+                  speech={speech[seat]?.text ?? null}
+                  active={view.current === seat && view.status === "ai"}
+                  dealer={view.round.dealer === seat}
+                  claimed={prompt?.claim?.from === seat ? prompt.claim.tile : null}
+                />
+              );
+            })}
+            <PlayerBand view={view} active={view.current === 0 && view.status === "human"} />
+          </div>
+        </>
       ) : (
         <>
           {/* Landscape: the opposite rival sits above the left one; wind badges keep seats clear. */}
@@ -162,7 +194,7 @@ export function Table({ game, onTitle, onAgain }: TableProps) {
       )}
 
       <div className={styles.board}>
-        <Board view={view} claimFrom={prompt?.claim?.from ?? null} />
+        {!portrait && <Board view={view} claimFrom={prompt?.claim?.from ?? null} />}
         {calloutBySeat[0] && <span className={styles.myCallout}>{t(`act_${calloutBySeat[0]}` as StringKey)}!</span>}
       </div>
 
