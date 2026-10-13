@@ -46,7 +46,7 @@ jobs:
       - name: Type-check and build web app
         run: npm run build
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -55,12 +55,24 @@ jobs:
 
       - name: Add Android platform (first run) and sync
         run: |
-          if [ ! -d android ]; then npx cap add android; fi
-          npx cap sync android
+          set -o pipefail
+          { if [ ! -d android ]; then npx cap add android; fi; npx cap sync android; } 2>&1 | tee "$RUNNER_TEMP/android.log"
 
       - name: Build debug APK
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: |
+          set -o pipefail
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon 2>&1 | tee -a "$RUNNER_TEMP/android.log"
+
+      # Surfaces the end of the Android log as an annotation, readable without raw logs.
+      - name: Report Android build failure
+        if: failure()
+        run: |
+          if [ -f "$RUNNER_TEMP/android.log" ]; then
+            msg=$(grep -v '^\s*$' "$RUNNER_TEMP/android.log" | tail -n 60 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=Android build log (tail)::$msg"
+          fi
 
       # Optional signed release: add ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD,
       # ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD as repository secrets.
