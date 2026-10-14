@@ -123,7 +123,8 @@ class Game:
     def _start_round(self) -> None:
         self.engine.start_round()
         self.engine.deal()
-        if self.scenario and self.round_index == 0:
+        # getattr: games pickled by older versions have no `scenario`.
+        if getattr(self, "scenario", None) and self.round_index == 0:
             scenarios.rig(self.engine, self.scenario)
         self.round_result = None
         self.round_index += 1

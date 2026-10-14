@@ -103,6 +103,10 @@ emulator screen is 900×1600 (phone-like portrait).
 
 - Visual changes: check portrait (412×915) and landscape, both table styles
   (`quiet`, `felt`), dark theme.
+- Saves pickle the whole `Game` (engine, brains). A new attribute on `Game`,
+  `Brain` or anything pickled must be read with `getattr(obj, "name", default)`
+  so games saved by older builds keep working (see
+  `test_old_save_without_new_attributes_keeps_playing`).
 - New engine data shown in the UI: add the type to `protocol.ts`, keep old
   saves working (optional fields), add a Python test that the numbers add up.
 - AI changes: check `python tests/python/style_stats.py 8` (table of calls,

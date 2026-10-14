@@ -226,3 +226,24 @@ def test_scenario_redfive_keeps_red_in_hand():
     me = step["view"]["players"][0]
     assert "r5p" in me["hand"], me
     assert me["discards"][-1] == "5p", me["discards"]
+
+
+def test_old_save_without_new_attributes_keeps_playing():
+    """Saves from older versions lack attributes added later (Game.scenario,
+    Brain.style_name); loading one and playing on must still work."""
+    step = json.loads(bridge.new_game(json.dumps({"seed": 21}), True))
+    game = bridge._game
+    del game.scenario
+    for brain in game.brains.values():
+        del brain.style_name
+    blob = bridge.save()
+    json.loads(bridge.load(blob))
+    brain = Brain("normal", random.Random(21))
+    for _ in range(3000):
+        view = step["view"]
+        if view["status"] == "round_over":
+            step = json.loads(bridge.next_round(True))
+            assert step["view"]["status"] in ("human", "ai", "round_over", "game_over")
+            return
+        step = json.loads(bridge.act(json.dumps(human_command(bridge._game, brain)), True))
+    raise AssertionError("no round end")
