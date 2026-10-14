@@ -13,9 +13,7 @@ interface SetupProps {
   onStart: (cast: string[]) => void;
 }
 
-const SEAT_KEY: StringKey[] = ["wind_south", "wind_west", "wind_north"];
-
-/** Pick three rivals; picking order fills the seats after the player. */
+/** Pick three rivals (the wind each one gets is shown only at the table). */
 export function Setup({ initial, onBack, onStart }: SetupProps) {
   const { t, lang, charName, unlocks, settings, rivals, updateSettings } = useApp();
   const available = CHARACTERS.filter((c) => isUnlocked(c, rivals));
@@ -89,12 +87,7 @@ export function Setup({ initial, onBack, onStart }: SetupProps) {
                   )}
                 </div>
                 <span className={styles.badge}>
-                  {seat >= 0 ? (
-                    <>
-                      <Icon name="check" size={16} />
-                      {t(SEAT_KEY[seat])}
-                    </>
-                  ) : null}
+                  {seat >= 0 ? <Icon name="check" size={18} /> : null}
                 </span>
               </button>
             );

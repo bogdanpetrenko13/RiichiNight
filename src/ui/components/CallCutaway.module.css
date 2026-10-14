@@ -24,10 +24,6 @@
   animation: sweep 2.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.band[data-kind="riichi"] {
-  background: linear-gradient(90deg, transparent 0%, #24392d 18%, #2e4a3b 50%, #24392d 82%, transparent 100%);
-}
-
 .inner {
   display: flex;
   align-items: center;
