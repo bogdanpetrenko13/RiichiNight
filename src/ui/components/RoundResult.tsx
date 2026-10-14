@@ -116,12 +116,19 @@ function WinBody({
               {nameOf(w.seat)} · {result.tsumo ? t("tsumoWin") : t("ronWin")}
             </h2>
             {!result.tsumo && result.from !== null && (
-              <div className={styles.sub}>{t("dealtInBy", { name: nameOf(result.from) })}</div>
+              <div className={styles.sub}>
+                {result.from === 0 ? t("dealtInByYou") : t("dealtInBy", { name: nameOf(result.from) })}
+              </div>
             )}
             <div className={styles.hand}>
               {w.hand.map((c, i) => (
                 <Tile key={i} code={c} size="meld" />
               ))}
+              {w.winTile && (
+                <span className={styles.winTile} title={t(result.tsumo ? "tsumoWin" : "ronWin")}>
+                  <Tile code={w.winTile} size="meld" highlight />
+                </span>
+              )}
               {w.melds.map((m, i) => (
                 <span key={`m${i}`} className={styles.meldGroup}>
                   {m.tiles.map((c, j) => (

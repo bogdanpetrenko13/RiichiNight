@@ -154,3 +154,16 @@ if __name__ == "__main__":
             f"scores {[p['score'] for p in view['players']]}"
         )
     print(f"ok: {total_rounds} rounds, human wins {human_wins}, {time.time() - start:.1f}s")
+
+
+def test_without_tile_keeps_red_five():
+    """Tile.__eq__ ignores the red flag: removing a plain 5 must not take the red one."""
+    from pyriichi.tiles import Suit, Tile
+
+    red = Tile(Suit.PINZU, 5, is_red_dora=True)
+    plain = Tile(Suit.PINZU, 5)
+    hand = [Tile(Suit.PINZU, 4), red, plain]
+    left = bridge.without_tile(hand, plain)
+    assert [str(t) for t in left] == ["4p", "r5p"]
+    left = bridge.without_tile(hand, red)
+    assert [str(t) for t in left] == ["4p", "5p"]

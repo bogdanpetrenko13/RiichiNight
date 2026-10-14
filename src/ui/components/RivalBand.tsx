@@ -126,6 +126,8 @@ export function RivalBand({ character, player, stage, emotion, callout, speech, 
       <div
         className={styles.river}
         data-rows={Math.ceil(player.discards.length / riverCols)}
+        // Rows beyond the planned ones (2 rows of 9, or 3 of 6) shrink the river.
+        data-over={Math.max(0, Math.ceil(player.discards.length / riverCols) - (riverCols === 9 ? 2 : 3)) || undefined}
         data-rival
         ref={riverRef}
         style={{ ["--river-cols" as string]: riverCols }}

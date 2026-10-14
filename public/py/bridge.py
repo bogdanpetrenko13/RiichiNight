@@ -62,6 +62,25 @@ def tstr(tile: Optional[Tile]) -> Optional[str]:
     return None if tile is None else str(tile)
 
 
+def without_tile(tiles: list, tile) -> list:
+    """Removes exactly `tile` from a copy of `tiles`.
+
+    pyriichi's Tile.__eq__ ignores the red-five flag, so list.remove() could
+    take the red 5 out of the hand instead of a plain one (or the reverse).
+    Match by identity first, then by exact notation (keeps red fives right).
+    """
+    out = list(tiles)
+    for i, t in enumerate(out):
+        if t is tile:
+            del out[i]
+            return out
+    for i, t in enumerate(out):
+        if str(t) == str(tile):
+            del out[i]
+            return out
+    return out
+
+
 def Tile_from(code: str) -> Tile:
     from pyriichi import parse_tiles
 
@@ -208,6 +227,15 @@ class Game:
             if not tsumo:
                 from_seat = sr.payment_from
             hand = self.engine.get_hand(seat)
+            # The winning tile is shown apart: drawn (tsumo) or the discard (ron).
+            if tsumo:
+                win_tile = hand.last_drawn_tile
+                concealed = without_tile(hand.tiles, win_tile) if win_tile is not None else list(hand.tiles)
+            else:
+                win_tile = self.engine.get_last_discard()
+                concealed = list(hand.tiles)
+                if win_tile is not None and len(concealed) % 3 == 2:
+                    concealed = without_tile(concealed, win_tile)
             winners.append(
                 {
                     "seat": seat,
@@ -219,7 +247,8 @@ class Game:
                         {"key": y.yaku.value, "ja": y.yaku.ja, "en": y.yaku.en, "han": y.han}
                         for y in wr.yaku
                     ],
-                    "hand": [tstr(t) for t in sorted(hand.tiles, key=tile_sort_key)],
+                    "hand": [tstr(t) for t in sorted(concealed, key=tile_sort_key)],
+                    "winTile": tstr(win_tile),
                     "melds": self._melds(seat),
                 }
             )
@@ -408,8 +437,8 @@ class Game:
             if show:
                 tiles = list(hand.tiles)
                 drawn = hand.last_drawn_tile if seat == HUMAN else None
-                if drawn is not None and drawn in tiles:
-                    tiles.remove(drawn)
+                if drawn is not None:
+                    tiles = without_tile(tiles, drawn)
                 entry["hand"] = [tstr(t) for t in sorted(tiles, key=tile_sort_key)]
                 entry["drawn"] = tstr(drawn)
             players.append(entry)

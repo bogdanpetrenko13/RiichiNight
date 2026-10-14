@@ -76,6 +76,12 @@
   align-items: flex-end;
 }
 
+/* Winning tile, apart from the hand. */
+.winTile {
+  display: inline-flex;
+  margin-left: 6px;
+}
+
 .meldGroup {
   display: inline-flex;
   gap: 1px;

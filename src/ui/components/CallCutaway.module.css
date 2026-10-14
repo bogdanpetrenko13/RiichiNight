@@ -8,9 +8,14 @@
   cursor: pointer;
 }
 
+/* Centred on the screen (absolute + translate), so the wide band overflows
+   both sides equally and the portrait + word sit in the middle. */
 .band {
+  position: absolute;
+  left: 50%;
+  top: 50%;
   width: 140vw;
-  transform: rotate(-8deg);
+  transform: translate(-50%, -50%) rotate(-8deg);
   background: linear-gradient(90deg, transparent 0%, var(--c) 18%, var(--c) 82%, transparent 100%);
   box-shadow:
     0 -3px 0 rgba(255, 255, 255, 0.85),
@@ -64,31 +69,31 @@
 /* 0.3 s in, 1.5 s readable (slow drift), 0.4 s out. */
 @keyframes sweep {
   0% {
-    transform: rotate(-8deg) translateX(-60%);
+    transform: translate(-50%, -50%) rotate(-8deg) translateX(-45%);
     opacity: 0;
   }
   14% {
-    transform: rotate(-8deg) translateX(0);
+    transform: translate(-50%, -50%) rotate(-8deg) translateX(0);
     opacity: 1;
   }
   82% {
-    transform: rotate(-8deg) translateX(2%);
+    transform: translate(-50%, -50%) rotate(-8deg) translateX(1.5%);
     opacity: 1;
   }
   100% {
-    transform: rotate(-8deg) translateX(40%);
+    transform: translate(-50%, -50%) rotate(-8deg) translateX(35%);
     opacity: 0;
   }
 }
 
 @keyframes slide {
   0% {
-    transform: translateX(-30px);
+    transform: translateX(-24px);
   }
   14% {
     transform: translateX(0);
   }
   100% {
-    transform: translateX(12px);
+    transform: translateX(8px);
   }
 }

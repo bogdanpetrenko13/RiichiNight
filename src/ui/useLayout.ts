@@ -105,7 +105,9 @@ export function bandVars(orientation: Layout["orientation"], areaW: number, area
   const wMax = (field - 2 + (12 * 1.35) / 13) / (1 + 1.35 / 13);
   let river = (wMax - 8) / 9;
   let back = (9 * river + 8 - 12) / 13;
-  const byH = (bandH - 20 - back * TILE_RATIO - 10) / rows;
+  // Sized for two rows of 9 (18 discards, the usual case) + the riichi stick;
+  // a third row shrinks the river (data-over in RivalBand / Band.module.css).
+  const byH = (bandH - 20 - back * TILE_RATIO - 10) / (2 * rowH + 0.38);
   river = clamp(Math.min(river, byH), 14, 40);
   back = (9 * river + 8 - 12) / 13;
   // Player: 6 per row next to the waits/buttons column; up to 4 rows.

@@ -94,6 +94,8 @@ export interface WinnerInfo {
   yakuman: boolean;
   yaku: YakuEntry[];
   hand: TileCode[];
+  /** Winning tile (drawn on tsumo, the discard on ron), shown apart. */
+  winTile?: TileCode | null;
   melds: Meld[];
 }
 
