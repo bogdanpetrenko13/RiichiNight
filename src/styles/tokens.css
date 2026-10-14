@@ -1,70 +1,146 @@
-/* Design tokens: modern night UI — deep ink background with soft aurora
-   glows, glass surfaces, crisp white tiles and a pink→violet accent.
-   --felt-* names are kept for the table surfaces; they hold plain dark tints. */
+/* Design tokens, following the Riichi Trainer design system
+   (github.com/bogdanpetrenko13/Riichi-Trainer, src/styles/tokens.css):
+   bamboo-green primary, terracotta accent, warm paper surfaces in the light
+   theme and charcoal-green in the dark one. Flat cards, thin borders, soft
+   shadows. The theme is set as data-theme="light|dark" on <html>.
+   The older token names further down are aliases used by the components. */
+
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f7f4ec;
+  --surface: #ffffff;
+  --surface-alt: #f0ece1;
+  --felt: #e6ede6;
+  --border: #e2dccf;
+  --border-strong: #cdc5b3;
+  --switch-off: #8e8a7f;
+  --overlay: rgba(28, 31, 29, 0.48);
+
+  --text: #232323;
+  --text-2: #5c5c5c;
+  --text-muted: #6b6b6b;
+
+  --primary: #2e4a3b;
+  --primary-hover: #24392d;
+  --on-primary: #ffffff;
+  --primary-soft: #e3ece6;
+
+  --accent: #b5503a;
+  --accent-hover: #9c442f;
+  --on-accent: #ffffff;
+  --accent-soft: #f6e4de;
+
+  --success: #3f7d5a;
+  --on-success: #ffffff;
+  --warning: #c98b2d;
+  --on-warning: #232323;
+  --warning-soft: #fbf0d8;
+  --danger: #b33a3a;
+  --on-danger: #ffffff;
+  --info: #3b6b8f;
+  --on-info: #ffffff;
+
+  --shadow-sm: 0 1px 2px rgba(35, 35, 35, 0.05);
+  --shadow-md: 0 2px 8px rgba(35, 35, 35, 0.06);
+  --shadow-lg: 0 8px 24px rgba(35, 35, 35, 0.1);
+  --shadow-xl: 0 16px 40px rgba(35, 35, 35, 0.14);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #1c1f1d;
+  --surface: #262a27;
+  --surface-alt: #2f3430;
+  --felt: #222b25;
+  --border: #3a3f3b;
+  --border-strong: #4b514c;
+  --switch-off: #6b716c;
+  --overlay: rgba(0, 0, 0, 0.62);
+
+  --text: #ececec;
+  --text-2: #a9ada9;
+  --text-muted: #9aa09a;
+
+  --primary: #7fb08c;
+  --primary-hover: #93c0a0;
+  --on-primary: #10201a;
+  --primary-soft: #2a3a31;
+
+  --accent: #e08768;
+  --accent-hover: #e99a7f;
+  --on-accent: #2a1008;
+  --accent-soft: #3d2a24;
+
+  --success: #6fbf8e;
+  --on-success: #0d2417;
+  --warning: #e0b058;
+  --on-warning: #2a1d05;
+  --warning-soft: #3a3120;
+  --danger: #e57373;
+  --on-danger: #2b0b0b;
+  --info: #7fb0d6;
+  --on-info: #0d2233;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.55);
+}
+
 :root {
-  /* Table/background tints (default theme "aurora"). */
-  --felt-900: #08070f;
-  --felt-800: #0e0c1a;
-  --felt-700: #151227;
-  --felt-600: #1d1936;
-  --felt-500: #2a2450;
-  --felt-line: rgba(255, 255, 255, 0.08);
-  --glow-1: rgba(139, 92, 246, 0.42);
-  --glow-2: rgba(255, 92, 160, 0.3);
-  --glow-3: rgba(56, 189, 248, 0.2);
-
-  /* Modern tile body: white face, cool grey edge, accent-coloured backs. */
+  /* Tile body: white face, neutral edge, backs in the primary colour. */
   --bone-50: #ffffff;
-  --bone-100: #f7f7fa;
-  --bone-200: #e8e8ef;
-  --bone-300: #c9cad8;
-  --bone-shadow: #8e90a8;
-  --tile-back: #7c4dff;
-  --tile-back-hi: #ff6fae;
-  --tile-back-edge: #4b2aa8;
-
-  --ink: #f5f3ff;
-  --ink-soft: rgba(245, 243, 255, 0.72);
-  --ink-faint: rgba(245, 243, 255, 0.45);
-  --ink-dark: #15131f;
-
-  /* Glass layers. */
-  --surface-1: rgba(17, 15, 30, 0.66);
-  --surface-2: rgba(255, 255, 255, 0.07);
-  --surface-3: rgba(255, 255, 255, 0.14);
-  --surface-solid: #141225;
-  --line: rgba(255, 255, 255, 0.1);
-  --blur: blur(18px) saturate(140%);
-
-  --accent: #ff5c9e;
-  --accent-2: #8b5cf6;
-  --accent-ink: #ffffff;
-  --grad-accent: linear-gradient(135deg, #ff5c9e 0%, #a855f7 55%, #6d5dfc 100%);
-  --grad-gold: linear-gradient(135deg, #ffd166 0%, #ff9f43 100%);
-  --grad-cool: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
-
-  --sakura: #ff7ab0;
-  --sakura-soft: #ffd3e6;
-  --gold: #ffc542;
-  --danger: #ff5d6c;
-  --ok: #34d399;
-
-  --suit-man: #d23a2b;
+  --bone-100: #fbfaf6;
+  --bone-200: #ece8de;
+  --bone-300: #cdc5b3;
+  --bone-shadow: #9a927f;
+  --tile-back: #2e4a3b;
+  --tile-back-hi: #4f7a63;
+  --tile-back-edge: #1d3026;
+  --ink-dark: #232323;
+  --honor-ink: #232323;
+  --suit-man: #c23a2b;
   --suit-pin: #1f6fa8;
   --suit-sou: #2f8a4c;
-  --honor-ink: #15131f;
+
+  /* Aliases used by the components. */
+  --ink: var(--text);
+  --ink-soft: var(--text-2);
+  --ink-faint: var(--text-muted);
+  --surface-1: var(--surface);
+  --surface-2: var(--surface-alt);
+  --surface-3: var(--primary-soft);
+  --surface-solid: var(--surface);
+  --line: var(--border);
+  --blur: none;
+  --felt-900: var(--bg);
+  --felt-800: var(--bg);
+  --felt-700: var(--surface-alt);
+  --felt-600: var(--felt);
+  --felt-500: var(--border-strong);
+  --felt-line: var(--border);
+  --accent-ink: var(--on-accent);
+  --grad-accent: var(--primary);
+  --grad-gold: var(--warning);
+  --grad-cool: var(--info);
+  --sakura: var(--accent);
+  --sakura-soft: var(--accent-soft);
+  --gold: var(--warning);
+  --ok: var(--success);
+  --shadow-1: var(--shadow-sm);
+  --shadow-2: var(--shadow-lg);
 
   --radius-s: 8px;
-  --radius-m: 14px;
-  --radius-l: 22px;
-  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-2: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --radius-m: 12px;
+  --radius-l: 16px;
 
-  --font-ui: "Inter", "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
-  /* Headings: heavy geometric sans instead of brush/mincho lettering. */
-  --font-display: "Manrope", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  /* Tile glyph fallback only (faces are SVG). */
-  --font-tile: var(--font-display);
+  /* System fonts only: nothing is downloaded, works offline. */
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Noto Sans JP", sans-serif;
+  --font-display: var(--font-ui);
+  --font-tile: var(--font-ui);
 
   --touch: 44px;
   --safe-top: env(safe-area-inset-top, 0px);
@@ -72,52 +148,7 @@
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
 
-  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-/* ---- table themes (data-table on <html>) --------------------------------- */
-:root[data-table="ocean"] {
-  --felt-900: #050b14;
-  --felt-800: #0a1424;
-  --felt-700: #0f1d34;
-  --felt-600: #15284a;
-  --felt-500: #1e3a66;
-  --glow-1: rgba(56, 189, 248, 0.38);
-  --glow-2: rgba(99, 102, 241, 0.3);
-  --glow-3: rgba(45, 212, 191, 0.18);
-}
-
-:root[data-table="mint"] {
-  --felt-900: #05100e;
-  --felt-800: #091a17;
-  --felt-700: #0e2622;
-  --felt-600: #133630;
-  --felt-500: #1b4a42;
-  --glow-1: rgba(45, 212, 191, 0.34);
-  --glow-2: rgba(132, 204, 22, 0.16);
-  --glow-3: rgba(56, 189, 248, 0.2);
-}
-
-:root[data-table="sunset"] {
-  --felt-900: #12070b;
-  --felt-800: #1d0c12;
-  --felt-700: #2a111a;
-  --felt-600: #3a1724;
-  --felt-500: #522036;
-  --glow-1: rgba(251, 113, 133, 0.38);
-  --glow-2: rgba(251, 146, 60, 0.28);
-  --glow-3: rgba(168, 85, 247, 0.22);
-}
-
-:root[data-table="mono"] {
-  --felt-900: #09090b;
-  --felt-800: #111114;
-  --felt-700: #19191e;
-  --felt-600: #232329;
-  --felt-500: #32323a;
-  --glow-1: rgba(255, 255, 255, 0.1);
-  --glow-2: rgba(255, 92, 158, 0.14);
-  --glow-3: rgba(255, 255, 255, 0.05);
+  --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ---- tile sets (data-tileset on <html>) ----------------------------------- */

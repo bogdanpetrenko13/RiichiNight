@@ -4,7 +4,7 @@ One folder per character id from `src/game/characters.ts`:
 
 ```
 <id>/portrait.webp            square table portrait (~512px)
-<id>/emotions/neutral.webp    also: happy, confident, surprised, troubled
+<id>/emotions/neutral.webp    also: happy, troubled
 <id>/reward/stage1.webp       reward scene for stage 1 … stage<stages-1>
 ```
 

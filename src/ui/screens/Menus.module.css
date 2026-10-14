@@ -42,7 +42,7 @@
 .logo {
   margin: 0;
   font-size: clamp(30px, 8vw, 54px);
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 0.02em;
   display: flex;
   flex-direction: column;
@@ -95,7 +95,7 @@
   padding: 12px;
   border-radius: var(--radius-l);
   border: 1px solid var(--felt-line);
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--surface-2);
   cursor: pointer;
   transition:
     box-shadow 160ms,
@@ -108,7 +108,7 @@
 
 .card[data-picked] {
   box-shadow: 0 0 0 2px var(--c);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-2);
 }
 
 .cardBody {
@@ -181,7 +181,7 @@
 .galleryRow {
   padding: 12px;
   border-radius: var(--radius-l);
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--surface-2);
   border: 1px solid var(--felt-line);
 }
 
@@ -244,7 +244,7 @@
   display: inline-flex;
   padding: 3px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--surface-2);
   align-self: flex-start;
 }
 
@@ -260,7 +260,7 @@
 
 .segmented button[data-on] {
   background: var(--sakura);
-  color: #2a0f19;
+  color: var(--on-accent);
 }
 
 .check {
@@ -308,7 +308,7 @@ input[type="range"] {
   width: min(260px, 70vw);
   height: 6px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--surface-2);
   overflow: hidden;
 }
 

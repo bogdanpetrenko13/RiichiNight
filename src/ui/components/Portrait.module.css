@@ -18,16 +18,12 @@
   object-fit: cover;
 }
 
-.frame[data-emotion="happy"],
-.frame[data-emotion="confident"] {
+.frame[data-emotion="happy"] {
   transform: scale(1.05);
 }
 
 .frame[data-emotion="troubled"] {
-  filter: saturate(0.75);
-}
-
-.frame[data-emotion="surprised"] {
+  filter: saturate(0.8);
   animation: jolt 380ms var(--ease-out);
 }
 
@@ -40,6 +36,7 @@
 .frame[data-round] {
   border-radius: 50%;
   box-shadow:
-    0 0 0 3px rgba(255, 255, 255, 0.85),
-    0 6px 16px rgba(0, 0, 0, 0.45);
+    0 0 0 3px var(--surface-solid),
+    0 0 0 5px var(--c),
+    var(--shadow-1);
 }

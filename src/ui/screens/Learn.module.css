@@ -17,7 +17,7 @@
   padding: 0 16px;
   border-radius: var(--radius-l);
   border: 1px solid var(--felt-line);
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--surface-2);
   font-weight: 700;
   text-align: left;
   cursor: pointer;
@@ -30,8 +30,8 @@
   height: 30px;
   border-radius: 50%;
   background: var(--sakura);
-  color: #2a0f19;
-  font-weight: 900;
+  color: var(--on-accent);
+  font-weight: 700;
   flex: none;
 }
 

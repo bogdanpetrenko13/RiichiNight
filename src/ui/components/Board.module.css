@@ -3,12 +3,11 @@
   position: relative;
   width: var(--board);
   height: var(--board);
-  border-radius: calc(var(--board) * 0.08);
-  background:
-    radial-gradient(60% 60% at 50% 50%, rgba(255, 255, 255, 0.06), transparent 70%),
-    var(--surface-1);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-2);
+  /* Felt board as in Riichi Trainer (.rt-board). */
+  border-radius: var(--radius-l);
+  background: var(--felt);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 3px rgba(35, 35, 35, 0.07);
 }
 
 .slot {
@@ -50,8 +49,8 @@
 }
 
 .seatLabel[data-current] .wind {
-  background: var(--grad-accent);
-  color: #fff;
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 .seatLabel[data-dealer] .wind {
@@ -64,7 +63,7 @@
   width: 1.6em;
   height: 1.6em;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--surface-2);
   font-family: var(--font-display);
   font-weight: 700;
   color: var(--ink);

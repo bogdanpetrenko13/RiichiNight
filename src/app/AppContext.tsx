@@ -72,8 +72,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement;
     root.lang = settings.lang;
     root.dataset.tileset = settings.tileset;
-    root.dataset.table = settings.table;
-  }, [settings.voiceVolume, settings.musicVolume, settings.lang, settings.tileset, settings.table]);
+  }, [settings.voiceVolume, settings.musicVolume, settings.lang, settings.tileset]);
+
+  // Light/dark theme; "system" follows the OS setting and its changes.
+  useEffect(() => {
+    const media = window.matchMedia?.("(prefers-color-scheme: dark)");
+    const apply = () => {
+      const dark = settings.theme === "dark" || (settings.theme === "system" && Boolean(media?.matches));
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+    };
+    apply();
+    if (settings.theme !== "system" || !media) return;
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, [settings.theme]);
 
   const updateSettings = useCallback((patch: Partial<Settings>) => {
     setSettings((prev) => {

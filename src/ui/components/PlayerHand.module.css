@@ -15,8 +15,6 @@
   border-radius: 999px;
   background: var(--surface-1);
   border: 1px solid var(--line);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
   font-size: 13px;
 }
 

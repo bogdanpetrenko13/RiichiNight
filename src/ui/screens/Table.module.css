@@ -110,7 +110,7 @@
   border-radius: 999px;
   background: var(--accent);
   color: var(--accent-ink);
-  font-weight: 900;
+  font-weight: 700;
   font-size: 22px;
   animation: pop 1.3s var(--ease-out) forwards;
   pointer-events: none;

@@ -6,8 +6,7 @@
   padding: 8px 14px 8px 8px;
   border-radius: 10px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, rgba(255, 255, 255, 0) 2px),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)), var(--surface-1);
+    var(--surface-1);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
   transition: box-shadow 200ms;
   min-width: 0;
@@ -117,7 +116,7 @@
   height: 9px;
   transform: rotate(45deg);
   border-radius: 2px;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--surface-2);
 }
 
 .pip[data-on] {

@@ -9,13 +9,14 @@ import { emptyStats, type Stats } from "./stats";
 
 export type AiSpeed = "fast" | "normal" | "slow";
 export type Tileset = "modern" | "classic" | "ivory" | "dark" | "flat";
-export type TableTheme = "aurora" | "ocean" | "mint" | "sunset" | "mono";
+/** Same choice as in Riichi Trainer: follow the system, or force light/dark. */
+export type ThemeMode = "system" | "light" | "dark";
 
 export const TILESETS: Tileset[] = ["modern", "classic", "ivory", "dark", "flat"];
-export const TABLE_THEMES: TableTheme[] = ["aurora", "ocean", "mint", "sunset", "mono"];
+export const THEME_MODES: ThemeMode[] = ["system", "light", "dark"];
 
 /** Bumped when the look changes so old theme choices are replaced once. */
-const STYLE_VERSION = 2;
+const STYLE_VERSION = 3;
 
 export interface Settings {
   lang: Lang;
@@ -28,7 +29,7 @@ export interface Settings {
   dealAnimation: boolean;
   speechBubbles: boolean;
   tileset: Tileset;
-  table: TableTheme;
+  theme: ThemeMode;
   styleVersion?: number;
   gameRules: GameRules;
   /** null until the age gate has been answered. */
@@ -72,7 +73,7 @@ export function defaultSettings(): Settings {
     dealAnimation: true,
     speechBubbles: true,
     tileset: "modern",
-    table: "aurora",
+    theme: "system",
     styleVersion: STYLE_VERSION,
     gameRules: { ...DEFAULT_GAME_RULES },
     adultConfirmed: null,
@@ -97,14 +98,15 @@ async function setJson(key: string, value: unknown): Promise<void> {
 export async function loadSettings(): Promise<Settings> {
   const stored = await getJson<Partial<Settings>>(KEYS.settings);
   const base = defaultSettings();
-  // Settings from the old felt-table design: switch to the new default look once.
+  // Settings from an older design: switch to the current default look once.
   const look =
-    stored?.styleVersion === STYLE_VERSION && TABLE_THEMES.includes(stored.table as TableTheme)
+    stored?.styleVersion === STYLE_VERSION && THEME_MODES.includes(stored.theme as ThemeMode)
       ? {}
-      : { tileset: base.tileset, table: base.table, styleVersion: STYLE_VERSION };
+      : { tileset: base.tileset, theme: base.theme, styleVersion: STYLE_VERSION };
+  const { table: _oldTable, ...rest } = (stored ?? {}) as Partial<Settings> & { table?: unknown };
   return {
     ...base,
-    ...stored,
+    ...rest,
     ...look,
     rewardRules: { ...base.rewardRules, ...(stored?.rewardRules ?? {}) },
     gameRules: { ...base.gameRules, ...(stored?.gameRules ?? {}) },

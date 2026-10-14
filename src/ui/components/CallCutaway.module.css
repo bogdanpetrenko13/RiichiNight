@@ -20,7 +20,7 @@
 }
 
 .band[data-kind="riichi"] {
-  background: linear-gradient(90deg, transparent 0%, #6d28d9 18%, #db2777 50%, #6d28d9 82%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, #24392d 18%, #2e4a3b 50%, #24392d 82%, transparent 100%);
 }
 
 .inner {
@@ -52,7 +52,7 @@
 
 .word {
   font-size: clamp(40px, 11vw, 78px);
-  font-weight: 900;
+  font-weight: 700;
   font-style: italic;
   color: white;
   text-shadow:

@@ -132,9 +132,10 @@ export function useGameController(): GameController {
             const vid = voiceIdFor(ev.seat);
             if (vid) void voice.play(vid, ev.kind);
             if (ev.seat === 0) {
-              if (ev.kind === "riichi") for (let s = 1; s <= 3; s++) setEmotion(s, "surprised");
+              // Your riichi worries everyone else.
+              if (ev.kind === "riichi") for (let s = 1; s <= 3; s++) setEmotion(s, "troubled");
             } else if (ev.kind === "riichi") {
-              setEmotion(ev.seat, "confident");
+              setEmotion(ev.seat, "happy");
               if (Math.random() < 0.6) say(ev.seat, "riichi");
             }
             break;

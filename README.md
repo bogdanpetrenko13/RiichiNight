@@ -87,29 +87,27 @@ Pyodide. Патч отвечает на те же вопросы через та
 (CC0, общественное достояние). Их импортирует `scripts/import-tiles.py` в `public/tiles/`
 (варианты `regular` и `black`), тело тайла рисует CSS.
 
-Сейчас у героинь временный арт из демо-игр движка Ren'Py (лицензия MIT). Его собирает
-`scripts/import-renpy-art.py`, а источники и текст лицензии перечислены в
-`public/characters/CREDITS.md`. Чтобы заменить арт, положите свои файлы с теми же именами.
-
-Рэйко и Нанами собраны из многослойных спрайтов автора Sutemo с itch.io
+Все героини собраны из многослойных спрайтов автора Sutemo с itch.io
 ([Female Mature Sprite](https://sutemo.itch.io/female-mature-anime-sprite),
-[Female Character Sprite](https://sutemo.itch.io/female-character)) скриптом
-`scripts/import-sutemo-art.py` (нужен ImageMagick):
+[Female Character Sprite](https://sutemo.itch.io/female-character)): у каждой своя
+причёска, цвет волос, одежда и аксессуары и три выражения лица для стола —
+обычное, радость (победа, риичи) и огорчение (проигрыш, чужой риичи).
+Используются только взрослые наряды. Собирает арт `scripts/import-sutemo-art.py`
+(нужен ImageMagick):
 
 ```
 python scripts/import-sutemo-art.py Anime_Mature_Woman_Free.psd Female_Sprite_by_Sutemo.psd
 ```
 
-Автор разрешает использовать спрайты в личных и коммерческих проектах, но не
-распространять их отдельно, поэтому в репозитории лежат только готовые картинки,
-без PSD и слоёв. Используются только взрослые наряды.
+Автор запрещает только перепродажу самого спрайта; игра бесплатная. Исходные PSD в
+репозиторий не входят, подробности в `public/characters/CREDITS.md`.
 
 Файлы подхватываются по соглашению об именах; пока файла нет, показывается
 аккуратная заглушка с ожидаемым путём.
 
 ```
 public/characters/<id>/portrait.webp            портрет за столом, квадрат ~512px
-public/characters/<id>/emotions/<emotion>.webp  neutral | happy | confident | surprised | troubled
+public/characters/<id>/emotions/<emotion>.webp  neutral | happy | troubled
 public/characters/<id>/reward/stage<N>.webp     наградная сцена для стадии N (1..stages-1)
 public/voice/<id>/<kind>.mp3                    riichi | pon | chi | kan | ron | tsumo
 public/voice/player/<kind>.mp3                  голос игрока (необязательно)
@@ -121,7 +119,7 @@ public/voice/player/<kind>.mp3                  голос игрока (нео�
 ## Возможности
 
 - **Героини за столом:** эмоции на портретах, реплики в облачке (победа, проигрыш, ничья, простой игрока, риичи), наклонная полоса с героиней при «Рон!», «Цумо!» и «Риичи!».
-- **Оформление:** 4 набора тайлов (классика, слоновая кость, тёмные, плоские) и 5 цветов стола. Музыка подхватывается из `public/audio/music/`.
+- **Оформление:** дизайн-система как в [Riichi Trainer](https://github.com/bogdanpetrenko13/Riichi-Trainer) (бамбуково-зелёный и терракотовый, плоские карточки), светлая, тёмная и системная тема, 5 наборов тайлов. Музыка подхватывается из `public/audio/music/`.
 - **Удобства:** подсказка ожиданий, индикатор фуритена, автосброс после риичи, анимация раздачи и сброса.
 - **Правила:** короткая партия (только Восток) или ханчан, тоби, агари-ямэ, кирияге-манган, куитан.
 - **Прогресс:** закрытая героиня (Юдзу открывается первым 1-м местом), случайный выбор соперниц, статистика, 10 достижений.

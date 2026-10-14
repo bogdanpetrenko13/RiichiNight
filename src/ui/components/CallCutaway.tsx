@@ -19,7 +19,7 @@ export function CallCutaway({ cutaway, cast }: { cutaway: Cutaway; cast: Charact
           {character && (
             <Portrait
               character={character}
-              emotion={cutaway.kind === "riichi" ? "confident" : "happy"}
+              emotion="happy"
               size={92}
               className={styles.portrait}
             />

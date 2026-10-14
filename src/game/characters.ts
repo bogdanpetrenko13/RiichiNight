@@ -12,13 +12,19 @@ import type { Lang } from "../i18n/strings";
  * Art is loaded by convention from public/characters/<id>/ and falls back to
  * a generated placeholder card when a file is missing:
  *   portrait.webp                 table portrait (square, ~512px)
- *   emotions/<emotion>.webp       neutral | happy | confident | surprised | troubled
+ *   emotions/<emotion>.webp       neutral | happy | troubled
  *   reward/stage<N>.webp          reward scene for stage N (1..stages-1)
  * Voice lines: public/voice/<id>/<riichi|pon|chi|kan|ron|tsumo>.mp3
  */
 
-export type Emotion = "neutral" | "happy" | "confident" | "surprised" | "troubled";
-export const EMOTIONS: Emotion[] = ["neutral", "happy", "confident", "surprised", "troubled"];
+/**
+ * Three table expressions:
+ *   neutral   default, while nothing special happens
+ *   happy     she wins a hand or declares riichi
+ *   troubled  she deals in, someone tsumos, or the player declares riichi
+ */
+export type Emotion = "neutral" | "happy" | "troubled";
+export const EMOTIONS: Emotion[] = ["neutral", "happy", "troubled"];
 
 export interface CharacterDef {
   id: string;

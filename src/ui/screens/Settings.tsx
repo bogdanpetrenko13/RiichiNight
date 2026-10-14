@@ -2,7 +2,7 @@ import { useApp } from "../../app/AppContext";
 import { LANGS, type StringKey } from "../../i18n/strings";
 import type { GameRules } from "../../engine/protocol";
 import type { RewardRules } from "../../game/rewards";
-import { TABLE_THEMES, TILESETS, type AiSpeed, type Settings, type TableTheme } from "../../game/storage";
+import { THEME_MODES, TILESETS, type AiSpeed, type Settings } from "../../game/storage";
 import { TileRow } from "../components/TileRow";
 import { AppBar, Group, Row, Segmented, Switch } from "../components/Primitives";
 import styles from "./SettingsScreen.module.css";
@@ -11,14 +11,6 @@ const SPEEDS: AiSpeed[] = ["fast", "normal", "slow"];
 const REWARD_RULES: (keyof RewardRules)[] = ["tsumoAdvancesAll", "bigHandBonus", "regressOnLoss", "firstPlaceBonus"];
 const GAME_TOGGLES: (keyof Omit<GameRules, "gameLength">)[] = ["redFives", "openTanyao", "tobi", "agariYame", "kiriageMangan"];
 
-/** Swatch gradients for the table themes (mirror the glows in tokens.css). */
-const SWATCH: Record<TableTheme, string> = {
-  aurora: "linear-gradient(135deg, #2a2450, #8b5cf6 60%, #ff5c9e)",
-  ocean: "linear-gradient(135deg, #15284a, #38bdf8 60%, #6366f1)",
-  mint: "linear-gradient(135deg, #133630, #2dd4bf 60%, #84cc16)",
-  sunset: "linear-gradient(135deg, #3a1724, #fb7185 60%, #fb923c)",
-  mono: "linear-gradient(135deg, #19191e, #4a4a55 60%, #9a9aa6)",
-};
 
 type BoolKey = { [K in keyof Settings]-?: Settings[K] extends boolean ? K : never }[keyof Settings];
 
@@ -72,20 +64,12 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
               <TileRow text="123m 5p 9s 1567z" size={30} />
             </div>
           </Row>
-          <Row label={t("tableTheme")} stacked>
-            <div className={styles.swatches}>
-              {TABLE_THEMES.map((th) => (
-                <button
-                  key={th}
-                  className={styles.swatch}
-                  data-on={settings.table === th || undefined}
-                  style={{ background: SWATCH[th] }}
-                  onClick={() => updateSettings({ table: th })}
-                >
-                  {t(`table_${th}` as StringKey)}
-                </button>
-              ))}
-            </div>
+          <Row label={t("theme")}>
+            <Segmented
+              value={settings.theme}
+              options={THEME_MODES.map((m) => ({ value: m, label: t(`theme_${m}` as StringKey) }))}
+              onChange={(theme) => updateSettings({ theme })}
+            />
           </Row>
         </Group>
 
