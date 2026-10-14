@@ -226,6 +226,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
               active={view.current === seat && view.status === "ai"}
               dealer={view.round.dealer === seat}
               claimed={prompt?.claim?.from === seat ? prompt.claim.tile : null}
+              riverCols={layout.orientation === "portrait" ? 9 : 6}
             />
           );
         })}

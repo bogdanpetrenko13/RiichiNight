@@ -182,8 +182,9 @@
   align-content: flex-start;
   gap: 1px;
   row-gap: calc(var(--river-tile) * 0.06 + 2px);
-  /* 6 tiles + gaps + room for one sideways riichi tile. */
-  width: calc(var(--river-tile) * 6.5 + 6px);
+  /* N tiles per row (--river-cols: 9 rivals in portrait, else 6) + gaps +
+     room for one sideways riichi tile. */
+  width: calc(var(--river-tile) * (var(--river-cols, 6) + 0.5) + var(--river-cols, 6) * 1px);
   max-width: 100%;
   min-height: 0;
 }
@@ -201,13 +202,18 @@
 /* More than three rows: shrink so the band never grows and nothing overlaps
    the closed hand. */
 .river[data-rows="4"],
-.river[data-rows="5"] {
+.river[data-rows="5"],
+.river[data-rows="6"] {
   --river-tile: calc(var(--band-river, 24px) * 0.76);
 }
 
 
 
-/* A rival's discard is put down: drops in with a soft landing. */
+/* Rivals' discards fly in from their hand (RivalBand); others drop in. */
+.river[data-rival] > * {
+  animation: none;
+}
+
 .river > * {
   animation: drop var(--dur-slow) var(--ease-in) both;
 }
@@ -245,6 +251,29 @@
   gap: 1px;
 }
 
+/* A new call slides into place. */
+.meld {
+  animation: meldIn var(--dur-slow) var(--ease-in) both;
+}
+
+@keyframes meldIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30%) scale(1.1);
+  }
+}
+
+/* Her drawn tile, apart from the hand; lifts while she thinks. */
+.drawn {
+  display: inline-flex;
+  margin-left: calc(var(--band-back, 14px) * 0.35);
+  transition: transform var(--dur-base) var(--ease-std);
+}
+
+.drawn[data-thinking] {
+  transform: translateY(-28%);
+}
+
 .melds {
   display: flex;
   gap: 4px;
@@ -280,6 +309,7 @@
 /* Player band: dead wall + counters in the left part, river in the middle,
    waits and the action buttons in a side column on the right (portrait). */
 .me {
+  --river-tile: var(--me-river, var(--band-river, 24px));
   grid-template-columns: var(--band-left, 104px) minmax(0, 1fr) var(--band-side, 104px);
   grid-template-areas: "left river side";
   grid-template-rows: minmax(0, 1fr);
@@ -295,6 +325,11 @@
 
 .actions {
   margin-top: auto;
+}
+
+/* The player's river is sized for four rows of 6 already. */
+.me .river[data-rows="4"] {
+  --river-tile: var(--me-river, var(--band-river, 24px));
 }
 
 /* The player's discards fly in from the hand (motion.ts) instead of dropping. */
@@ -355,6 +390,7 @@
 }
 
 :global([data-orientation="landscape"]) .me {
+  --river-tile: var(--me-river, var(--band-river, 24px));
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr) auto;
   grid-template-areas:

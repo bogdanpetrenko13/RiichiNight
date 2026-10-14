@@ -111,6 +111,8 @@
 /* ---- dock: the hand (portrait); hand + buttons (landscape) ------------------ */
 .dock {
   padding-bottom: 10px;
+  /* A shelf under the hand: keeps it away from the screen edge / gesture bar. */
+  background: linear-gradient(180deg, transparent, var(--shelf, rgba(0, 0, 0, 0.16)));
   grid-area: dock;
   position: relative;
   z-index: 3;
@@ -120,6 +122,10 @@
   min-width: 0;
 }
 
+
+.table[data-orientation="portrait"] .dock {
+  padding: 6px 0 calc(34px + var(--safe-bottom));
+}
 
 /* Landscape: hand on the left, buttons stacked on the right. */
 .table[data-orientation="landscape"] .dock {

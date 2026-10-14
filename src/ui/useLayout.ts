@@ -75,8 +75,9 @@ function handVars(hand: number, avail: number, cap: number): CSSProperties {
  * (measured by the table), so rivers always fit their band.
  *   portrait: 4 stacked bands, field right of a fixed left part
  *   landscape: 4 columns
- * Each river holds 3 rows (6 tiles + one sideways riichi tile) plus the riichi
- * stick line; more rows shrink via CSS.
+ * Rivals' rivers hold 9 tiles per row in portrait (6 in landscape columns),
+ * the player's 6 per row; plus one sideways riichi tile and the riichi stick
+ * line. More rows than planned shrink via CSS.
  */
 export function bandVars(orientation: Layout["orientation"], areaW: number, areaH: number, left: number): CSSProperties {
   if (areaW <= 0 || areaH <= 0) return {};
@@ -99,12 +100,16 @@ export function bandVars(orientation: Layout["orientation"], areaW: number, area
   const meField = field - side - 8;
   const back = clamp((field - 6) / 14.8, 12, 24);
   const byH = (bandH - back * TILE_RATIO - 28) / rows;
-  const river = clamp(Math.min((field - 6) / 6.6, (meField - 4) / 6.6, byH), 14, 40);
+  // Rivals: 9 tiles per row (2 rows usually, 3 at most) across the field.
+  const river = clamp(Math.min((field - 14) / 9.6, byH), 14, 40);
+  // Player: 6 per row next to the waits/buttons column; up to 4 rows.
+  const meRiver = clamp(Math.min((meField - 4) / 6.6, (bandH - 16) / (4 * rowH + 0.38)), 14, 40);
   // Portrait under wind / score / name (~68 px of labels): never covers them.
   const portrait = clamp(Math.min(left - 14, bandH - 16 - 70), 48, 110);
   return {
     ["--band-side" as string]: `${side}px`,
     ["--band-river" as string]: px(river),
+    ["--me-river" as string]: px(meRiver),
     ["--band-back" as string]: px(back),
     ["--band-portrait" as string]: px(portrait),
   };
