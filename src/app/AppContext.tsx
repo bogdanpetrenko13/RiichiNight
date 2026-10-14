@@ -3,10 +3,12 @@ import { STRINGS, YAKU_RU, type Lang, type StringKey } from "../i18n/strings";
 import {
   defaultSettings,
   loadAchievements,
+  loadRivals,
   loadSettings,
   loadStats,
   loadUnlocks,
   saveAchievements,
+  saveRivals,
   saveSettings,
   saveStats,
   saveUnlocks,
@@ -31,7 +33,11 @@ interface AppState {
   commitStats: (s: Stats) => void;
   resetStats: () => void;
   achievements: AchievementLog;
-  /** Achievement ids waiting to be shown as toasts. */
+  /** Rivals unlocked through the progression ladder. */
+  rivals: string[];
+  /** Adds rivals and queues a "new rival" toast for each. */
+  unlockRivals: (ids: string[]) => void;
+  /** Achievement ids (or "rival:<id>") waiting to be shown as toasts. */
   toasts: string[];
   dismissToast: () => void;
   t: Translate;
@@ -47,15 +53,21 @@ const clearsOf = (u: Unlocks) => Object.values(u).reduce((n, x) => n + (x.clears
 export function AppProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
   const [unlocks, setUnlocksState] = useState<Unlocks>({});
   const [stats, setStats] = useState<Stats>(emptyStats);
   const [achievements, setAchievements] = useState<AchievementLog>({});
   const [toasts, setToasts] = useState<string[]>([]);
+  const [rivals, setRivals] = useState<string[]>([]);
+  const rivalsRef = useRef<string[]>([]);
   const achievementsRef = useRef<AchievementLog>({});
   const unlocksRef = useRef<Unlocks>({});
 
   useEffect(() => {
-    void Promise.all([loadSettings(), loadUnlocks(), loadStats(), loadAchievements()]).then(([s, u, st, a]) => {
+    void Promise.all([loadSettings(), loadUnlocks(), loadStats(), loadAchievements(), loadRivals()]).then(([s, u, st, a, r]) => {
+      rivalsRef.current = r;
+      setRivals(r);
       setSettings(s);
       setUnlocksState(u);
       unlocksRef.current = u;
@@ -96,7 +108,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const award = useCallback((s: Stats, u: Unlocks) => {
-    const earned = newlyEarned(s, clearsOf(u), achievementsRef.current);
+    const earned = newlyEarned(s, clearsOf(u), achievementsRef.current, settingsRef.current.extrasUnlocked);
     if (!earned.length) return;
     const now = Date.now();
     const next = { ...achievementsRef.current };
@@ -137,6 +149,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const dismissToast = useCallback(() => setToasts((q) => q.slice(1)), []);
 
+  const unlockRivals = useCallback((ids: string[]) => {
+    const fresh = ids.filter((id) => !rivalsRef.current.includes(id));
+    if (!fresh.length) return;
+    const next = [...rivalsRef.current, ...fresh];
+    rivalsRef.current = next;
+    setRivals(next);
+    void saveRivals(next);
+    setToasts((q) => [...q, ...fresh.map((id) => `rival:${id}`)]);
+  }, []);
+
   const value = useMemo<AppState>(() => {
     const lang = settings.lang;
     const table = STRINGS[lang];
@@ -155,6 +177,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       commitStats,
       resetStats,
       achievements,
+      rivals,
+      unlockRivals,
       toasts,
       dismissToast,
       t,
@@ -162,7 +186,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       yakuName: (key, en) => (lang === "ru" ? YAKU_RU[key] ?? en : en),
       charName: (c) => c.name[lang],
     };
-  }, [ready, settings, updateSettings, unlocks, setUnlocks, stats, commitStats, resetStats, achievements, toasts, dismissToast]);
+  }, [ready, settings, updateSettings, unlocks, setUnlocks, stats, commitStats, resetStats, achievements, rivals, unlockRivals, toasts, dismissToast]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

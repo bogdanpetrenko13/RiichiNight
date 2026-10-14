@@ -1,10 +1,15 @@
 .bar {
-  min-height: 52px;
+  min-height: 48px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+:global([data-orientation="landscape"]) .bar {
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .label {
@@ -14,7 +19,7 @@
 }
 
 .action {
-  min-width: 92px;
+  min-width: 104px;
   min-height: 48px;
   padding: 0 18px;
   display: inline-flex;

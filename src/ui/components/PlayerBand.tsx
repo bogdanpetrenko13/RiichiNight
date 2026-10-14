@@ -2,51 +2,53 @@ import type { GameView } from "../../engine/protocol";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
-import styles from "./PlayerBand.module.css";
+import styles from "./Band.module.css";
 
 /**
- * The player's own band: seat wind and score, table counters and dora on the
- * left, own river on the right (the hand itself sits below this band).
+ * The player's band: wind and score, then the dead wall with the dora
+ * indicators and the table counters (riichi sticks, honba, tiles left in the
+ * wall); the player's river on the right. The hand itself sits below.
  */
 export function PlayerBand({ view, active }: { view: GameView; active: boolean }) {
   const { t } = useApp();
   const me = view.players[0];
-  const lastIndex = me.discards.length - 1;
-  // Dora indicators shown face up, the rest of the dead-wall row as backs (5 total).
+  // Dora indicators face up, the rest of the dead-wall row as backs (5 total).
   const hidden = Math.max(0, 5 - view.dora.length);
+  const small = { ["--tw" as string]: "calc(var(--band-back, 14px) * 0.95)" };
   return (
-    <section className={styles.band} data-active={active || undefined}>
-      <div className={styles.side}>
+    <section className={`${styles.band} ${styles.me}`} data-active={active || undefined}>
+      <div className={styles.left}>
         <span className={styles.wind} data-dealer={view.round.dealer === 0 || undefined}>
           {t(`wind_${me.wind}` as StringKey)}
         </span>
         <span className={styles.score}>{me.score.toLocaleString()}</span>
-        <div className={styles.dora} aria-label={t("dora")}>
-          {view.dora.map((d, i) => (
-            <Tile key={i} code={d} size="river" />
-          ))}
-          {Array.from({ length: hidden }, (_, i) => (
-            <Tile key={`b${i}`} back size="river" />
-          ))}
-        </div>
-        <div className={styles.counters}>
-          <span title={t("honba", { n: view.round.honba })}>
-            <i className={styles.honba} />×{view.round.honba}
-          </span>
-          <span>
-            <i className={styles.stick} />×{view.round.riichiSticks}
-          </span>
-          <span>
-            <i className={styles.wall} />×{view.wall ?? 0}
-          </span>
+        <div className={styles.table}>
+          <div className={styles.dora} aria-label={t("dora")}>
+            {view.dora.map((d, i) => (
+              <Tile key={i} code={d} size="river" style={small} />
+            ))}
+            {Array.from({ length: hidden }, (_, i) => (
+              <Tile key={`b${i}`} back size="river" style={small} />
+            ))}
+          </div>
+          <div className={styles.counters}>
+            <span title={t("riichiSticks")}>
+              <i className={styles.stick} />×{view.round.riichiSticks}
+            </span>
+            <span title={t("honba", { n: view.round.honba })}>
+              <i className={styles.honba} />×{view.round.honba}
+            </span>
+            <span title={t("wall", { n: view.wall ?? 0 })}>
+              <i className={styles.wall} />×{view.wall ?? 0}
+            </span>
+          </div>
         </div>
         {me.riichi && <span className={styles.riichi}>{t("act_riichi")}!</span>}
       </div>
-      <div className={styles.river}>
+      <div className={styles.river} data-long={me.discards.length > 18 || undefined}>
         {me.discards.map((code, i) => (
-          <Tile key={`${i}-${code}`} code={code} size="river" sideways={me.riichiIndex === i} highlight={false} />
+          <Tile key={`${i}-${code}`} code={code} size="river" sideways={me.riichiIndex === i} />
         ))}
-        {lastIndex < 0 && <span className={styles.empty} />}
       </div>
     </section>
   );

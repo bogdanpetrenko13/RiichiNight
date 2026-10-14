@@ -14,12 +14,14 @@ interface TileProps {
   highlight?: boolean;
   /** Riichi declaration tile, laid sideways. */
   sideways?: boolean;
+  /** Small pointer above the tile (claimable discard). */
+  marked?: boolean;
   onClick?: () => void;
   label?: string;
   style?: CSSProperties;
 }
 
-export function Tile({ code, back, size = "hand", selected, dimmed, highlight, sideways, onClick, label, style }: TileProps) {
+export function Tile({ code, back, size = "hand", selected, dimmed, highlight, sideways, marked, onClick, label, style }: TileProps) {
   const { settings } = useApp();
   const variant = settings.tileset === "dark" ? "black" : "regular";
   const classes = [
@@ -29,6 +31,7 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
     dimmed && styles.dimmed,
     highlight && styles.highlight,
     sideways && styles.sideways,
+    marked && styles.marked,
     onClick && styles.clickable,
     back && styles.back,
   ]

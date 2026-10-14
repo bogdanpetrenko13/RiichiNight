@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
   width: 100%;
 }
 
@@ -47,7 +46,7 @@
   flex-wrap: nowrap;
   gap: calc(var(--hand-tile) * 0.3);
   width: 100%;
-  padding: 0 2px calc(var(--hand-tile) * 0.18);
+  padding: 0 2px calc(var(--hand-tile) * 0.1);
   /* Melds use the hand size of this row. */
   --meld-tile: calc(var(--hand-tile) * 0.72);
 }
@@ -98,9 +97,15 @@
   position: relative;
 }
 
+/* Wait hints float over the bottom of the player band, saving a row. */
 .wrap[data-float] .hintRow {
   position: absolute;
-  left: 12px;
-  bottom: calc(100% + 6px);
+  right: 10px;
+  bottom: calc(100% - var(--hand-tile) * 0.25);
   z-index: 3;
+  box-shadow: var(--shadow-md);
+}
+
+.wrap[data-float] .hintRow:empty {
+  box-shadow: none;
 }

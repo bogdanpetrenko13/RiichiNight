@@ -7,7 +7,7 @@
   justify-content: center;
   flex: none;
   width: var(--tw);
-  height: calc(var(--tw) * 1.4);
+  height: calc(var(--tw) * 1.42);
   padding: 0;
   border: none;
   border-radius: calc(var(--tw) * 0.16);
@@ -92,7 +92,26 @@
 }
 
 .selected {
-  transform: translateY(calc(var(--tw) * -0.32));
+  transform: translateY(calc(var(--tw) * -0.3));
+}
+
+/* Kemono-style pointer above the lifted tile and above a claimable discard. */
+.selected::after,
+.marked::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 3px);
+  transform: translateX(-50%);
+  border: calc(var(--tw) * 0.2) solid transparent;
+  border-bottom: 0;
+  border-top: calc(var(--tw) * 0.26) solid var(--accent);
+  pointer-events: none;
+}
+
+.marked::after {
+  border-width: 5px 5px 0;
+  border-top-width: 7px;
 }
 
 .highlight {

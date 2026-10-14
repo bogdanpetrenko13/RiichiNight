@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useApp } from "../../app/AppContext";
-import { CHARACTERS, isUnlocked } from "../../game/characters";
+import { CHARACTERS, getCharacter, isUnlocked, type CharacterDef } from "../../game/characters";
 import type { StringKey } from "../../i18n/strings";
 import { Portrait } from "../components/Portrait";
 import { AppBar, IconButton, Segmented } from "../components/Primitives";
@@ -17,9 +17,16 @@ const SEAT_KEY: StringKey[] = ["wind_south", "wind_west", "wind_north"];
 
 /** Pick three rivals; picking order fills the seats after the player. */
 export function Setup({ initial, onBack, onStart }: SetupProps) {
-  const { t, lang, charName, unlocks, settings, stats, updateSettings } = useApp();
-  const firstPlaces = stats.placements[0];
-  const available = CHARACTERS.filter((c) => isUnlocked(c, firstPlaces));
+  const { t, lang, charName, unlocks, settings, rivals, updateSettings } = useApp();
+  const available = CHARACTERS.filter((c) => isUnlocked(c, rivals));
+  const unlockHint = (c: CharacterDef) => {
+    const names = (c.unlock?.with ?? []).map((id) => {
+      const other = getCharacter(id);
+      return other ? other.name[lang].split(" ")[0] : id;
+    });
+    const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} ${t("and")} ${names[names.length - 1]}` : names[0] ?? "";
+    return t("unlockWith", { names: list });
+  };
   const [cast, setCast] = useState<string[]>(() => {
     const kept = initial.filter((id) => available.some((c) => c.id === id)).slice(0, 3);
     for (const c of available) if (kept.length < 3 && !kept.includes(c.id)) kept.push(c.id);
@@ -44,7 +51,7 @@ export function Setup({ initial, onBack, onStart }: SetupProps) {
       <div className="screen-body">
         <div className={styles.list}>
           {CHARACTERS.map((c) => {
-            const open = isUnlocked(c, firstPlaces);
+            const open = isUnlocked(c, rivals);
             const seat = cast.indexOf(c.id);
             const progress = unlocks[c.id]?.unlocked ?? 0;
             return (
@@ -74,7 +81,7 @@ export function Setup({ initial, onBack, onStart }: SetupProps) {
                     <span>{c.title[lang]}</span>
                     <span>· {c.age}</span>
                   </div>
-                  <p className={styles.bio}>{open ? c.bio[lang] : t("unlockFirstPlaces")}</p>
+                  <p className={styles.bio}>{open ? c.bio[lang] : unlockHint(c)}</p>
                   {open && settings.rewardScenes && (
                     <div className={styles.progress}>
                       <i style={{ width: `${(progress / (c.stages - 1)) * 100}%` }} />

@@ -130,7 +130,7 @@ export default function App() {
     <>
       {content}
       <AchievementToast />
-      {ready && settings.adultConfirmed === null && screen !== "boot" && <AgeGate />}
+      {ready && settings.extrasUnlocked && settings.adultConfirmed === null && screen !== "boot" && <AgeGate />}
     </>
   );
 }

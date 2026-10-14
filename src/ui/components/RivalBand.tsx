@@ -4,7 +4,7 @@ import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { Portrait } from "./Portrait";
 import { Tile } from "./Tile";
-import styles from "./RivalBand.module.css";
+import styles from "./Band.module.css";
 
 interface RivalBandProps {
   character: CharacterDef;
@@ -15,18 +15,19 @@ interface RivalBandProps {
   speech?: string | null;
   active: boolean;
   dealer: boolean;
-  /** Last discard being claimed from this rival (highlighted). */
+  /** Last discard being claimed from this rival (highlighted with a marker). */
   claimed?: TileCode | null;
 }
 
 /**
- * One rival as a horizontal band: seat wind, score and name on the left, a
- * round portrait, then her river; closed hand (backs) and calls underneath.
+ * One rival: wind, score and name with her portrait on the left; her river
+ * (6 per row) on the right, closed hand and calls underneath.
  */
 export function RivalBand({ character, player, stage, emotion, callout, speech, active, dealer, claimed }: RivalBandProps) {
   const { t, charName, settings } = useApp();
   const pips = character.stages - 1;
   const lastIndex = player.discards.length - 1;
+  const backStyle = { ["--tw" as string]: "var(--band-back, 14px)" };
   return (
     <section
       className={styles.band}
@@ -34,7 +35,7 @@ export function RivalBand({ character, player, stage, emotion, callout, speech, 
       style={{ ["--c" as string]: character.color }}
       aria-label={charName(character)}
     >
-      <div className={styles.side}>
+      <div className={styles.left}>
         <span className={styles.wind} data-dealer={dealer || undefined}>
           {t(`wind_${player.wind}` as StringKey)}
         </span>
@@ -47,41 +48,42 @@ export function RivalBand({ character, player, stage, emotion, callout, speech, 
             ))}
           </span>
         )}
+        <div className={styles.portrait}>
+          <Portrait character={character} emotion={emotion} size={88} className={styles.face} />
+          {player.riichi && <span className={styles.riichi}>{t("act_riichi")}!</span>}
+          {callout && (
+            <span key={callout} className={styles.callout}>
+              {t(`act_${callout}` as StringKey)}!
+            </span>
+          )}
+          {speech && (
+            <div key={speech} className={styles.bubble} role="status">
+              {speech}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className={styles.portrait}>
-        <Portrait character={character} emotion={emotion} size={88} round />
-        {player.riichi && <span className={styles.riichi}>{t("act_riichi")}!</span>}
-        {callout && (
-          <span key={callout} className={styles.callout}>
-            {t(`act_${callout}` as StringKey)}!
-          </span>
-        )}
-        {speech && (
-          <div key={speech} className={styles.bubble} role="status">
-            {speech}
-          </div>
-        )}
+      <div className={styles.river} data-long={player.discards.length > 18 || undefined}>
+        {player.discards.map((code, i) => (
+          <Tile
+            key={`${i}-${code}`}
+            code={code}
+            size="river"
+            sideways={player.riichiIndex === i}
+            highlight={i === lastIndex && claimed === code}
+            marked={i === lastIndex && claimed === code}
+          />
+        ))}
       </div>
 
-      <div className={styles.field}>
-        <div className={styles.river}>
-          {player.discards.map((code, i) => (
-            <Tile
-              key={`${i}-${code}`}
-              code={code}
-              size="river"
-              sideways={player.riichiIndex === i}
-              highlight={i === lastIndex && claimed === code}
-            />
+      <div className={styles.lower}>
+        <div className={styles.backs} aria-label={t("handCount", { n: player.handCount })}>
+          {Array.from({ length: player.handCount }, (_, i) => (
+            <Tile key={i} back size="river" style={backStyle} />
           ))}
         </div>
-        <div className={styles.lower}>
-          <div className={styles.backs}>
-            {Array.from({ length: player.handCount }, (_, i) => (
-              <Tile key={i} back size="river" style={{ ["--tw" as string]: "var(--band-back, 14px)" }} />
-            ))}
-          </div>
+        {player.melds.length > 0 && (
           <div className={styles.melds}>
             {player.melds.map((m, i) => (
               <span key={i} className={styles.meld}>
@@ -91,13 +93,13 @@ export function RivalBand({ character, player, stage, emotion, callout, speech, 
                     code={code}
                     size="river"
                     back={m.type === "closed_kan" && (j === 0 || j === 3)}
-                    style={{ ["--tw" as string]: "var(--band-back, 14px)" }}
+                    style={backStyle}
                   />
                 ))}
               </span>
             ))}
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

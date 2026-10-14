@@ -3,6 +3,8 @@ import { LANGS, type StringKey } from "../../i18n/strings";
 import type { GameRules } from "../../engine/protocol";
 import type { RewardRules } from "../../game/rewards";
 import { THEME_MODES, TILESETS, type AiSpeed, type Settings } from "../../game/storage";
+import { useState } from "react";
+import { checkExtrasCode } from "../../game/extras";
 import { TileRow } from "../components/TileRow";
 import { AppBar, Group, Row, Segmented, Switch } from "../components/Primitives";
 import styles from "./SettingsScreen.module.css";
@@ -111,23 +113,23 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
           ))}
         </Group>
 
-        <Group title={t("rewardScenes")}>
-          <Row label={t("rewardScenes")} hint="18+">
-            <Switch
-              label={t("rewardScenes")}
-              checked={settings.rewardScenes}
-              onChange={(on) => {
-                // Turning scenes on always needs an explicit 18+ answer.
-                if (on && !settings.adultConfirmed && !window.confirm(`${t("ageGateBody")}\n\n${t("ageGateAdult")}?`)) {
-                  return;
-                }
-                updateSettings({ rewardScenes: on, adultConfirmed: on ? true : settings.adultConfirmed });
-              }}
-            />
-          </Row>
-          {settings.rewardScenes && (
-            <>
-              {REWARD_RULES.map((key) => (
+        {settings.extrasUnlocked ? (
+          <Group title={t("scenesGroup")}>
+            <Row label={t("rewardScenes")}>
+              <Switch
+                label={t("rewardScenes")}
+                checked={settings.rewardScenes}
+                onChange={(on) => {
+                  // Turning scenes on always needs an explicit 18+ answer.
+                  if (on && !settings.adultConfirmed && !window.confirm(`${t("ageGateBody")}\n\n${t("ageGateAdult")}?`)) {
+                    return;
+                  }
+                  updateSettings({ rewardScenes: on, adultConfirmed: on ? true : settings.adultConfirmed });
+                }}
+              />
+            </Row>
+            {settings.rewardScenes &&
+              REWARD_RULES.map((key) => (
                 <Row key={key} label={t(`rule_${key}` as StringKey)}>
                   <Switch
                     label={t(`rule_${key}` as StringKey)}
@@ -136,6 +138,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
                   />
                 </Row>
               ))}
+            {settings.rewardScenes && (
               <Row label={t("resetProgress")}>
                 <button
                   className="btn btn-ghost"
@@ -146,10 +149,70 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
                   ↺
                 </button>
               </Row>
-            </>
-          )}
-        </Group>
+            )}
+            <Row label={t("extrasLock")}>
+              <button
+                className="btn btn-ghost"
+                style={{ color: "var(--danger)" }}
+                onClick={() => {
+                  if (window.confirm(t("extrasLockConfirm")))
+                    updateSettings({ extrasUnlocked: false, rewardScenes: false, adultConfirmed: null });
+                }}
+              >
+                {t("extrasLockAction")}
+              </button>
+            </Row>
+          </Group>
+        ) : (
+          <Group title={t("extrasGroup")}>
+            <ExtrasCode onUnlock={() => updateSettings({ extrasUnlocked: true, adultConfirmed: null })} />
+          </Group>
+        )}
       </div>
+    </div>
+  );
+}
+
+/** Code field that unlocks the hidden extra content. */
+function ExtrasCode({ onUnlock }: { onUnlock: () => void }) {
+  const { t } = useApp();
+  const [code, setCode] = useState("");
+  const [wrong, setWrong] = useState(false);
+  const submit = async () => {
+    if (await checkExtrasCode(code)) {
+      setCode("");
+      onUnlock();
+    } else setWrong(true);
+  };
+  return (
+    <div className={styles.code}>
+      <form
+        className={styles.codeRow}
+        onSubmit={(e) => {
+          e.preventDefault();
+          void submit();
+        }}
+      >
+        <input
+          className={styles.codeInput}
+          type="password"
+          autoComplete="off"
+          autoCapitalize="characters"
+          spellCheck={false}
+          value={code}
+          onChange={(e) => {
+            setCode(e.target.value);
+            setWrong(false);
+          }}
+          placeholder={t("extrasCode")}
+          aria-label={t("extrasCode")}
+          aria-invalid={wrong || undefined}
+        />
+        <button className="btn btn-primary" type="submit" disabled={!code.trim()}>
+          OK
+        </button>
+      </form>
+      <p className={wrong ? styles.codeError : styles.codeHint}>{wrong ? t("extrasWrong") : t("extrasHint")}</p>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { getEngine } from "../engine/EngineClient";
 import type { CallKind, GameView, HumanCommand, StepResult } from "../engine/protocol";
 import { useApp } from "../app/AppContext";
 import { music, voice } from "./audio";
-import { getCharacter, pickLine, type CharacterDef, type Emotion, type SpeechKind } from "./characters";
+import { getCharacter, pickLine, rivalsUnlockedBy, type CharacterDef, type Emotion, type SpeechKind } from "./characters";
 import { applyGameEnd, applyRound, freshSession, mergeUnlocks, type SessionStages, type StageChange } from "./rewards";
 import { applyEvents } from "./stats";
 import { clearGame, saveGame, type SavedGame } from "./storage";
@@ -56,7 +56,9 @@ export interface GameController {
 }
 
 export function useGameController(): GameController {
-  const { settings, unlocks, setUnlocks, stats, commitStats, lang } = useApp();
+  const { settings, unlocks, setUnlocks, stats, commitStats, lang, rivals, unlockRivals } = useApp();
+  const rivalsRef = useRef(rivals);
+  rivalsRef.current = rivals;
   const engine = getEngine();
 
   const [view, setView] = useState<GameView | null>(null);
@@ -178,6 +180,9 @@ export function useGameController(): GameController {
             if (ev.kind === "exhaustive_draw") say(randomRival(), "wallGame");
             break;
           case "game_end": {
+            // Progression: a 1st place opens the next, harder rivals.
+            if (ev.placement[0] === 0)
+              unlockRivals(rivalsUnlockedBy(castRef.current.map((c) => c.id), rivalsRef.current));
             const { session: next, changes } = applyGameEnd(
               sessionRef.current,
               ev.placement,
@@ -227,7 +232,7 @@ export function useGameController(): GameController {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setUnlocks, commitStats, say],
+    [setUnlocks, commitStats, say, unlockRivals],
   );
 
   const run = useCallback(

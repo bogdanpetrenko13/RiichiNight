@@ -43,8 +43,12 @@ export interface CharacterDef {
   stageLines: Record<Lang, string[]>;
   /** Speech-bubble lines at the table, picked at random per event. */
   lines: Record<Lang, Record<SpeechKind, string[]>>;
-  /** Locked until the condition is met; omitted = available from the start. */
-  unlock?: { kind: "firstPlaces"; count: number };
+  /**
+   * Locked until the player finishes 1st in a match where every heroine in
+   * `with` sat at the table; omitted = available from the start. Harder
+   * rivals unlock step by step this way.
+   */
+  unlock?: { kind: "firstPlaceWith"; with: string[] };
 }
 
 export type SpeechKind = "pleased" | "lossRon" | "lossBig" | "lossTsumo" | "wallGame" | "idle" | "riichi";
@@ -128,6 +132,7 @@ export const ROSTER: CharacterDef[] = [
   },
   {
     id: "mai",
+    unlock: { kind: "firstPlaceWith", with: ["rin", "yuzu"] },
     name: { en: "Mai Tachibana", ru: "Май Татибана" },
     title: { en: "Mahjong parlor owner", ru: "Хозяйка маджонг-салона" },
     age: 31,
@@ -173,7 +178,6 @@ export const ROSTER: CharacterDef[] = [
       en: "Streams her games every night. Loves flashy hands and never backs down from a riichi.",
       ru: "Каждый вечер стримит свои партии. Обожает эффектные руки и никогда не сдаётся под риичи.",
     },
-    unlock: { kind: "firstPlaces", count: 1 },
     level: "normal",
     color: "#8e6cd8",
     accent: "#ece2ff",
@@ -205,6 +209,7 @@ export const ROSTER: CharacterDef[] = [
   },
   {
     id: "reiko",
+    unlock: { kind: "firstPlaceWith", with: ["mai"] },
     name: { en: "Reiko Shirase", ru: "Рэйко Сирасэ" },
     title: { en: "Project manager", ru: "Руководитель проектов" },
     age: 33,
@@ -291,8 +296,15 @@ export function validateRoster(roster: CharacterDef[]): CharacterDef[] {
 
 export const CHARACTERS = validateRoster(ROSTER);
 
-export function isUnlocked(c: CharacterDef, firstPlaces: number): boolean {
-  return !c.unlock || firstPlaces >= c.unlock.count;
+export function isUnlocked(c: CharacterDef, rivals: readonly string[]): boolean {
+  return !c.unlock || rivals.includes(c.id);
+}
+
+/** Rivals newly unlocked by a 1st place with this cast at the table. */
+export function rivalsUnlockedBy(cast: readonly string[], rivals: readonly string[]): string[] {
+  return CHARACTERS.filter(
+    (c) => c.unlock && !rivals.includes(c.id) && c.unlock.with.every((id) => cast.includes(id)),
+  ).map((c) => c.id);
 }
 
 export function pickLine(c: CharacterDef, lang: Lang, kind: SpeechKind): string {

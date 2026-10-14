@@ -1,7 +1,7 @@
 import { useApp } from "../../app/AppContext";
 import styles from "../components/Overlay.module.css";
 
-/** First-launch question: enables reward scenes only after an explicit 18+ answer. */
+/** Shown right after the extras code is accepted: scenes need an explicit 18+ answer. */
 export function AgeGate() {
   const { t, updateSettings } = useApp();
   return (
@@ -11,7 +11,7 @@ export function AgeGate() {
         <p>{t("ageGateBody")}</p>
         <p className="muted">{t("ageGateNote")}</p>
         <div className={styles.buttons}>
-          <button className="btn btn-ghost" onClick={() => updateSettings({ adultConfirmed: false, rewardScenes: false })}>
+          <button className="btn btn-ghost" onClick={() => updateSettings({ extrasUnlocked: false, adultConfirmed: null, rewardScenes: false })}>
             {t("ageGateSkip")}
           </button>
           <button className="btn btn-primary" onClick={() => updateSettings({ adultConfirmed: true, rewardScenes: true })}>

@@ -33,6 +33,10 @@ export interface Settings {
   styleVersion?: number;
   gameRules: GameRules;
   /** null until the age gate has been answered. */
+  /** Extra content unlocked with the code from Settings (see extras.ts). */
+  extrasUnlocked: boolean;
+  /** Ids of lessons the player finished. */
+  lessonsDone: string[];
   adultConfirmed: boolean | null;
   rewardScenes: boolean;
   rewardRules: RewardRules;
@@ -58,6 +62,7 @@ const KEYS = {
   game: "game.v1",
   stats: "stats.v1",
   achievements: "achievements.v1",
+  rivals: "rivals.v1",
 };
 
 export function defaultSettings(): Settings {
@@ -76,6 +81,8 @@ export function defaultSettings(): Settings {
     theme: "system",
     styleVersion: STYLE_VERSION,
     gameRules: { ...DEFAULT_GAME_RULES },
+    extrasUnlocked: false,
+    lessonsDone: [],
     adultConfirmed: null,
     rewardScenes: false,
     rewardRules: { ...DEFAULT_RULES },
@@ -104,10 +111,14 @@ export async function loadSettings(): Promise<Settings> {
       ? {}
       : { tileset: base.tileset, theme: base.theme, styleVersion: STYLE_VERSION };
   const { table: _oldTable, ...rest } = (stored ?? {}) as Partial<Settings> & { table?: unknown };
+  // Until the code is entered nothing about reward scenes is active or shown.
+  const extras =
+    rest.extrasUnlocked === true ? {} : { extrasUnlocked: false, adultConfirmed: null, rewardScenes: false };
   return {
     ...base,
     ...rest,
     ...look,
+    ...extras,
     rewardRules: { ...base.rewardRules, ...(stored?.rewardRules ?? {}) },
     gameRules: { ...base.gameRules, ...(stored?.gameRules ?? {}) },
   };
@@ -132,6 +143,14 @@ export async function loadAchievements(): Promise<AchievementLog> {
 }
 
 export const saveAchievements = (a: AchievementLog) => setJson(KEYS.achievements, a);
+
+/** Ids of rivals unlocked through the progression ladder. */
+export async function loadRivals(): Promise<string[]> {
+  const v = await getJson<string[]>(KEYS.rivals);
+  return Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
+}
+
+export const saveRivals = (r: string[]) => setJson(KEYS.rivals, r);
 
 export async function loadGame(): Promise<SavedGame | null> {
   const g = await getJson<SavedGame>(KEYS.game);

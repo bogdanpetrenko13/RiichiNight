@@ -1,6 +1,6 @@
 {
-  "appId": "com.animeriichi.game",
-  "appName": "Anime Riichi",
+  "appId": "com.bogdanpetrenko.riichinight",
+  "appName": "Riichi Night",
   "webDir": "dist",
   "android": {
     "allowMixedContent": false,

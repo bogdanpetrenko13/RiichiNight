@@ -6,8 +6,6 @@ import type { StageChange } from "../../game/rewards";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { useLayout } from "../useLayout";
-import { Board } from "../components/Board";
-import { OpponentPanel } from "../components/OpponentPanel";
 import { PlayerHand } from "../components/PlayerHand";
 import { ActionBar } from "../components/ActionBar";
 import { RoundResult } from "../components/RoundResult";
@@ -118,28 +116,12 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
     void game.act({ action, ...extra });
   };
 
-  const panel = (seat: number) => {
-    const character = cast[seat - 1];
-    if (!character) return null;
-    return (
-      <OpponentPanel
-        key={seat}
-        character={character}
-        player={view.players[seat]}
-        stage={session[seat] ?? 0}
-        emotion={emotions[seat]}
-        callout={calloutBySeat[seat] ?? null}
-        active={view.current === seat && view.status === "ai"}
-        speech={speech[seat]?.text ?? null}
-      />
-    );
-  };
-
+  const claimer = prompt?.claim ? cast[prompt.claim.from - 1] : undefined;
   const statusText = error
     ? t("engineError", { msg: error })
     : view.status === "human"
-      ? prompt?.claim
-        ? null
+      ? claimer
+        ? t("claimFrom", { name: claimer.name[settings.lang].split(" ")[0] })
         : t("yourTurn")
       : view.status === "ai"
         ? t("waitingFor")
@@ -148,61 +130,57 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const showRound =
     view.result !== null && (view.status === "round_over" || (view.status === "game_over" && ackRound !== view.round.index));
   const showGameOver = view.status === "game_over" && !showRound;
-  const portrait = layout.orientation === "portrait";
 
   return (
     <div className={styles.table} data-orientation={layout.orientation} style={layout.vars}>
       <header className={styles.topBar}>
         <IconButton icon="menu" label={t("menu")} onClick={() => setMenuOpen(true)} />
-        <div className={styles.roundInfo}>
-          <b>{t("roundLabel", { wind: t(`wind_${view.round.wind}` as StringKey), n: view.round.number })}</b>
-          <span>
-            {t("honba", { n: view.round.honba })} · {t("wall", { n: view.wall ?? 0 })}
-          </span>
-        </div>
+        <b className={styles.roundInfo}>
+          {t("roundLabel", { wind: t(`wind_${view.round.wind}` as StringKey), n: view.round.number })}
+        </b>
         <IconButton icon="help" label={t("yakuRef")} onClick={() => onOpen("learn")} />
       </header>
 
-      {portrait ? (
-        /* Kemono-style rows: kamicha, toimen, shimocha, then the player. */
-        <div className={styles.bands}>
-          {[3, 2, 1].map((seat) => {
-            const character = cast[seat - 1];
-            if (!character) return null;
-            return (
-              <RivalBand
-                key={seat}
-                character={character}
-                player={view.players[seat]}
-                stage={session[seat] ?? 0}
-                emotion={emotions[seat]}
-                callout={calloutBySeat[seat] ?? null}
-                speech={speech[seat]?.text ?? null}
-                active={view.current === seat && view.status === "ai"}
-                dealer={view.round.dealer === seat}
-                claimed={prompt?.claim?.from === seat ? prompt.claim.tile : null}
-              />
-            );
-          })}
-          <PlayerBand view={view} active={view.current === 0 && view.status === "human"} />
-        </div>
-      ) : (
-        <>
-          <div className={styles.left}>
-            {panel(2)}
-            {panel(3)}
-          </div>
-          <div className={styles.right}>{panel(1)}</div>
-          <div className={styles.board}>
-            <Board view={view} claimFrom={prompt?.claim?.from ?? null} />
-          </div>
-        </>
-      )}
+      {/* Kemono-style bands: kamicha, toimen, shimocha, then the player.
+          Rows in portrait, columns in landscape. */}
+      <div className={styles.bands}>
+        {[3, 2, 1].map((seat) => {
+          const character = cast[seat - 1];
+          if (!character) return null;
+          return (
+            <RivalBand
+              key={seat}
+              character={character}
+              player={view.players[seat]}
+              stage={session[seat] ?? 0}
+              emotion={emotions[seat]}
+              callout={calloutBySeat[seat] ?? null}
+              speech={speech[seat]?.text ?? null}
+              active={view.current === seat && view.status === "ai"}
+              dealer={view.round.dealer === seat}
+              claimed={prompt?.claim?.from === seat ? prompt.claim.tile : null}
+            />
+          );
+        })}
+        <PlayerBand view={view} active={view.current === 0 && view.status === "human"} />
+      </div>
 
       {calloutBySeat[0] && <span className={styles.myCallout}>{t(`act_${calloutBySeat[0]}` as StringKey)}!</span>}
 
+      {/* Hand on top, buttons under it on the right (Kemono Mahjong). */}
       <div className={styles.dock}>
-        <div className={styles.dockTop}>
+        <PlayerHand
+          player={me}
+          prompt={prompt}
+          riichiMode={riichiMode}
+          selected={selected}
+          onSelect={setSelected}
+          onDiscard={(tile) => act("discard", { tile })}
+          onRiichi={(tile) => act("riichi", { tile })}
+          dealing={dealing}
+          floatingHints
+        />
+        <div className={styles.actions}>
           <div className={styles.status}>{statusText}</div>
           <ActionBar
             prompt={prompt}
@@ -219,17 +197,6 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
             onChiPicker={setChiPicker}
           />
         </div>
-        <PlayerHand
-          player={me}
-          prompt={prompt}
-          riichiMode={riichiMode}
-          selected={selected}
-          onSelect={setSelected}
-          onDiscard={(tile) => act("discard", { tile })}
-          onRiichi={(tile) => act("riichi", { tile })}
-          dealing={dealing}
-          floatingHints={!portrait}
-        />
       </div>
 
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title={t("menu")}>
