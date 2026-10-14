@@ -161,6 +161,12 @@ class App:
         os.makedirs(SHOTS, exist_ok=True)
         self.page.screenshot(path=os.path.join(SHOTS, name + ".png"))
 
+    def in_viewport(self, selector: str) -> bool:
+        """The element is fully on screen (no scrolling needed to reach it)."""
+        box = self.page.locator(selector).first.bounding_box()
+        vp = self.page.viewport_size
+        return bool(box) and box["y"] >= 0 and box["y"] + box["height"] <= vp["height"] + 1
+
     def no_horizontal_scroll(self):
         return self.page.evaluate("() => document.documentElement.scrollWidth <= window.innerWidth + 1")
 

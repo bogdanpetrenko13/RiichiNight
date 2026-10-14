@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { WinCalc, WinnerInfo } from "../../engine/protocol";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
@@ -7,29 +9,57 @@ import styles from "./Overlay.module.css";
 const n = (v: number) => v.toLocaleString();
 
 /**
- * "How it's scored": fu parts with rounding, base points or the limit name,
- * and who pays what (honba and riichi sticks apart). Collapsed by default;
- * the open/closed state is remembered in settings.
+ * "How it's scored": a link under the total that opens a popup with the fu
+ * parts and rounding, base points or the limit name, and who pays what
+ * (honba and riichi sticks apart). The result panel itself stays short, so
+ * "Next hand" is visible without scrolling.
+ *
+ * payer: the discarder's name on ron (null on tsumo), "you" for the player.
  */
-/** payer: the discarder's name on ron (null on tsumo), "you" for the player. */
 export function ScoreCalc({ winner, payer }: { winner: WinnerInfo; payer: string | null }) {
-  const { t, settings, updateSettings } = useApp();
+  const { t } = useApp();
+  const [open, setOpen] = useState(false);
   const calc = winner.calc;
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
   if (!calc) return null;
-  const open = settings.scoreDetails ?? false;
   return (
-    <div className={styles.calc}>
-      <button
-        type="button"
-        className={styles.calcToggle}
-        aria-expanded={open}
-        onClick={() => updateSettings({ scoreDetails: !open })}
-      >
+    <>
+      <button type="button" className={styles.calcToggle} aria-haspopup="dialog" onClick={() => setOpen(true)}>
         {t("calcToggle")}
-        <span aria-hidden>{open ? "▴" : "▾"}</span>
+        <span aria-hidden>›</span>
       </button>
-      {open && <CalcBody winner={winner} calc={calc} payer={payer} />}
-    </div>
+      {open &&
+        createPortal(
+          <div className={styles.calcLayer} onClick={() => setOpen(false)}>
+            <div
+              className={`panel ${styles.calcDialog}`}
+              role="dialog"
+              aria-modal="true"
+              aria-label={t("calcToggle")}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <header className={styles.calcDialogHead}>
+                <h2>{t("calcToggle")}</h2>
+                <button type="button" className={styles.calcClose} aria-label={t("close")} onClick={() => setOpen(false)}>
+                  ×
+                </button>
+              </header>
+              <div className={styles.calcScroll}>
+                <CalcBody winner={winner} calc={calc} payer={payer} />
+              </div>
+              <button type="button" className="btn" onClick={() => setOpen(false)}>
+                {t("calcGotIt")}
+              </button>
+            </div>
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }
 

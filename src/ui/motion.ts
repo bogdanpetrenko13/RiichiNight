@@ -5,8 +5,10 @@
 export const DUR = { fast: 120, base: 200, slow: 320 } as const;
 /** Standard easing: quick start, soft landing. */
 export const EASE = "cubic-bezier(0.2, 0, 0, 1)";
-/** Emphasised deceleration for things that arrive. */
-export const EASE_IN = "cubic-bezier(0.05, 0.7, 0.1, 1)";
+/** Deceleration for things that arrive (ease-out cubic). The earlier
+ *  (0.05, 0.7, 0.1, 1) covered half of a rival's discard flight in the first
+ *  frame, which read as a jump; this one moves at most ~1/4 per frame. */
+export const EASE_IN = "cubic-bezier(0.33, 1, 0.68, 1)";
 
 let speed = 1;
 /** Opponent speed slider also scales animations (0.6–1.3). */

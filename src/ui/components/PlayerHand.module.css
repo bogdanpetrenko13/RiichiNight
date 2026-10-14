@@ -110,3 +110,11 @@
 .wrap[data-float] .hintRow:empty {
   box-shadow: none;
 }
+
+/* Empty place of the drawn tile between turns (keeps the hand from shifting). */
+.slot {
+  flex: none;
+  width: var(--hand-tile);
+  margin-left: calc(var(--hand-tile) * 0.3);
+  visibility: hidden;
+}

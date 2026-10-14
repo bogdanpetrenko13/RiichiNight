@@ -97,10 +97,15 @@ export function PlayerHand({
 
   // Size tiles so concealed tiles + melds always fit one row (real counts).
   const meldTiles = player.melds.reduce((n, m) => n + m.tiles.length, 0);
+  // The drawn tile's slot is always reserved (an empty placeholder between
+  // turns), so tile size and centring do not change when a tile is drawn or
+  // discarded: only the tiles that really move animate.
+  const reserveSlot = !drawn && all.length % 3 === 1;
   const units = Math.max(
     HAND_UNITS_BASE,
     all.length +
-      (drawn ? 0.3 : 0) +
+      (drawn || reserveSlot ? 0.3 : 0) +
+      (reserveSlot ? 1 : 0) +
       (player.melds.length ? 0.3 + meldTiles * (MELD_SCALE + 0.02) + (player.melds.length - 1) * 0.3 : 0) +
       0.2,
   );
@@ -176,6 +181,7 @@ export function PlayerHand({
               />
             );
           })}
+          {reserveSlot && !dealing && <span className={styles.slot} aria-hidden />}
         </div>
         {player.melds.length > 0 && (
           <div className={styles.melds}>

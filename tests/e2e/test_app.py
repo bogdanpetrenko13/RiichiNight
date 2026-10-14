@@ -12,18 +12,22 @@ def test_tsumo_result_shows_score_breakdown(make_app):
         app.discard("1z")  # the player deals: cut the junk tile first
     app.button("Цумо").first.wait_for(timeout=60_000)
     app.button("Цумо").first.click()
-    panel = app.page.get_by_text("Как посчитано")
+    panel = app.page.get_by_role("button", name="Как посчитано")
     panel.wait_for(timeout=30_000)
     app.page.wait_for_timeout(600)
-    app.shot("result_collapsed")
+    app.shot("result_panel")
+    assert app.in_viewport("button:has-text('Следующая раздача')"), "Next hand needs scrolling"
+    assert "Дора" in app.page.locator("[class*=yaku]").first.inner_text()
     panel.click()
-    body = app.page.locator("[class*=calcBody]")
-    body.wait_for()
-    text = body.inner_text()
+    dialog = app.page.get_by_role("dialog")
+    dialog.wait_for()
+    app.page.wait_for_timeout(300)
+    text = dialog.inner_text()
     for part in ("Основа", "Цумо", "Закрытый сет", "Ценная пара", "канчан", "30 фу", "Каждая платит"):
         assert part in text, (part, text)
-    assert "Дора" in app.page.locator("[class*=yaku]").first.inner_text()
     app.shot("result_breakdown")
+    app.page.get_by_role("button", name="Понятно").click()
+    dialog.wait_for(state="detached")
     assert not app.errors, app.errors
 
 

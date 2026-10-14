@@ -112,5 +112,10 @@ emulator screen is 900×1600 (phone-like portrait).
 - AI changes: check `python tests/python/style_stats.py 8` (table of calls,
   riichi, win / deal-in rates, safe discards under riichi per style) and keep
   `tests/python/test_styles.py` passing.
+- Animations: `tests/e2e/test_motion.py` follows tiles frame by frame
+  (`motion_probe.js`): no frame may cover more than ~40 % of a flight, flights
+  start at the source tile, the hand must not shift on draw / discard, and
+  nothing stays transformed afterwards. Keep it passing when touching
+  `motion.ts`, `PlayerHand`, `RivalBand` or `PlayerBand`.
 - New game situations worth testing: add a scenario to `scenarios.py` and an
   e2e test instead of waiting for it in random play.
