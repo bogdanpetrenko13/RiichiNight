@@ -104,7 +104,9 @@ class Game:
         while len(levels) < NUM_PLAYERS - 1:
             levels.append("normal")
         self.levels = levels[: NUM_PLAYERS - 1]
-        self.brains = {i + 1: Brain(self.levels[i], self.rng) for i in range(NUM_PLAYERS - 1)}
+        styles = list(config.get("styles") or [])
+        styles += [None] * (NUM_PLAYERS - 1 - len(styles))
+        self.brains = {i + 1: Brain(self.levels[i], self.rng, styles[i]) for i in range(NUM_PLAYERS - 1)}
         self.rules = game_rules.normalize(config.get("rules"))
         self.engine = RuleEngine(num_players=NUM_PLAYERS)
         self.engine.start_game()

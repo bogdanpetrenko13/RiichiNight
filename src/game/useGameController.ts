@@ -300,7 +300,7 @@ export function useGameController(): GameController {
       const chars = castIds.map((id) => getCharacter(id)).filter((c): c is CharacterDef => Boolean(c));
       begin(chars, freshSession(chars), 0);
       await run(() =>
-        engine.newGame({ levels: chars.map((c) => c.level), rules: settingsRef.current.gameRules, ...testParams() }),
+        engine.newGame({ levels: chars.map((c) => c.level), styles: chars.map((c) => c.style), rules: settingsRef.current.gameRules, ...testParams() }),
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

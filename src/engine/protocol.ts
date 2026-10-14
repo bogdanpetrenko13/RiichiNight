@@ -201,6 +201,8 @@ export interface HumanCommand {
 
 export interface NewGameConfig {
   seed?: number;
+  /** Play style per rival seat (public/py/ai.py STYLES). */
+  styles?: string[];
   /** Rigged first deal for tests (public/py/scenarios.py). */
   scenario?: string;
   levels: Level[];

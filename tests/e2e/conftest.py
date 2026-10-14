@@ -51,7 +51,10 @@ class Server(http.server.ThreadingHTTPServer):
 @pytest.fixture(scope="session")
 def base_url():
     if not os.path.exists(os.path.join(DIST, "index.html")):
-        pytest.skip(f"no built app in {DIST} (run npm run build or set E2E_DIST)")
+        message = f"no built app in {DIST} (run npm run build or set E2E_DIST)"
+        if os.environ.get("E2E_REQUIRE"):
+            raise RuntimeError(message)  # CI: never pass by skipping
+        pytest.skip(message)
     server = Server(("127.0.0.1", 0), functools.partial(Handler, directory=DIST))
     threading.Thread(target=server.serve_forever, daemon=True).start()
     yield f"http://127.0.0.1:{server.server_address[1]}/"

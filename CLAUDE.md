@@ -26,7 +26,7 @@ The owner writes in Russian; reply in Russian.
 | Path | What |
 |---|---|
 | `public/py/bridge.py` | JSON bridge to pyriichi: `new_game`, `act`, `ai_step`, `next_round`, `save`, `load`; views show only what the player may see |
-| `public/py/ai.py` | Heroine AI (shanten + ukeire, danger-based defence) |
+| `public/py/ai.py` | Heroine AI: level (mistakes) + style (`STYLES`: folding, calls, dama, flush, value); each heroine's `style` is in `src/game/characters.ts` and matches her bio |
 | `public/py/yakufix.py` | Fixes to pyriichi: ryanpeikou vs chiitoitsu, chanta without sequences, dora counting (melds; tsumo tile counted twice) |
 | `public/py/calcinfo.py` | Score explanation for the result screen (fu parts, dora split, payments) + open-hand ron 30 fu minimum |
 | `public/py/scenarios.py` | Rigged first deals for tests (`?scenario=tsumo`, `redfive`) |
@@ -105,5 +105,8 @@ emulator screen is 900×1600 (phone-like portrait).
   (`quiet`, `felt`), dark theme.
 - New engine data shown in the UI: add the type to `protocol.ts`, keep old
   saves working (optional fields), add a Python test that the numbers add up.
+- AI changes: check `python tests/python/style_stats.py 8` (table of calls,
+  riichi, win / deal-in rates, safe discards under riichi per style) and keep
+  `tests/python/test_styles.py` passing.
 - New game situations worth testing: add a scenario to `scenarios.py` and an
   e2e test instead of waiting for it in random play.

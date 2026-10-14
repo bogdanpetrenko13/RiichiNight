@@ -34,6 +34,8 @@ export interface CharacterDef {
   age: number;
   bio: Record<Lang, string>;
   level: Level;
+  /** How she plays (public/py/ai.py STYLES), matching her bio. */
+  style: string;
   /** Theme colours for cards, callouts and placeholders. */
   color: string;
   accent: string;
@@ -64,6 +66,7 @@ export const ROSTER: CharacterDef[] = [
       ru: "Работает в утреннюю смену, а вечерами играет в маджонг. Быстрая, весёлая, немного безрассудная.",
     },
     level: "easy",
+    style: "reckless",
     color: "#f2a65a",
     accent: "#ffe3c4",
     stages: 5,
@@ -102,6 +105,7 @@ export const ROSTER: CharacterDef[] = [
       ru: "Считает каждый тайл в стене. Спокойная, точная, по её лицу ничего не понять.",
     },
     level: "normal",
+    style: "precise",
     color: "#5b8def",
     accent: "#dbe6ff",
     stages: 5,
@@ -141,6 +145,7 @@ export const ROSTER: CharacterDef[] = [
       ru: "Держит салон и видела все уловки. Вовремя сбрасывается и бьёт наверняка.",
     },
     level: "hard",
+    style: "sharp",
     color: "#c2456b",
     accent: "#ffd6e2",
     stages: 5,
@@ -179,6 +184,7 @@ export const ROSTER: CharacterDef[] = [
       ru: "Каждый вечер стримит свои партии. Обожает эффектные руки и никогда не сдаётся под риичи.",
     },
     level: "normal",
+    style: "showy",
     color: "#8e6cd8",
     accent: "#ece2ff",
     stages: 5,
@@ -218,6 +224,7 @@ export const ROSTER: CharacterDef[] = [
       ru: "Руководит командой из тридцати человек, а после работы отдыхает за маджонгом. Терпеливая, расчётливая, беспощадная в нужный момент.",
     },
     level: "hard",
+    style: "patient",
     color: "#6d5dfc",
     accent: "#e3e0ff",
     stages: 5,
@@ -256,6 +263,7 @@ export const ROSTER: CharacterDef[] = [
       ru: "Днём рисует обложки книг, ночью собирает красивые руки. Обожает хоницу и терпеть не может сбрасываться.",
     },
     level: "easy",
+    style: "flush",
     color: "#2fb5a0",
     accent: "#d6f5ef",
     stages: 5,
