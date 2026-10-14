@@ -4,6 +4,7 @@ import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { Portrait } from "./Portrait";
 import { Tile } from "./Tile";
+import { Tenbo } from "./Tenbo";
 import styles from "./Band.module.css";
 
 interface RivalBandProps {
@@ -50,7 +51,6 @@ export function RivalBand({ character, player, stage, emotion, callout, speech, 
         )}
         <div className={styles.portrait}>
           <Portrait character={character} emotion={emotion} size={88} className={styles.face} />
-          {player.riichi && <span className={styles.riichi}>{t("act_riichi")}!</span>}
           {callout && (
             <span key={callout} className={styles.callout}>
               {t(`act_${callout}` as StringKey)}!
@@ -64,7 +64,13 @@ export function RivalBand({ character, player, stage, emotion, callout, speech, 
         </div>
       </div>
 
-      <div className={styles.river} data-long={player.discards.length > 18 || undefined}>
+      <div className={styles.river} data-rows={Math.ceil(player.discards.length / 6)}>
+        {/* Riichi: a 1 000 stick laid in front of the river, as on a real table. */}
+        {player.riichi && (
+          <div className={styles.riichiLine}>
+            <Tenbo kind="1000" width="calc(var(--river-tile) * 3.4)" />
+          </div>
+        )}
         {player.discards.map((code, i) => (
           <Tile
             key={`${i}-${code}`}

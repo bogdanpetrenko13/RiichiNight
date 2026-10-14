@@ -2,14 +2,13 @@ import { useApp } from "../../app/AppContext";
 import { LANGS, type StringKey } from "../../i18n/strings";
 import type { GameRules } from "../../engine/protocol";
 import type { RewardRules } from "../../game/rewards";
-import { THEME_MODES, TILESETS, type AiSpeed, type Settings } from "../../game/storage";
+import { AI_DELAY_MAX, AI_DELAY_MIN, THEME_MODES, TILESETS, type Settings } from "../../game/storage";
 import { useState } from "react";
 import { checkExtrasCode } from "../../game/extras";
 import { TileRow } from "../components/TileRow";
 import { AppBar, Group, Row, Segmented, Switch } from "../components/Primitives";
 import styles from "./SettingsScreen.module.css";
 
-const SPEEDS: AiSpeed[] = ["fast", "normal", "slow"];
 const REWARD_RULES: (keyof RewardRules)[] = ["tsumoAdvancesAll", "bigHandBonus", "regressOnLoss", "firstPlaceBonus"];
 const GAME_TOGGLES: (keyof Omit<GameRules, "gameLength">)[] = ["redFives", "openTanyao", "tobi", "agariYame", "kiriageMangan"];
 
@@ -63,8 +62,15 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
               onChange={(tileset) => updateSettings({ tileset })}
             />
             <div className={styles.preview}>
-              <TileRow text="123m 5p 9s 1567z" size={30} />
+              <TileRow text="19m 5p 9s 1234z 567z" size={30} hints />
             </div>
+          </Row>
+          <Row label={t("tileHints")} stacked>
+            <Segmented
+              value={settings.tileHints}
+              options={(["none", "man", "all"] as const).map((m) => ({ value: m, label: t(`tileHints_${m}` as StringKey) }))}
+              onChange={(tileHints) => updateSettings({ tileHints })}
+            />
           </Row>
           <Row label={t("theme")}>
             <Segmented
@@ -76,12 +82,24 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
         </Group>
 
         <Group title={t("gameplay")}>
-          <Row label={t("aiSpeed")}>
-            <Segmented
-              value={settings.aiSpeed}
-              options={SPEEDS.map((s) => ({ value: s, label: t(`speed_${s}` as StringKey) }))}
-              onChange={(aiSpeed) => updateSettings({ aiSpeed })}
-            />
+          <Row label={t("aiSpeed")} hint={t("aiDelayValue", { s: (settings.aiDelay / 1000).toFixed(1) })} stacked>
+            <div className={styles.speed}>
+              <input
+                className={styles.slider}
+                type="range"
+                // Right = faster: the slider runs over the inverted delay.
+                min={AI_DELAY_MIN}
+                max={AI_DELAY_MAX}
+                step={50}
+                value={AI_DELAY_MAX + AI_DELAY_MIN - settings.aiDelay}
+                onChange={(e) => updateSettings({ aiDelay: AI_DELAY_MAX + AI_DELAY_MIN - Number(e.target.value) })}
+                aria-label={t("aiSpeed")}
+              />
+              <div className={styles.speedEnds}>
+                <span>{t("speed_slow")}</span>
+                <span>{t("speed_fast")}</span>
+              </div>
+            </div>
           </Row>
           {toggle("showWaitHints", "waitHints")}
           {toggle("autoDiscardRiichi", "autoDiscardRiichi")}

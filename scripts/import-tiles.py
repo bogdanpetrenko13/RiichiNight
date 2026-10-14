@@ -58,6 +58,17 @@ def clean(svg: str) -> str:
     return re.sub(r">\s+<", "><", out).strip() + "\n"
 
 
+# Winds are drawn in black ink (FluffyStuff draws them blue).
+WINDS = ("Ton", "Nan", "Shaa", "Pei")
+WIND_BLUES = ("#142896", "#19328c")
+
+
+def recolor_wind(svg: str) -> str:
+    for blue in WIND_BLUES:
+        svg = re.sub(blue, "#1a1a1a", svg, flags=re.I)
+    return svg
+
+
 def main() -> None:
     tmp = tempfile.mkdtemp(prefix="tiles-")
     subprocess.run(
@@ -73,6 +84,8 @@ def main() -> None:
         for name in FACES:
             with open(os.path.join(tmp, folder, f"{name}.svg"), encoding="utf-8") as f:
                 svg = clean(f.read())
+            if variant == "regular" and name in WINDS:
+                svg = recolor_wind(svg)
             with open(os.path.join(OUT, variant, f"{name}.svg"), "w", encoding="utf-8") as f:
                 f.write(svg)
     with open(os.path.join(OUT, "fluffystuff.version"), "w") as f:

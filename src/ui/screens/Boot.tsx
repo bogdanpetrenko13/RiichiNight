@@ -14,7 +14,7 @@ export function Boot({ stage, error, onRetry }: BootProps) {
   return (
     <div className={`screen ${styles.boot}`}>
       <div className={styles.logo}>
-        <span className={styles.logoJa}>麻雀</span>
+        <span className={styles.logoBadge}>Riichi Mahjong</span>
         {t("appTitle")}
       </div>
       {error ? (
@@ -30,7 +30,9 @@ export function Boot({ stage, error, onRetry }: BootProps) {
           <div className={styles.progress}>
             <div style={{ width: `${pct}%` }} />
           </div>
-          <p className="muted">{stage === "engine" ? t("loadingEngine") : t("loadingRuntime")}</p>
+          <p className="muted">
+            {stage === "ready" ? t("loadingSeats") : stage === "engine" ? t("loadingEngine") : t("loadingRuntime")}
+          </p>
         </>
       )}
     </div>

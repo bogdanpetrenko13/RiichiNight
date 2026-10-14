@@ -44,10 +44,21 @@ export function faceFile(t: ParsedTile, variant: "regular" | "black"): string {
   return `${BASE}tiles/${variant}/${name}.svg`;
 }
 
-const WIND_INDEX = ["", "E", "S", "W", "N"];
+export type TileHints = "none" | "man" | "all";
 
-/** Small corner index as on printed sets: rank for suits, letter for winds. */
-export function cornerIndex(t: ParsedTile): string {
-  if (t.suit === "z") return WIND_INDEX[t.rank] ?? "";
+const WIND_INDEX: Record<string, string[]> = {
+  en: ["", "E", "S", "W", "N"],
+  ru: ["", "В", "Ю", "З", "С"],
+};
+
+/**
+ * Corner index (setting "Hints on tiles"): "man" labels the character suit
+ * and the winds (the tiles drawn with kanji), "all" labels every suit tile
+ * too. Dragons never get one.
+ */
+export function cornerIndex(t: ParsedTile, mode: TileHints, lang: string): string {
+  if (mode === "none") return "";
+  if (t.suit === "z") return (WIND_INDEX[lang] ?? WIND_INDEX.en)[t.rank] ?? "";
+  if (mode === "man" && t.suit !== "m") return "";
   return String(t.rank);
 }

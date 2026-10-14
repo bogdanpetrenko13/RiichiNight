@@ -8,12 +8,12 @@ import styles from "./CallCutaway.module.css";
 const ROMAJI = { ron: "RON", tsumo: "TSUMO", riichi: "RIICHI" } as const;
 
 /** Slanted banner that sweeps across the table on Ron / Tsumo / Riichi. */
-export function CallCutaway({ cutaway, cast }: { cutaway: Cutaway; cast: CharacterDef[] }) {
+export function CallCutaway({ cutaway, cast, onSkip }: { cutaway: Cutaway; cast: CharacterDef[]; onSkip: () => void }) {
   const { t } = useApp();
   const character = cutaway.seat > 0 ? cast[cutaway.seat - 1] : undefined;
   const color = character?.color ?? "var(--sakura)";
   return (
-    <div className={styles.layer} aria-live="assertive">
+    <div className={styles.layer} aria-live="assertive" onClick={onSkip} role="button" aria-label={t(`act_${cutaway.kind}` as StringKey)}>
       <div className={styles.band} data-kind={cutaway.kind} style={{ ["--c" as string]: color }}>
         <div className={styles.inner}>
           {character && (

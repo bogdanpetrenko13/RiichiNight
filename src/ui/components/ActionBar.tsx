@@ -1,7 +1,6 @@
 import type { ActionName, Prompt, TileCode } from "../../engine/protocol";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
-import { Tile } from "./Tile";
 import styles from "./ActionBar.module.css";
 
 interface ActionBarProps {
@@ -45,18 +44,12 @@ export function ActionBar({
     );
   }
 
+  // Several Chi options: the tiles are picked in the hand (highlighted there).
   if (chiPicker && prompt.chiOptions) {
     return (
       <div className={styles.bar}>
-        {prompt.chiOptions.map((seq, i) => (
-          <button key={i} className={`btn ${styles.chi}`} onClick={() => onAction("chi", i)} disabled={busy}>
-            {seq.map((c) => (
-              <Tile key={c} code={c} size="mini" style={{ ["--tw" as string]: "24px" }} />
-            ))}
-            {prompt.claim && <Tile code={prompt.claim.tile} size="mini" highlight style={{ ["--tw" as string]: "24px" }} />}
-          </button>
-        ))}
-        <button className={`btn btn-ghost ${styles.action}`} onClick={() => onChiPicker(false)}>
+        <span className={styles.label}>{t("chooseChiTiles")}</span>
+        <button className={styles.action} data-kind="pass" onClick={() => onChiPicker(false)}>
           {t("cancel")}
         </button>
       </div>
@@ -84,7 +77,6 @@ export function ActionBar({
       {canDiscard && selectedTile && (
         <button className={styles.action} data-kind="discard" onClick={onDiscardSelected} disabled={busy}>
           {t("act_discard")}
-          <Tile code={selectedTile} size="mini" style={{ ["--tw" as string]: "20px" }} />
         </button>
       )}
     </div>

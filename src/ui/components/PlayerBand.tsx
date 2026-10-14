@@ -2,6 +2,7 @@ import type { GameView } from "../../engine/protocol";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
+import { Tenbo } from "./Tenbo";
 import styles from "./Band.module.css";
 
 /**
@@ -33,19 +34,23 @@ export function PlayerBand({ view, active }: { view: GameView; active: boolean }
           </div>
           <div className={styles.counters}>
             <span title={t("riichiSticks")}>
-              <i className={styles.stick} />×{view.round.riichiSticks}
+              <Tenbo kind="1000" width={24} />×{view.round.riichiSticks}
             </span>
             <span title={t("honba", { n: view.round.honba })}>
-              <i className={styles.honba} />×{view.round.honba}
+              <Tenbo kind="100" width={24} />×{view.round.honba}
             </span>
             <span title={t("wall", { n: view.wall ?? 0 })}>
               <i className={styles.wall} />×{view.wall ?? 0}
             </span>
           </div>
         </div>
-        {me.riichi && <span className={styles.riichi}>{t("act_riichi")}!</span>}
       </div>
-      <div className={styles.river} data-long={me.discards.length > 18 || undefined}>
+      <div className={styles.river} data-rows={Math.ceil(me.discards.length / 6)}>
+        {me.riichi && (
+          <div className={styles.riichiLine}>
+            <Tenbo kind="1000" width="calc(var(--river-tile) * 3.4)" />
+          </div>
+        )}
         {me.discards.map((code, i) => (
           <Tile key={`${i}-${code}`} code={code} size="river" sideways={me.riichiIndex === i} />
         ))}

@@ -4,10 +4,15 @@
 import { Preferences } from "@capacitor/preferences";
 import { DEFAULT_GAME_RULES, type GameRules, type Level } from "../engine/protocol";
 import type { Lang } from "../i18n/strings";
+import type { TileHints } from "../ui/tiles";
 import { DEFAULT_RULES, type RewardRules, type SessionStages, type Unlocks } from "./rewards";
 import { emptyStats, type Stats } from "./stats";
 
-export type AiSpeed = "fast" | "normal" | "slow";
+export const AI_DELAY_MIN = 200;
+export const AI_DELAY_MAX = 1500;
+export const AI_DELAY_DEFAULT = 700;
+/** Old three-step setting, mapped to the slider on load. */
+const OLD_SPEED: Record<string, number> = { fast: 250, normal: AI_DELAY_DEFAULT, slow: 1100 };
 export type Tileset = "modern" | "classic" | "ivory" | "dark" | "flat";
 /** Same choice as in Riichi Trainer: follow the system, or force light/dark. */
 export type ThemeMode = "system" | "light" | "dark";
@@ -23,12 +28,15 @@ export interface Settings {
   voiceVolume: number;
   sfxVolume: number;
   musicVolume: number;
-  aiSpeed: AiSpeed;
+  /** Pause before each opponent action, ms (slider in Settings). */
+  aiDelay: number;
   showWaitHints: boolean;
   autoDiscardRiichi: boolean;
   dealAnimation: boolean;
   speechBubbles: boolean;
   tileset: Tileset;
+  /** Corner index on tiles: none, man + winds, or all. */
+  tileHints: TileHints;
   theme: ThemeMode;
   styleVersion?: number;
   gameRules: GameRules;
@@ -37,6 +45,8 @@ export interface Settings {
   extrasUnlocked: boolean;
   /** Ids of lessons the player finished. */
   lessonsDone: string[];
+  /** Set once the pre-code reward progress of older builds has been cleared. */
+  progressGate?: boolean;
   adultConfirmed: boolean | null;
   rewardScenes: boolean;
   rewardRules: RewardRules;
@@ -72,12 +82,13 @@ export function defaultSettings(): Settings {
     voiceVolume: 0.9,
     sfxVolume: 0.7,
     musicVolume: 0.4,
-    aiSpeed: "normal",
+    aiDelay: AI_DELAY_DEFAULT,
     showWaitHints: true,
     autoDiscardRiichi: true,
     dealAnimation: true,
     speechBubbles: true,
     tileset: "modern",
+    tileHints: "man",
     theme: "system",
     styleVersion: STYLE_VERSION,
     gameRules: { ...DEFAULT_GAME_RULES },
@@ -110,7 +121,11 @@ export async function loadSettings(): Promise<Settings> {
     stored?.styleVersion === STYLE_VERSION && THEME_MODES.includes(stored.theme as ThemeMode)
       ? {}
       : { tileset: base.tileset, theme: base.theme, styleVersion: STYLE_VERSION };
-  const { table: _oldTable, ...rest } = (stored ?? {}) as Partial<Settings> & { table?: unknown };
+  const { table: _oldTable, aiSpeed: oldSpeed, ...rest } = (stored ?? {}) as Partial<Settings> & {
+    table?: unknown;
+    aiSpeed?: string;
+  };
+  if (rest.aiDelay === undefined && oldSpeed) rest.aiDelay = OLD_SPEED[oldSpeed] ?? AI_DELAY_DEFAULT;
   // Until the code is entered nothing about reward scenes is active or shown.
   const extras =
     rest.extrasUnlocked === true ? {} : { extrasUnlocked: false, adultConfirmed: null, rewardScenes: false };

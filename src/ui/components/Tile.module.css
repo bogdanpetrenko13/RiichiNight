@@ -48,21 +48,42 @@
   user-select: none;
 }
 
+/* With a corner index the artwork moves right/down to give it its own
+   corner (as in Kemono Mahjong), instead of the digit covering the art. */
+.withIdx .art {
+  position: absolute;
+  left: 13%;
+  top: 17%;
+  width: 82%;
+  height: 79%;
+}
+
 .idx {
   position: absolute;
-  top: calc(var(--tw) * 0.04);
+  top: calc(var(--tw) * 0.03);
   left: calc(var(--tw) * 0.07);
-  font-family: var(--font-ui);
-  font-size: calc(var(--tw) * 0.2);
+  font-family: "Roboto Condensed", "Arial Narrow", var(--font-ui);
+  font-size: calc(var(--tw) * 0.3);
   font-weight: 800;
   line-height: 1;
-  color: var(--honor-ink);
-  opacity: 0.8;
+  letter-spacing: -0.02em;
   pointer-events: none;
 }
 
-.idx[data-red] {
+.idx[data-suit="m"] {
   color: var(--suit-man);
+}
+
+.idx[data-suit="p"] {
+  color: var(--suit-pin);
+}
+
+.idx[data-suit="s"] {
+  color: var(--suit-sou);
+}
+
+.idx[data-suit="z"] {
+  color: var(--honor-ink);
 }
 
 .back {
@@ -114,17 +135,49 @@
   border-top-width: 7px;
 }
 
+/* Claimable discard in a river: ring in the accent colour. */
 .highlight {
-  filter: drop-shadow(0 0 calc(var(--tw) * 0.18) var(--accent));
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 calc(var(--tw) * 0.08) 0 var(--bone-300),
+    0 0 calc(var(--tw) * 0.4) color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* Tiles you can use for the pending choice: raised + primary ring (A + C). */
+.eligible {
+  transform: translateY(calc(var(--tw) * -0.16));
+  box-shadow:
+    0 0 0 2.5px var(--primary),
+    0 calc(var(--tw) * 0.08) 0 var(--bone-300),
+    0 0 calc(var(--tw) * 0.45) color-mix(in srgb, var(--primary) 55%, transparent);
+}
+
+.eligible.selected {
+  transform: translateY(calc(var(--tw) * -0.3));
+}
+
+/* Discarding this tile keeps tenpai: a short bar under it. */
+.hint::before {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: calc(var(--tw) * -0.26);
+  height: 3px;
+  border-radius: 3px;
+  background: var(--primary);
+  pointer-events: none;
 }
 
 .dimmed {
-  filter: grayscale(0.7) brightness(0.55);
+  filter: grayscale(0.6) brightness(0.5);
 }
 
+/* Riichi tile lies sideways: rotated, its width becomes the tile height, so it
+   needs (1.42 - 1) / 2 of a tile on each side plus room for the 3D edge. */
 .sideways {
-  transform: rotate(90deg);
-  margin: 0 calc(var(--tw) * 0.18);
+  transform: rotate(90deg) translateX(calc(var(--tw) * -0.05));
+  margin: 0 calc(var(--tw) * 0.25);
 }
 
 /* Flat tile set: no 3D edge, crisp outline. */
@@ -143,4 +196,10 @@
 /* Corner index is unreadable on the smallest tiles. */
 .mini .idx {
   display: none;
+}
+
+.mini.withIdx .art {
+  position: static;
+  width: 96%;
+  height: 94%;
 }

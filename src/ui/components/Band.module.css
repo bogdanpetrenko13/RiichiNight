@@ -102,20 +102,6 @@
   background: var(--accent);
 }
 
-.riichi {
-  position: absolute;
-  left: 50%;
-  bottom: -4px;
-  transform: translateX(-50%);
-  padding: 1px 8px;
-  border-radius: 6px;
-  background: var(--accent);
-  color: var(--on-accent);
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
 .callout {
   position: absolute;
   top: -8px;
@@ -194,15 +180,30 @@
   align-content: flex-start;
   gap: 1px;
   row-gap: calc(var(--river-tile) * 0.06 + 2px);
-  width: calc(var(--river-tile) * 6 + 5px + var(--river-tile) * 0.42);
+  /* 6 tiles + gaps + room for one sideways riichi tile. */
+  width: calc(var(--river-tile) * 6.5 + 6px);
   max-width: 100%;
   min-height: 0;
 }
 
-/* More than three rows: shrink so the band never grows. */
-.river[data-long] {
+/* Riichi stick: its own line in front of the discards. */
+.riichiLine {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: center;
+  max-width: calc(var(--river-tile) * 6 + 5px);
+  padding-bottom: calc(var(--river-tile) * 0.08);
+  animation: none !important;
+}
+
+/* More than three rows: shrink so the band never grows and nothing overlaps
+   the closed hand. */
+.river[data-rows="4"],
+.river[data-rows="5"] {
   --river-tile: calc(var(--band-river, 24px) * 0.76);
 }
+
+
 
 .river > * {
   animation: drop 240ms var(--ease-out) both;
@@ -223,6 +224,8 @@
 .lower {
   grid-area: lower;
   display: flex;
+  /* Calls that do not fit next to the closed hand move above it. */
+  flex-wrap: wrap-reverse;
   align-items: flex-end;
   justify-content: flex-end;
   gap: 6px;
@@ -248,8 +251,9 @@
 
 .counters {
   display: flex;
-  gap: 7px;
-  font-size: 11px;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  font-size: 10.5px;
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
 }
@@ -258,22 +262,6 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-}
-
-.stick {
-  width: 12px;
-  height: 4px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #f5f5f5 40%, var(--danger) 40% 60%, #f5f5f5 60%);
-  box-shadow: 0 0 0 1px var(--border-strong);
-}
-
-.honba {
-  width: 12px;
-  height: 4px;
-  border-radius: 2px;
-  background: repeating-linear-gradient(90deg, #f5f5f5 0 2px, #333 2px 4px);
-  box-shadow: 0 0 0 1px var(--border-strong);
 }
 
 .wall {

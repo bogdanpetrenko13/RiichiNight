@@ -66,6 +66,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void Promise.all([loadSettings(), loadUnlocks(), loadStats(), loadAchievements(), loadRivals()]).then(([s, u, st, a, r]) => {
+      // Older builds counted reward stages before the code was entered: clear once.
+      if (!s.progressGate) {
+        if (!s.extrasUnlocked) {
+          u = {};
+          void saveUnlocks(u);
+        }
+        s = { ...s, progressGate: true };
+        void saveSettings(s);
+      }
       rivalsRef.current = r;
       setRivals(r);
       setSettings(s);

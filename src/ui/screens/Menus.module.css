@@ -50,12 +50,16 @@
   line-height: 1.05;
 }
 
-.logoJa {
-  font-family: var(--font-display);
-  font-size: 0.55em;
-  color: var(--sakura);
-  letter-spacing: 0.4em;
-  margin-right: -0.4em;
+.logoBadge {
+  margin-bottom: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 .menu {

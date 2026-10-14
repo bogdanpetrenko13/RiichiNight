@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ActionName, CallKind, TileCode } from "../../engine/protocol";
-import type { GameController } from "../../game/useGameController";
+import { CUTAWAY_MS, type GameController } from "../../game/useGameController";
 import type { CharacterDef } from "../../game/characters";
 import type { StageChange } from "../../game/rewards";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
-import { useLayout } from "../useLayout";
+import { bandVars, useLayout } from "../useLayout";
+import { sameType } from "../tiles";
 import { PlayerHand } from "../components/PlayerHand";
 import { ActionBar } from "../components/ActionBar";
 import { RoundResult } from "../components/RoundResult";
@@ -54,9 +55,28 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const [selected, setSelected] = useState<number | null>(null);
   const [riichiMode, setRiichiMode] = useState(false);
   const [chiPicker, setChiPicker] = useState(false);
+  /** Chi with several options: index of the first hand tile picked. */
+  const [chiFirst, setChiFirst] = useState<number | null>(null);
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [ackRound, setAckRound] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Rivers are sized from the real size of the bands area.
+  const bandsRef = useRef<HTMLDivElement>(null);
+  const [bandsBox, setBandsBox] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    const el = bandsRef.current;
+    if (!el) return;
+    const update = () => setBandsBox({ w: el.clientWidth, h: el.clientHeight });
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [view !== null]);
+  const bandStyle = useMemo(
+    () => bandVars(layout.orientation, bandsBox.w, bandsBox.h, layout.left),
+    [layout.orientation, layout.left, bandsBox.w, bandsBox.h],
+  );
 
   // Any new engine state clears local selection modes.
   const promptKey = view ? `${view.round.index}:${view.players[0].discards.length}:${view.status}:${view.players[0].handCount}` : "";
@@ -64,6 +84,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
     setSelected(null);
     setRiichiMode(false);
     setChiPicker(false);
+    setChiFirst(null);
   }, [promptKey]);
 
   // Tiles fly in for a moment after each new deal.
@@ -88,6 +109,22 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
     const timer = window.setTimeout(() => void gameRef.current.act({ action: "discard", tile: drawnTile }), 550);
     return () => window.clearTimeout(timer);
   }, [settings.autoDiscardRiichi, onlyDiscard, drawnTile, busy, promptKey]);
+
+  // The result panel waits until the Ron/Tsumo banner and the heroine's line
+  // have played; a tap anywhere skips the wait.
+  const resultKey = view?.result ? `${view.round.index}:${view.status}:${view.result.type}` : null;
+  const [released, setReleased] = useState<string | null>(null);
+  useEffect(() => {
+    if (!resultKey) return;
+    const ms = resultKey.endsWith(":win") ? CUTAWAY_MS + 600 : 900;
+    const timer = window.setTimeout(() => setReleased(resultKey), ms);
+    return () => window.clearTimeout(timer);
+  }, [resultKey]);
+  const holding = resultKey !== null && released !== resultKey;
+  const skipHold = () => {
+    gameRef.current.skipCutaway();
+    if (resultKey) setReleased(resultKey);
+  };
 
   // A rival comments when the player takes a long time.
   const waitingForHuman = view?.status === "human" && !menuOpen;
@@ -128,8 +165,10 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
         : null;
 
   const showRound =
-    view.result !== null && (view.status === "round_over" || (view.status === "game_over" && ackRound !== view.round.index));
-  const showGameOver = view.status === "game_over" && !showRound;
+    !holding &&
+    view.result !== null &&
+    (view.status === "round_over" || (view.status === "game_over" && ackRound !== view.round.index));
+  const showGameOver = view.status === "game_over" && !showRound && !holding;
 
   return (
     <div className={styles.table} data-orientation={layout.orientation} style={layout.vars}>
@@ -143,7 +182,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
 
       {/* Kemono-style bands: kamicha, toimen, shimocha, then the player.
           Rows in portrait, columns in landscape. */}
-      <div className={styles.bands}>
+      <div className={styles.bands} ref={bandsRef} style={bandStyle}>
         {[3, 2, 1].map((seat) => {
           const character = cast[seat - 1];
           if (!character) return null;
@@ -179,6 +218,21 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
           onRiichi={(tile) => act("riichi", { tile })}
           dealing={dealing}
           floatingHints
+          chiMode={chiPicker ? { first: chiFirst } : null}
+          onChiTile={(i) => {
+            const options = prompt?.chiOptions ?? [];
+            const code = allTiles[i];
+            if (chiFirst === i) {
+              setChiFirst(null);
+              return;
+            }
+            const first = chiFirst !== null ? allTiles[chiFirst] : null;
+            const matches = options
+              .map((o, k) => ({ o, k }))
+              .filter(({ o }) => o.some((c) => sameType(c, code)) && (!first || o.some((c) => sameType(c, first))));
+            if (matches.length === 1) act("chi", { option: matches[0].k });
+            else if (matches.length > 1) setChiFirst(i);
+          }}
         />
         <div className={styles.actions}>
           <div className={styles.status}>{statusText}</div>
@@ -221,7 +275,8 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
         </div>
       </Sheet>
 
-      {cutaway && <CallCutaway key={cutaway.id} cutaway={cutaway} cast={cast} />}
+      {cutaway && <CallCutaway key={cutaway.id} cutaway={cutaway} cast={cast} onSkip={holding ? skipHold : game.skipCutaway} />}
+      {holding && !cutaway && <button className={styles.skipLayer} onClick={skipHold} aria-label={t("continue")} />}
 
       {showRound && (
         <RoundResult

@@ -17,6 +17,9 @@ interface PlayerHandProps {
   dealing?: boolean;
   /** Landscape: wait hints float above the rack instead of taking a row. */
   floatingHints?: boolean;
+  /** Chi with several options: pick the tiles in the hand. */
+  chiMode?: { first: number | null } | null;
+  onChiTile?: (index: number) => void;
 }
 
 const contains = (list: TileCode[] | undefined, code: TileCode) => Boolean(list?.some((c) => sameType(c, code)));
@@ -35,6 +38,8 @@ export function PlayerHand({
   onRiichi,
   dealing,
   floatingHints,
+  chiMode,
+  onChiTile,
 }: PlayerHandProps) {
   const { t, settings } = useApp();
   const tiles = player.hand ?? [];
@@ -45,8 +50,34 @@ export function PlayerHand({
   const allowed = (code: TileCode) =>
     riichiMode ? contains(prompt?.riichiTiles, code) : canDiscard && contains(prompt?.discardable, code);
 
+  // Tiles that take part in the pending choice: riichi discards, chi partners,
+  // or the tiles a Pon/Kan would use. Shown raised with a ring, others dimmed.
+  const chiOptions = prompt?.chiOptions ?? [];
+  const firstCode = chiMode && chiMode.first !== null ? all[chiMode.first] : null;
+  const claimTile = prompt?.claim?.tile ?? null;
+  const callsPon = Boolean(prompt?.actions.some((a) => a === "pon" || a === "kan"));
+  const callsChi = Boolean(prompt?.actions.includes("chi"));
+  const eligible = (code: TileCode, index: number): boolean | null => {
+    if (riichiMode) return allowed(code);
+    if (chiMode) {
+      if (!firstCode) return chiOptions.some((o) => contains(o, code));
+      if (chiMode.first === index) return true;
+      // Second pick: the partner tile of an option that contains the first.
+      const partners = chiOptions.filter((o) => contains(o, firstCode)).map((o) => o.find((c) => !sameType(c, firstCode)));
+      return partners.some((p) => p !== undefined && sameType(p, code));
+    }
+    if (claimTile && !canDiscard && (callsPon || callsChi)) {
+      return (callsPon && sameType(code, claimTile)) || (callsChi && chiOptions.some((o) => contains(o, code)));
+    }
+    return null;
+  };
+
   const tap = (index: number) => {
     const code = all[index];
+    if (chiMode) {
+      if (eligible(code, index)) onChiTile?.(index);
+      return;
+    }
     if (!allowed(code)) return;
     if (riichiMode) {
       onRiichi(code);
@@ -94,17 +125,18 @@ export function PlayerHand({
         <div className={styles.tiles} data-dealing={dealing || undefined}>
           {all.map((code, i) => {
             const isDrawn = drawn !== null && i === all.length - 1;
-            const ok = allowed(code);
-            const showsWait = !riichiMode && settings.showWaitHints && Boolean(prompt?.hints && findHint(prompt, code));
+            const pick = eligible(code, i);
+            const showsWait = !riichiMode && !chiMode && settings.showWaitHints && Boolean(prompt?.hints && findHint(prompt, code));
             return (
               <Tile
                 key={`${i}-${code}`}
                 code={code}
                 size="hand"
-                selected={selected === i}
-                dimmed={(riichiMode || canDiscard) && !ok}
-                highlight={riichiMode ? ok : showsWait}
-                onClick={canDiscard || riichiMode ? () => tap(i) : undefined}
+                selected={chiMode ? chiMode.first === i : selected === i}
+                dimmed={pick === false || (pick === null && canDiscard && !allowed(code))}
+                eligible={pick === true}
+                hint={pick === null && showsWait}
+                onClick={canDiscard || riichiMode || chiMode ? () => tap(i) : undefined}
                 style={{
                   ...(isDrawn ? { marginLeft: "calc(var(--hand-tile) * 0.3)" } : null),
                   ...(dealing ? { animationDelay: `${i * 40}ms` } : null),

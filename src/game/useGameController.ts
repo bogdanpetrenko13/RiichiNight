@@ -26,9 +26,9 @@ export interface Cutaway {
   kind: "ron" | "tsumo" | "riichi";
 }
 
-const STEP_DELAY = { fast: 160, normal: 420, slow: 750 } as const;
 const CALL_PAUSE = 650;
-const CUTAWAY_PAUSE = 1300;
+/** Ron / Tsumo / Riichi banner: 0.3 s in, 1.5 s readable, 0.4 s out. */
+export const CUTAWAY_MS = 2200;
 const SPEECH_MS = 3200;
 const PLAYER_VOICE = "player";
 const MANGAN = 8000;
@@ -53,6 +53,8 @@ export interface GameController {
   nextRound: () => Promise<void>;
   /** A heroine comments on the human taking long (called by the table). */
   sayIdle: () => void;
+  /** Tap on the banner: hide it and continue without waiting. */
+  skipCutaway: () => void;
 }
 
 export function useGameController(): GameController {
@@ -68,6 +70,8 @@ export function useGameController(): GameController {
   const [callouts, setCallouts] = useState<Callout[]>([]);
   const [speech, setSpeech] = useState<Record<number, Speech>>({});
   const [cutaway, setCutaway] = useState<Cutaway | null>(null);
+  /** Re-schedules the next opponent step (after skipping a banner). */
+  const [nudge, setNudge] = useState(0);
   const [roundChanges, setRoundChanges] = useState<StageChange[]>([]);
   const [endChanges, setEndChanges] = useState<StageChange[]>([]);
   const [busy, setBusy] = useState(false);
@@ -124,12 +128,15 @@ export function useGameController(): GameController {
           case "call": {
             pause = Math.max(pause, CALL_PAUSE);
             const id = nextId.current++;
-            setCallouts((prev) => [...prev, { id, seat: ev.seat, kind: ev.kind }]);
-            window.setTimeout(() => setCallouts((prev) => prev.filter((c) => c.id !== id)), 1400);
+            // Ron / Tsumo / Riichi get the big banner instead of the small callout.
+            if (ev.kind !== "ron" && ev.kind !== "tsumo" && ev.kind !== "riichi") {
+              setCallouts((prev) => [...prev, { id, seat: ev.seat, kind: ev.kind }]);
+              window.setTimeout(() => setCallouts((prev) => prev.filter((c) => c.id !== id)), 1400);
+            }
             if (ev.kind === "ron" || ev.kind === "tsumo" || ev.kind === "riichi") {
-              pause = CUTAWAY_PAUSE;
+              pause = CUTAWAY_MS;
               setCutaway({ id, seat: ev.seat, kind: ev.kind });
-              window.setTimeout(() => setCutaway((c) => (c?.id === id ? null : c)), 1250);
+              window.setTimeout(() => setCutaway((c) => (c?.id === id ? null : c)), CUTAWAY_MS);
             }
             const vid = voiceIdFor(ev.seat);
             if (vid) void voice.play(vid, ev.kind);
@@ -162,7 +169,8 @@ export function useGameController(): GameController {
                 setEmotion(w, "happy");
                 say(w, "pleased");
               }
-            if (result) {
+            // Reward stages only count once the extras code has been entered.
+            if (result && settingsRef.current.extrasUnlocked) {
               const { session: next, changes } = applyRound(
                 sessionRef.current,
                 result,
@@ -183,6 +191,7 @@ export function useGameController(): GameController {
             // Progression: a 1st place opens the next, harder rivals.
             if (ev.placement[0] === 0)
               unlockRivals(rivalsUnlockedBy(castRef.current.map((c) => c.id), rivalsRef.current));
+            if (!settingsRef.current.extrasUnlocked) break;
             const { session: next, changes } = applyGameEnd(
               sessionRef.current,
               ev.placement,
@@ -256,12 +265,12 @@ export function useGameController(): GameController {
   // Opponents move one action at a time so discards are readable.
   useEffect(() => {
     if (!view || view.status !== "ai" || busy) return;
-    const delay = STEP_DELAY[settings.aiSpeed] + pauseRef.current;
+    const delay = settings.aiDelay + pauseRef.current;
     const timer = window.setTimeout(() => {
       void run(() => engine.aiStep());
     }, delay);
     return () => window.clearTimeout(timer);
-  }, [view, busy, settings.aiSpeed, run, engine]);
+  }, [view, busy, settings.aiDelay, run, engine, nudge]);
 
   const begin = (chars: CharacterDef[], stages: SessionStages, dealIns: number) => {
     castRef.current = chars;
@@ -319,6 +328,12 @@ export function useGameController(): GameController {
 
   const sayIdle = useCallback(() => say(randomRival(), "idle"), [say]);
 
+  const skipCutaway = useCallback(() => {
+    setCutaway(null);
+    pauseRef.current = 0;
+    setNudge((n) => n + 1);
+  }, []);
+
   return {
     view,
     cast,
@@ -336,5 +351,6 @@ export function useGameController(): GameController {
     act,
     nextRound,
     sayIdle,
+    skipCutaway,
   };
 }

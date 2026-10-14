@@ -6,7 +6,18 @@ import { Tile } from "./Tile";
  * Renders "123m 55p" as tiles with small gaps between groups. With `fit`, the
  * tiles shrink so the whole example stays on one line (up to `size`).
  */
-export function TileRow({ text, size = 26, fit = false }: { text: string; size?: number; fit?: boolean }) {
+export function TileRow({
+  text,
+  size = 26,
+  fit = false,
+  hints = false,
+}: {
+  text: string;
+  size?: number;
+  fit?: boolean;
+  /** Show corner indexes (as at the table) instead of clean example tiles. */
+  hints?: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   const items = parseExample(text);
@@ -34,7 +45,7 @@ export function TileRow({ text, size = 26, fit = false }: { text: string; size?:
         code === null ? (
           <span key={`g${i}`} style={{ width: tw * 0.35, flex: "none" }} />
         ) : (
-          <Tile key={i} code={code} size="mini" style={{ ["--tw" as string]: `${tw.toFixed(1)}px` }} />
+          <Tile key={i} code={code} size={hints ? "river" : "mini"} style={{ ["--tw" as string]: `${tw.toFixed(1)}px` }} />
         ),
       )}
     </div>

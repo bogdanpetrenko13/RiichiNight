@@ -16,12 +16,16 @@ interface TileProps {
   sideways?: boolean;
   /** Small pointer above the tile (claimable discard). */
   marked?: boolean;
+  /** Part of the pending choice (riichi, chi, pon, kan): raised with a ring. */
+  eligible?: boolean;
+  /** Discarding it keeps tenpai: small bar under the tile. */
+  hint?: boolean;
   onClick?: () => void;
   label?: string;
   style?: CSSProperties;
 }
 
-export function Tile({ code, back, size = "hand", selected, dimmed, highlight, sideways, marked, onClick, label, style }: TileProps) {
+export function Tile({ code, back, size = "hand", selected, dimmed, highlight, sideways, marked, eligible, hint, onClick, label, style }: TileProps) {
   const { settings } = useApp();
   const variant = settings.tileset === "dark" ? "black" : "regular";
   const classes = [
@@ -32,6 +36,8 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
     highlight && styles.highlight,
     sideways && styles.sideways,
     marked && styles.marked,
+    eligible && styles.eligible,
+    hint && styles.hint,
     onClick && styles.clickable,
     back && styles.back,
   ]
@@ -43,12 +49,12 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
   }
 
   const t = parseTile(code);
-  const index = cornerIndex(t);
+  const index = cornerIndex(t, settings.tileHints, settings.lang);
   const face = (
     <>
       <img className={styles.art} src={faceFile(t, variant)} alt="" draggable={false} decoding="async" />
       {index && (
-        <span className={styles.idx} data-red={t.red || undefined}>
+        <span className={styles.idx} data-suit={t.suit}>
           {index}
         </span>
       )}
@@ -58,7 +64,7 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
   const Tag = onClick ? "button" : "span";
   return (
     <Tag
-      className={classes}
+      className={index ? `${classes} ${styles.withIdx}` : classes}
       data-suit={t.suit}
       data-red={t.red || undefined}
       onClick={onClick}
