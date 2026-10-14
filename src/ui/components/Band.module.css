@@ -294,10 +294,12 @@
   gap: 1px;
 }
 
+/* One line in both orientations: sticks ×n, honba ×n, wall ×n. */
 .counters {
   display: flex;
-  flex-wrap: wrap;
-  gap: 2px 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  gap: 6px;
   font-size: 10.5px;
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
@@ -395,12 +397,13 @@
 }
 
 :global([data-orientation="landscape"]) .me .left {
-  /* Same height as a rival's header (portrait), so all rivers start on one line. */
+  /* Wind above the score, as tall as a rival's header (portrait), so all
+     rivers start on one line. */
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
   min-height: var(--band-portrait, 46px);
 }
 
@@ -420,23 +423,16 @@
   min-width: 0;
 }
 
+/* Same block as in portrait: dead wall, counters in one line under it;
+   left edge shared with the river, bottom on the rivals' hand line. */
 .meLower .table {
   margin-top: 0;
-  gap: 4px;
+  gap: 5px;
 }
 
 .meLower .dora {
-  align-items: center;
-  gap: 2px;
-}
-
-.doraLabel {
-  margin-right: 6px;
-  color: var(--ink-soft);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  align-items: flex-end;
+  gap: 1px;
 }
 
 :global([data-orientation="landscape"]) .lower {

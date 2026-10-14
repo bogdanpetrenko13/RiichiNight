@@ -32,7 +32,8 @@ export function PlayerBand({
   const me = view.players[0];
   // Dora indicators face up, the rest of the dead-wall row as backs (5 total).
   const hidden = Math.max(0, 5 - view.dora.length);
-  const small = { ["--tw" as string]: "calc(var(--band-back, 14px) * 0.95)" };
+  // Portrait: as large as five tiles fit in the band's left part.
+  const small = { ["--tw" as string]: "calc((var(--band-left, 104px) - 4px) / 5)" };
   // Landscape: the dora indicators are shown large, near the rivers' size.
   const doraBig = { ["--tw" as string]: "calc(var(--band-river, 24px) * 0.85)" };
   // The newest discard flies in from the hand.
@@ -47,7 +48,6 @@ export function PlayerBand({
   const deadWall = (
     <div className={styles.table}>
       <div className={styles.dora} aria-label={t("dora")}>
-        {big && <span className={styles.doraLabel}>{t("dora")}</span>}
         {view.dora.map((d, i) => (
           <Tile key={i} code={d} size="river" style={big ? doraBig : small} />
         ))}
@@ -57,10 +57,10 @@ export function PlayerBand({
       </div>
       <div className={styles.counters}>
         <span title={t("riichiSticks")}>
-          <Tenbo kind="1000" width={24} />×{view.round.riichiSticks}
+          <Tenbo kind="1000" width={18} />×{view.round.riichiSticks}
         </span>
         <span title={t("honba", { n: view.round.honba })}>
-          <Tenbo kind="100" width={24} />×{view.round.honba}
+          <Tenbo kind="100" width={18} />×{view.round.honba}
         </span>
         <span title={t("wall", { n: view.wall ?? 0 })}>
           <i className={styles.wall} />×{view.wall ?? 0}
