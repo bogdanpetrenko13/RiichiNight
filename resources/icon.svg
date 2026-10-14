@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108"><defs><radialGradient id="nb" cx="50%" cy="38%" r="75%">
+<stop offset="0" stop-color="#2e4a3b"/><stop offset="1" stop-color="#121614"/></radialGradient></defs>
+<rect width="108" height="108" fill="url(#nb)"/><circle cx="24" cy="26" r="1.1" fill="#fbfaf6" opacity="0.9"/><circle cx="84" cy="22" r="0.8" fill="#fbfaf6" opacity="0.7"/><circle cx="90" cy="52" r="1" fill="#fbfaf6" opacity="0.8"/><circle cx="18" cy="70" r="0.7" fill="#fbfaf6" opacity="0.6"/><circle cx="30" cy="88" r="0.9" fill="#fbfaf6" opacity="0.7"/><circle cx="80" cy="86" r="0.7" fill="#fbfaf6" opacity="0.6"/><circle cx="62" cy="16" r="0.6" fill="#fbfaf6" opacity="0.6"/><g transform="rotate(-8 54 53)">
+<rect x="32" y="27" width="44" height="58" rx="7" fill="#9a927f"/>
+<rect x="32" y="25.6" width="44" height="58" rx="7" fill="#cdc5b3"/>
+<rect x="32" y="24" width="44" height="58" rx="7" fill="#fdfcf8"/>
+<rect x="33" y="25" width="42" height="56" rx="6" fill="none" stroke="#ffffff" stroke-opacity=".7"/>
+<mask id="moon"><circle cx="54" cy="53" r="15" fill="#fff"/><circle cx="60.3" cy="48.8" r="12.3" fill="#000"/></mask>
+<circle cx="54" cy="53" r="15" fill="#e08768" mask="url(#moon)"/></g></svg>

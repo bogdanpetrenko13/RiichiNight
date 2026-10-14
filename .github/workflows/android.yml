@@ -71,6 +71,8 @@ jobs:
         run: |
           set -o pipefail
           { if [ ! -d android ]; then npx cap add android; fi; npx cap sync android; } 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
+          # App icon (adaptive + round) and splash screens from scripts/make-icons.py.
+          cp -r resources/android/res/. android/app/src/main/res/
 
       - id: gradle
         name: Build debug APK

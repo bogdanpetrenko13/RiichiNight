@@ -97,6 +97,13 @@ python -c "import hashlib;print(hashlib.sha256(b'riichi-night:НОВЫЙКОД')
   наготой. Если откровенные сцены будут, распространяйте APK напрямую или через
   площадки для взрослого контента, а для Play держите отдельную сборку без сцен.
 
+## Иконка и заставка
+
+Иконку (тайл с полумесяцем на ночном небе), адаптивные иконки Android и заставки
+рисует `scripts/make-icons.py night` (вектор, без чужих ресурсов). Результат лежит в
+`resources/android/res/`, CI копирует его в Android-проект после `cap add`.
+Веб-иконки — `public/favicon.png`, `icon-192.png`, `icon-512.png`.
+
 ## Арт и озвучка
 
 Лица тайлов взяты из набора [FluffyStuff/riichi-mahjong-tiles](https://github.com/FluffyStuff/riichi-mahjong-tiles)
