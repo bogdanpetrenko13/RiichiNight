@@ -20,6 +20,11 @@ export type ThemeMode = "system" | "light" | "dark";
 export const TILESETS: Tileset[] = ["modern", "classic", "ivory", "dark", "flat"];
 export const THEME_MODES: ThemeMode[] = ["system", "light", "dark"];
 
+export type TableStyle = "quiet" | "felt";
+export const TABLE_STYLES: TableStyle[] = ["quiet", "felt"];
+/** Tile set that suits each table style (applied when the style changes). */
+export const STYLE_TILESET: Record<TableStyle, Tileset> = { quiet: "modern", felt: "classic" };
+
 /** Bumped when the look changes so old theme choices are replaced once. */
 const STYLE_VERSION = 3;
 
@@ -35,6 +40,8 @@ export interface Settings {
   dealAnimation: boolean;
   speechBubbles: boolean;
   tileset: Tileset;
+  /** Table look: flat cards ("quiet") or one green felt ("felt"). */
+  tableStyle: TableStyle;
   /** Corner index on tiles: none, man + winds, or all. */
   tileHints: TileHints;
   theme: ThemeMode;
@@ -88,6 +95,7 @@ export function defaultSettings(): Settings {
     dealAnimation: true,
     speechBubbles: true,
     tileset: "modern",
+    tableStyle: "quiet",
     tileHints: "man",
     theme: "system",
     styleVersion: STYLE_VERSION,

@@ -18,10 +18,10 @@
   flex: 1 1 0;
   min-height: 0;
   padding: 8px 8px 8px 10px;
-  border-radius: var(--radius-m);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--band-radius);
+  background: var(--band-bg);
+  border: var(--band-border);
+  box-shadow: var(--band-shadow);
 }
 
 .band[data-active]::after {
@@ -29,7 +29,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: inset 0 0 0 2px var(--primary);
+  box-shadow: inset 0 0 0 2px var(--active-ring);
   pointer-events: none;
 }
 
@@ -46,8 +46,9 @@
 
 .wind {
   padding: 2px 9px;
-  border-radius: 999px;
-  background: var(--surface-alt);
+  border-radius: var(--chip-radius);
+  background: var(--chip-bg);
+  color: var(--chip-text);
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -83,6 +84,7 @@
 .face {
   width: var(--band-portrait, 88px) !important;
   height: var(--band-portrait, 88px) !important;
+  border-radius: var(--portrait-radius) !important;
 }
 
 .pips {
@@ -205,14 +207,18 @@
 
 
 
+/* A rival's discard is put down: drops in with a soft landing. */
 .river > * {
-  animation: drop 240ms var(--ease-out) both;
+  animation: drop var(--dur-slow) var(--ease-in) both;
 }
 
 @keyframes drop {
   from {
     opacity: 0;
-    transform: translateY(-30%) scale(1.12);
+    transform: translateY(-45%) scale(1.15);
+  }
+  60% {
+    opacity: 1;
   }
 }
 
@@ -271,6 +277,31 @@
   background: linear-gradient(180deg, var(--tile-back-hi), var(--tile-back));
 }
 
+/* Player band: dead wall + counters in the left part, river in the middle,
+   waits and the action buttons in a side column on the right (portrait). */
+.me {
+  grid-template-columns: var(--band-left, 104px) minmax(0, 1fr) var(--band-side, 104px);
+  grid-template-areas: "left river side";
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.side {
+  grid-area: side;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.actions {
+  margin-top: auto;
+}
+
+/* The player's discards fly in from the hand (motion.ts) instead of dropping. */
+.river[data-flight] > * {
+  animation: none;
+}
+
 /* Player band: dead wall + counters live in the left part under the score. */
 .me .left {
   gap: 3px;
@@ -321,6 +352,15 @@
 
 :global([data-orientation="landscape"]) .me .left {
   grid-template-columns: auto 1fr;
+}
+
+:global([data-orientation="landscape"]) .me {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "left"
+    "river"
+    "side";
 }
 
 :global([data-orientation="landscape"]) .me .table {

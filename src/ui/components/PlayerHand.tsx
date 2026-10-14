@@ -2,6 +2,8 @@ import type { PlayerView, Prompt, TileCode } from "../../engine/protocol";
 import { useApp } from "../../app/AppContext";
 import { sameType } from "../tiles";
 import { HAND_UNITS_BASE } from "../useLayout";
+import { DUR, EASE_IN, animate, setHandLocator } from "../motion";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { Tile } from "./Tile";
 import styles from "./PlayerHand.module.css";
 
@@ -15,8 +17,6 @@ interface PlayerHandProps {
   onRiichi: (code: TileCode) => void;
   /** True for a moment after a new deal: tiles fly in. */
   dealing?: boolean;
-  /** Landscape: wait hints float above the rack instead of taking a row. */
-  floatingHints?: boolean;
   /** Chi with several options: pick the tiles in the hand. */
   chiMode?: { first: number | null } | null;
   onChiTile?: (index: number) => void;
@@ -37,11 +37,10 @@ export function PlayerHand({
   onDiscard,
   onRiichi,
   dealing,
-  floatingHints,
   chiMode,
   onChiTile,
 }: PlayerHandProps) {
-  const { t, settings } = useApp();
+  const { settings } = useApp();
   const tiles = player.hand ?? [];
   const drawn = player.drawn ?? null;
   const all = drawn ? [...tiles, drawn] : tiles;
@@ -87,41 +86,73 @@ export function PlayerHand({
     else onSelect(index);
   };
 
-  const selectedCode = selected !== null ? all[selected] : null;
-  const selectedHint = selectedCode && settings.showWaitHints ? prompt?.hints?.[selectedCode] ?? findHint(prompt, selectedCode) : null;
-  // Kemono-style wait info: while tenpai, the current waits stay visible.
-  const standingWaits =
-    !selectedHint && player.waits && player.waits.length
-      ? { waits: player.waits.map((tile) => ({ tile, remaining: -1 })), furiten: Boolean(player.furiten) }
-      : null;
-  const hint = selectedHint ?? standingWaits;
+  // Stable identity per physical tile: code + occurrence, so a discard only
+  // removes one tile and the others slide instead of being re-created.
+  const seen: Record<string, number> = {};
+  const keys = all.map((code) => {
+    const n = seen[code] ?? 0;
+    seen[code] = n + 1;
+    return `${code}#${n}`;
+  });
 
-  // Size tiles so concealed tiles + melds always fit one row. Each meld
-  // replaces 3 hand slots with 3–4 smaller tiles and a separator.
+  // Size tiles so concealed tiles + melds always fit one row (real counts).
   const meldTiles = player.melds.reduce((n, m) => n + m.tiles.length, 0);
-  const units =
-    HAND_UNITS_BASE - player.melds.length * 3 + meldTiles * (MELD_SCALE + 0.02) + player.melds.length * 0.3;
+  const units = Math.max(
+    HAND_UNITS_BASE,
+    all.length +
+      (drawn ? 0.3 : 0) +
+      (player.melds.length ? 0.3 + meldTiles * (MELD_SCALE + 0.02) + (player.melds.length - 1) * 0.3 : 0) +
+      0.2,
+  );
   const rowStyle = { ["--hand-tile" as string]: `min(var(--hand-max), calc(var(--hand-avail) / ${units.toFixed(2)}))` };
 
+  // FLIP: tiles that moved glide from their old place; new tiles slide in.
+  const rowRef = useRef<HTMLDivElement>(null);
+  const prev = useRef<Map<string, { x: number; y: number }>>(new Map());
+  useLayoutEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    const next = new Map<string, { x: number; y: number }>();
+    const nodes = Array.from(row.querySelectorAll<HTMLElement>("[data-k]"));
+    for (const n of nodes) next.set(n.dataset.k!, { x: n.offsetLeft, y: n.offsetTop });
+    if (!dealing && prev.current.size) {
+      for (const n of nodes) {
+        const old = prev.current.get(n.dataset.k!);
+        const now = next.get(n.dataset.k!)!;
+        if (old) {
+          const dx = old.x - now.x;
+          if (Math.abs(dx) > 1) animate(n, [{ transform: `translateX(${dx}px)` }, { transform: "translateX(0)" }], DUR.base);
+        } else {
+          animate(
+            n,
+            [
+              { transform: "translate(35%, -25%)", opacity: 0 },
+              { transform: "translate(0, 0)", opacity: 1 },
+            ],
+            DUR.base + 60,
+            EASE_IN,
+          );
+        }
+      }
+    }
+    prev.current = next;
+  });
+
+  // Lets the table find a tile's element when it is discarded (flight to the river).
+  useEffect(() => {
+    setHandLocator((code) => {
+      const row = rowRef.current;
+      if (!row) return null;
+      const sel = selected !== null ? row.querySelector(`[data-k="${CSS.escape(keys[selected] ?? "")}"]`) : null;
+      if (sel && sel.getAttribute("data-k")?.startsWith(code)) return sel;
+      return row.querySelector(`[data-k^="${CSS.escape(code)}#"]`);
+    });
+    return () => setHandLocator(null);
+  });
+
   return (
-    <div className={styles.wrap} data-float={floatingHints || undefined}>
-      <div className={styles.hintRow} aria-live="polite">
-        {player.furiten && !hint && <span className={styles.furiten}>{t("furiten")}</span>}
-        {riichiMode ? (
-          <span className={styles.hintText}>{t("chooseRiichiTile")}</span>
-        ) : hint ? (
-          <>
-            <span className={hint.furiten ? styles.furiten : styles.hintText}>{hint.furiten ? t("furiten") : t("waits")}</span>
-            {hint.waits.map((w) => (
-              <span key={w.tile} className={styles.wait}>
-                <Tile code={w.tile} size="mini" />
-                {w.remaining >= 0 && <small>×{w.remaining}</small>}
-              </span>
-            ))}
-          </>
-        ) : null}
-      </div>
-      <div className={styles.row} style={rowStyle}>
+    <div className={styles.wrap}>
+      <div className={styles.row} style={rowStyle} ref={rowRef}>
         <div className={styles.tiles} data-dealing={dealing || undefined}>
           {all.map((code, i) => {
             const isDrawn = drawn !== null && i === all.length - 1;
@@ -129,7 +160,8 @@ export function PlayerHand({
             const showsWait = !riichiMode && !chiMode && settings.showWaitHints && Boolean(prompt?.hints && findHint(prompt, code));
             return (
               <Tile
-                key={`${i}-${code}`}
+                key={keys[i]}
+                dataKey={keys[i]}
                 code={code}
                 size="hand"
                 selected={chiMode ? chiMode.first === i : selected === i}
@@ -150,7 +182,13 @@ export function PlayerHand({
             {player.melds.map((m, i) => (
               <span key={i} className={styles.meld}>
                 {m.tiles.map((code, j) => (
-                  <Tile key={j} code={code} size="meld" back={m.type === "closed_kan" && (j === 0 || j === 3)} />
+                  <Tile
+                    key={j}
+                    code={code}
+                    size="meld"
+                    back={m.type === "closed_kan" && (j === 0 || j === 3)}
+                    style={{ ["--tw" as string]: `calc(var(--hand-tile) * ${MELD_SCALE})` }}
+                  />
                 ))}
               </span>
             ))}

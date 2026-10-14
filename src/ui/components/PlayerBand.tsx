@@ -1,4 +1,7 @@
+import type { ReactNode } from "react";
+import { useLayoutEffect, useRef } from "react";
 import type { GameView } from "../../engine/protocol";
+import { landDiscard } from "../motion";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
@@ -10,12 +13,32 @@ import styles from "./Band.module.css";
  * indicators and the table counters (riichi sticks, honba, tiles left in the
  * wall); the player's river on the right. The hand itself sits below.
  */
-export function PlayerBand({ view, active }: { view: GameView; active: boolean }) {
+export function PlayerBand({
+  view,
+  active,
+  waits,
+  actions,
+}: {
+  view: GameView;
+  active: boolean;
+  /** Waits / furiten chip, top right of the band. */
+  waits?: ReactNode;
+  /** Action buttons, bottom right of the band (portrait). */
+  actions?: ReactNode;
+}) {
   const { t } = useApp();
   const me = view.players[0];
   // Dora indicators face up, the rest of the dead-wall row as backs (5 total).
   const hidden = Math.max(0, 5 - view.dora.length);
   const small = { ["--tw" as string]: "calc(var(--band-back, 14px) * 0.95)" };
+  // The newest discard flies in from the hand.
+  const riverRef = useRef<HTMLDivElement>(null);
+  const count = me.discards.length;
+  const lastCount = useRef(count);
+  useLayoutEffect(() => {
+    if (count > lastCount.current) landDiscard(riverRef.current?.lastElementChild ?? null);
+    lastCount.current = count;
+  }, [count]);
   return (
     <section className={`${styles.band} ${styles.me}`} data-active={active || undefined}>
       <div className={styles.left}>
@@ -45,7 +68,7 @@ export function PlayerBand({ view, active }: { view: GameView; active: boolean }
           </div>
         </div>
       </div>
-      <div className={styles.river} data-rows={Math.ceil(me.discards.length / 6)}>
+      <div className={styles.river} data-rows={Math.ceil(me.discards.length / 6)} data-flight ref={riverRef}>
         {me.riichi && (
           <div className={styles.riichiLine}>
             <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
@@ -55,6 +78,12 @@ export function PlayerBand({ view, active }: { view: GameView; active: boolean }
           <Tile key={`${i}-${code}`} code={code} size="river" sideways={me.riichiIndex === i} />
         ))}
       </div>
+      {(waits || actions) && (
+        <div className={styles.side}>
+          {waits}
+          {actions && <div className={styles.actions}>{actions}</div>}
+        </div>
+      )}
     </section>
   );
 }

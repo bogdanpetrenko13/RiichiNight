@@ -18,6 +18,7 @@ import {
 import type { Unlocks } from "../game/rewards";
 import { emptyStats, newlyEarned, type Stats } from "../game/stats";
 import { music, voice } from "../game/audio";
+import { setMotionSpeed } from "../ui/motion";
 import type { CharacterDef } from "../game/characters";
 
 export type Translate = (key: StringKey, vars?: Record<string, string | number>) => string;
@@ -89,11 +90,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     voice.volume = settings.voiceVolume;
+    setMotionSpeed(settings.aiDelay);
     music.setVolume(settings.musicVolume);
     const root = document.documentElement;
     root.lang = settings.lang;
     root.dataset.tileset = settings.tileset;
-  }, [settings.voiceVolume, settings.musicVolume, settings.lang, settings.tileset]);
+  }, [settings.voiceVolume, settings.musicVolume, settings.lang, settings.tileset, settings.aiDelay]);
 
   // Light/dark theme; "system" follows the OS setting and its changes.
   useEffect(() => {

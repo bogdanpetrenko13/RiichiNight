@@ -7,6 +7,7 @@ import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { bandVars, useLayout } from "../useLayout";
 import { sameType } from "../tiles";
+import { rememberHandDiscard } from "../motion";
 import { PlayerHand } from "../components/PlayerHand";
 import { ActionBar } from "../components/ActionBar";
 import { RoundResult } from "../components/RoundResult";
@@ -15,6 +16,7 @@ import { RewardScene } from "../components/RewardScene";
 import { CallCutaway } from "../components/CallCutaway";
 import { RivalBand } from "../components/RivalBand";
 import { PlayerBand } from "../components/PlayerBand";
+import { WaitsChip } from "../components/WaitsChip";
 import { IconButton, Sheet } from "../components/Primitives";
 import { Icon } from "../icons";
 import styles from "./Table.module.css";
@@ -106,7 +108,10 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const drawnTile = view?.players[0].drawn ?? null;
   useEffect(() => {
     if (!settings.autoDiscardRiichi || !onlyDiscard || !drawnTile || busy) return;
-    const timer = window.setTimeout(() => void gameRef.current.act({ action: "discard", tile: drawnTile }), 550);
+    const timer = window.setTimeout(() => {
+      rememberHandDiscard(drawnTile);
+      void gameRef.current.act({ action: "discard", tile: drawnTile });
+    }, 550);
     return () => window.clearTimeout(timer);
   }, [settings.autoDiscardRiichi, onlyDiscard, drawnTile, busy, promptKey]);
 
@@ -147,6 +152,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const selectedTile = selected !== null ? allTiles[selected] ?? null : null;
 
   const act = (action: ActionName, extra?: { tile?: TileCode; option?: number }) => {
+    if (extra?.tile && (action === "discard" || action === "riichi")) rememberHandDiscard(extra.tile);
     setSelected(null);
     setRiichiMode(false);
     setChiPicker(false);
@@ -164,6 +170,27 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
         ? t("waitingFor")
         : null;
 
+  const portrait = layout.orientation === "portrait";
+  const actionBar = (
+    <ActionBar
+      prompt={prompt}
+      riichiMode={riichiMode}
+      chiPicker={chiPicker}
+      busy={busy}
+      selectedTile={selectedTile}
+      onDiscardSelected={() => selectedTile && act("discard", { tile: selectedTile })}
+      onAction={(action, option) => act(action, option !== undefined ? { option } : undefined)}
+      onRiichiMode={(on) => {
+        setSelected(null);
+        setRiichiMode(on);
+      }}
+      onChiPicker={setChiPicker}
+    />
+  );
+  const waitsChip = (
+    <WaitsChip player={me} prompt={prompt} selectedCode={selectedTile} riichiMode={riichiMode} />
+  );
+
   const showRound =
     !holding &&
     view.result !== null &&
@@ -171,18 +198,19 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const showGameOver = view.status === "game_over" && !showRound && !holding;
 
   return (
-    <div className={styles.table} data-orientation={layout.orientation} style={layout.vars}>
-      <header className={styles.topBar}>
+    <div className={styles.table} data-orientation={layout.orientation} data-style={settings.tableStyle} style={layout.vars}>
+      <header className={styles.topBar} data-zone>
         <IconButton icon="menu" label={t("menu")} onClick={() => setMenuOpen(true)} />
-        <b className={styles.roundInfo}>
-          {t("roundLabel", { wind: t(`wind_${view.round.wind}` as StringKey), n: view.round.number })}
-        </b>
+        <div className={styles.roundInfo}>
+          <b>{t("roundLabel", { wind: t(`wind_${view.round.wind}` as StringKey), n: view.round.number })}</b>
+          {statusText && <span key={statusText}>{statusText}</span>}
+        </div>
         <IconButton icon="help" label={t("yakuRef")} onClick={() => onOpen("learn")} />
       </header>
 
       {/* Kemono-style bands: kamicha, toimen, shimocha, then the player.
           Rows in portrait, columns in landscape. */}
-      <div className={styles.bands} ref={bandsRef} style={bandStyle}>
+      <div className={styles.bands} ref={bandsRef} style={bandStyle} data-zone>
         {[3, 2, 1].map((seat) => {
           const character = cast[seat - 1];
           if (!character) return null;
@@ -201,13 +229,18 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
             />
           );
         })}
-        <PlayerBand view={view} active={view.current === 0 && view.status === "human"} />
+        <PlayerBand
+          view={view}
+          active={view.current === 0 && view.status === "human"}
+          waits={waitsChip}
+          actions={portrait ? actionBar : undefined}
+        />
       </div>
 
       {calloutBySeat[0] && <span className={styles.myCallout}>{t(`act_${calloutBySeat[0]}` as StringKey)}!</span>}
 
-      {/* Hand on top, buttons under it on the right (Kemono Mahjong). */}
-      <div className={styles.dock}>
+      {/* The hand across the bottom; in landscape the buttons sit to its right. */}
+      <div className={styles.dock} data-zone>
         <PlayerHand
           player={me}
           prompt={prompt}
@@ -217,7 +250,6 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
           onDiscard={(tile) => act("discard", { tile })}
           onRiichi={(tile) => act("riichi", { tile })}
           dealing={dealing}
-          floatingHints
           chiMode={chiPicker ? { first: chiFirst } : null}
           onChiTile={(i) => {
             const options = prompt?.chiOptions ?? [];
@@ -234,23 +266,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
             else if (matches.length > 1) setChiFirst(i);
           }}
         />
-        <div className={styles.actions}>
-          <div className={styles.status}>{statusText}</div>
-          <ActionBar
-            prompt={prompt}
-            riichiMode={riichiMode}
-            chiPicker={chiPicker}
-            busy={busy}
-            selectedTile={selectedTile}
-            onDiscardSelected={() => selectedTile && act("discard", { tile: selectedTile })}
-            onAction={(action, option) => act(action, option !== undefined ? { option } : undefined)}
-            onRiichiMode={(on) => {
-              setSelected(null);
-              setRiichiMode(on);
-            }}
-            onChiPicker={setChiPicker}
-          />
-        </div>
+        {!portrait && <div className={styles.actions}>{actionBar}</div>}
       </div>
 
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title={t("menu")}>

@@ -31,7 +31,7 @@ export function ActionBar({
   onChiPicker,
 }: ActionBarProps) {
   const { t } = useApp();
-  if (!prompt) return <div className={styles.bar} />;
+  if (!prompt) return null;
 
   if (riichiMode) {
     return (
@@ -58,8 +58,10 @@ export function ActionBar({
 
   const buttons = ORDER.filter((a) => prompt.actions.includes(a));
   const canDiscard = prompt.actions.includes("discard");
+  const count = buttons.length + (canDiscard && selectedTile ? 1 : 0);
+  if (!count) return null;
   return (
-    <div className={styles.bar}>
+    <div className={styles.bar} data-count={count}>
       {buttons.map((action) => {
         const kind =
           action === "tsumo" || action === "ron" ? "win" : action === "riichi" ? "riichi" : action === "pass" ? "pass" : "call";

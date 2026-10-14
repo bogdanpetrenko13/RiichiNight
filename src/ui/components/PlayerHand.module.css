@@ -40,6 +40,7 @@
 }
 
 .row {
+  position: relative;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -79,7 +80,7 @@
 }
 
 .tiles[data-dealing] > * {
-  animation: dealIn 420ms var(--ease-out) both;
+  animation: dealIn 460ms var(--ease-in) both;
 }
 
 @keyframes dealIn {

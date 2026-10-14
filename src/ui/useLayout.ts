@@ -94,11 +94,16 @@ export function bandVars(orientation: Layout["orientation"], areaW: number, area
   }
   const bandH = (areaH - 3 * GAP) / 4;
   const field = areaW - 12 - 2 - left - 26;
+  // The player band also holds the waits + buttons column on the right.
+  const side = clamp(Math.round(areaW * 0.26), 96, 124);
+  const meField = field - side - 8;
   const back = clamp((field - 6) / 14.8, 12, 24);
   const byH = (bandH - back * TILE_RATIO - 28) / rows;
-  const river = clamp(Math.min((field - 6) / 6.6, byH), 14, 40);
-  const portrait = clamp(Math.min(left - 14, bandH - 72), 56, 110);
+  const river = clamp(Math.min((field - 6) / 6.6, (meField - 4) / 6.6, byH), 14, 40);
+  // Portrait under wind / score / name (~68 px of labels): never covers them.
+  const portrait = clamp(Math.min(left - 14, bandH - 16 - 70), 48, 110);
   return {
+    ["--band-side" as string]: `${side}px`,
     ["--band-river" as string]: px(river),
     ["--band-back" as string]: px(back),
     ["--band-portrait" as string]: px(portrait),

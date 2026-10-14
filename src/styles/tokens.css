@@ -151,6 +151,83 @@
   --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ---- table style (Settings → Table style) ---------------------------------
+   "quiet": flat Riichi Trainer cards (defaults below).
+   "felt":  one continuous green felt, bands split by thin lines, pill buttons.
+   Set as data-style on the table; the felt overrides live on its zones
+   (top bar, bands, dock) so overlays keep the app theme. */
+:root {
+  --tbl-bg: var(--bg);
+  --band-bg: var(--surface);
+  --band-border: 1px solid var(--border);
+  --band-radius: var(--radius-m);
+  --band-shadow: var(--shadow-sm);
+  --band-gap: 6px;
+  --band-pad-x: 6px;
+  --chip-bg: var(--surface-alt);
+  --chip-text: var(--ink);
+  --chip-radius: 999px;
+  --portrait-radius: 22%;
+  --active-ring: var(--primary);
+  --pointer: var(--accent);
+  --btn-radius: var(--radius-s);
+  --btn-case: none;
+  --btn-ls: 0;
+  --btn-bg: var(--surface);
+  --btn-text: var(--ink);
+  --btn-border: var(--border-strong);
+  --btn-primary-bg: var(--primary);
+  --btn-primary-text: var(--on-primary);
+  --btn-call-bg: var(--info);
+  --btn-call-text: var(--on-info);
+  --btn-win-bg: var(--accent);
+  --btn-win-text: var(--on-accent);
+
+  /* Motion (see src/ui/motion.ts). */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --ease-std: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in: cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+[data-style="felt"] {
+  --tbl-bg: radial-gradient(120% 80% at 50% 40%, #2b5a45 0%, #1a3d2f 55%, #0f241b 100%);
+}
+
+[data-style="felt"] [data-zone] {
+  --ink: #f3efe2;
+  --ink-soft: #c9d5cc;
+  --ink-faint: #9fb3a6;
+  --primary: #f2c14e;
+  --on-primary: #2b1e00;
+  --band-bg: transparent;
+  --band-border: 0;
+  --band-radius: 0;
+  --band-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.07), inset 0 1px 0 rgba(0, 0, 0, 0.25);
+  --band-gap: 0px;
+  --band-pad-x: 0px;
+  --chip-bg: rgba(0, 0, 0, 0.28);
+  --chip-text: #f3efe2;
+  --chip-radius: 6px;
+  --portrait-radius: 50%;
+  --active-ring: #f2c14e;
+  --pointer: #f2c14e;
+  --btn-radius: 999px;
+  --btn-case: uppercase;
+  --btn-ls: 0.04em;
+  --btn-bg: rgba(0, 0, 0, 0.3);
+  --btn-text: #f3efe2;
+  --btn-border: rgba(255, 255, 255, 0.25);
+  --btn-primary-bg: #f2c14e;
+  --btn-primary-text: #2b1e00;
+  --btn-call-bg: #f3efe2;
+  --btn-call-text: #1a3d2f;
+  --btn-win-bg: #d2452f;
+  --btn-win-text: #ffffff;
+  color: var(--ink);
+}
+
 /* ---- tile sets (data-tileset on <html>) ----------------------------------- */
 /* Traditional look: warm face, amber edge, golden backs. */
 :root[data-tileset="classic"] {

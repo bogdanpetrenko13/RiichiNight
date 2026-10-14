@@ -2,7 +2,7 @@ import { useApp } from "../../app/AppContext";
 import { LANGS, type StringKey } from "../../i18n/strings";
 import type { GameRules } from "../../engine/protocol";
 import type { RewardRules } from "../../game/rewards";
-import { AI_DELAY_MAX, AI_DELAY_MIN, THEME_MODES, TILESETS, type Settings } from "../../game/storage";
+import { AI_DELAY_MAX, AI_DELAY_MIN, STYLE_TILESET, TABLE_STYLES, THEME_MODES, TILESETS, type Settings } from "../../game/storage";
 import { useState } from "react";
 import { checkExtrasCode } from "../../game/extras";
 import { TileRow } from "../components/TileRow";
@@ -55,6 +55,13 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
         </Group>
 
         <Group title={t("appearance")}>
+          <Row label={t("tableStyle")} hint={t(`tableStyle_${settings.tableStyle}_hint` as StringKey)} stacked>
+            <Segmented
+              value={settings.tableStyle}
+              options={TABLE_STYLES.map((st) => ({ value: st, label: t(`tableStyle_${st}` as StringKey) }))}
+              onChange={(tableStyle) => updateSettings({ tableStyle, tileset: STYLE_TILESET[tableStyle] })}
+            />
+          </Row>
           <Row label={t("tileset")} stacked>
             <Segmented
               value={settings.tileset}

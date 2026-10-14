@@ -23,9 +23,11 @@ interface TileProps {
   onClick?: () => void;
   label?: string;
   style?: CSSProperties;
+  /** Stable identity for animations (data-k attribute). */
+  dataKey?: string;
 }
 
-export function Tile({ code, back, size = "hand", selected, dimmed, highlight, sideways, marked, eligible, hint, onClick, label, style }: TileProps) {
+export function Tile({ code, back, size = "hand", selected, dimmed, highlight, sideways, marked, eligible, hint, onClick, label, style, dataKey }: TileProps) {
   const { settings } = useApp();
   const variant = settings.tileset === "dark" ? "black" : "regular";
   const classes = [
@@ -45,7 +47,7 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
     .join(" ");
 
   if (back || !code) {
-    return <span className={classes} style={style} aria-hidden="true" />;
+    return <span className={classes} style={style} aria-hidden="true" data-k={dataKey} />;
   }
 
   const t = parseTile(code);
@@ -66,6 +68,7 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
     <Tag
       className={index ? `${classes} ${styles.withIdx}` : classes}
       data-suit={t.suit}
+      data-k={dataKey}
       data-red={t.red || undefined}
       onClick={onClick}
       aria-label={label ?? code}

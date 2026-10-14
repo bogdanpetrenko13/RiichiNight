@@ -10,6 +10,7 @@
     "dock";
   overflow: hidden;
   padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  background: var(--tbl-bg);
 }
 
 /* ---- top bar: round only; counters live in the player band ------------------ */
@@ -25,9 +26,34 @@
 }
 
 .roundInfo {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.roundInfo b {
   font-size: 16px;
   font-weight: 700;
+}
+
+/* Status line ("Your turn", "Rin discards…") under the round name. */
+.roundInfo span {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  animation: statusIn var(--dur-base, 200ms) var(--ease-std) both;
+}
+
+@keyframes statusIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
 }
 
 /* ---- bands ------------------------------------------------------------------ */
@@ -36,8 +62,8 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 0 6px;
+  gap: var(--band-gap);
+  padding: 0 var(--band-pad-x);
   overflow: hidden;
 }
 
@@ -82,8 +108,9 @@
   }
 }
 
-/* ---- dock: hand, then the button row (Kemono Mahjong) ---------------------- */
+/* ---- dock: the hand (portrait); hand + buttons (landscape) ------------------ */
 .dock {
+  padding-bottom: 10px;
   grid-area: dock;
   position: relative;
   z-index: 3;
@@ -93,23 +120,6 @@
   min-width: 0;
 }
 
-.actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 60px;
-  padding: 4px 8px 8px 12px;
-}
-
-.status {
-  min-width: 0;
-  overflow: hidden;
-  font-size: 13px;
-  color: var(--ink-soft);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 /* Landscape: hand on the left, buttons stacked on the right. */
 .table[data-orientation="landscape"] .dock {
@@ -132,10 +142,7 @@
   padding: 0;
 }
 
-.table[data-orientation="landscape"] .status {
-  text-align: center;
-  white-space: normal;
-}
+
 
 /* ---- in-game menu ---------------------------------------------------------- */
 .menuList {
