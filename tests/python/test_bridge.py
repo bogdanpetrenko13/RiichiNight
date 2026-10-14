@@ -167,3 +167,62 @@ def test_without_tile_keeps_red_five():
     assert [str(t) for t in left] == ["4p", "r5p"]
     left = bridge.without_tile(hand, red)
     assert [str(t) for t in left] == ["4p", "5p"]
+
+
+def test_scenario_tsumo_wins_on_first_draw():
+    import scenarios
+
+    step = json.loads(bridge.new_game(json.dumps({"seed": 5, "scenario": "tsumo"})))
+    game = bridge._game
+    hand = sorted(str(t) for t in game.engine.get_hand(bridge.HUMAN).tiles)
+    expected = scenarios.parse(scenarios.SCENARIOS["tsumo"]["hand"])
+    for code in expected:
+        assert code in hand
+    total = sum(len(game.engine.get_hand(p).tiles) for p in range(4)) + len(game.engine._tile_set._tiles)
+    assert total == 136 - 14
+    # Discard the junk tile (if dealing) and keep cutting the drawn tile until tsumo shows up.
+    for _ in range(40):
+        view = step["view"]
+        if view["status"] == "ai":
+            step = json.loads(bridge.ai_step())
+            continue
+        if view["status"] == "round_over":
+            break
+        prompt = view["prompt"]
+        if "tsumo" in prompt["actions"]:
+            step = json.loads(bridge.act(json.dumps({"action": "tsumo"})))
+            break
+        if "discard" in prompt["actions"]:
+            tile = "1z" if "1z" in prompt["discardable"] else prompt["discardable"][-1]
+            step = json.loads(bridge.act(json.dumps({"action": "discard", "tile": tile})))
+        else:
+            step = json.loads(bridge.act(json.dumps({"action": "skip"})))
+    result = step["view"]["result"]
+    assert result and result["type"] == "win" and result["tsumo"], result
+    w = result["winners"][0]
+    assert w["seat"] == 0 and w["winTile"] == "7s"
+    keys = [p["key"] for p in w["calc"]["fuParts"]]
+    assert keys == ["base", "tsumo", "closedTriplet", "valuePair", "wait_kanchan"], keys
+    assert w["calc"]["dora"] == 3
+
+
+def test_scenario_redfive_keeps_red_in_hand():
+    step = json.loads(bridge.new_game(json.dumps({"seed": 6, "scenario": "redfive"})))
+    for _ in range(40):
+        view = step["view"]
+        if view["status"] == "ai":
+            step = json.loads(bridge.ai_step())
+            continue
+        if view["players"][0].get("drawn") == "5p":
+            break
+        prompt = view["prompt"]
+        if "discard" in prompt["actions"]:
+            step = json.loads(bridge.act(json.dumps({"action": "discard", "tile": "1z"})))
+        else:
+            step = json.loads(bridge.act(json.dumps({"action": "skip"})))
+    me = step["view"]["players"][0]
+    assert "r5p" in me["hand"], me
+    step = json.loads(bridge.act(json.dumps({"action": "discard", "tile": "5p"})))
+    me = step["view"]["players"][0]
+    assert "r5p" in me["hand"], me
+    assert me["discards"][-1] == "5p", me["discards"]

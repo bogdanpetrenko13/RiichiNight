@@ -300,7 +300,7 @@ export function useGameController(): GameController {
       const chars = castIds.map((id) => getCharacter(id)).filter((c): c is CharacterDef => Boolean(c));
       begin(chars, freshSession(chars), 0);
       await run(() =>
-        engine.newGame({ levels: chars.map((c) => c.level), rules: settingsRef.current.gameRules }),
+        engine.newGame({ levels: chars.map((c) => c.level), rules: settingsRef.current.gameRules, ...testParams() }),
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -360,4 +360,17 @@ export function useGameController(): GameController {
     sayIdle,
     skipCutaway,
   };
+}
+
+/**
+ * `?seed=N` and `?scenario=name` in the page URL (tests and previews only; the
+ * Android app never has a query string) make a new game reproducible or start
+ * it from a rigged deal (public/py/scenarios.py).
+ */
+function testParams(): { seed?: number; scenario?: string } {
+  if (typeof location === "undefined") return {};
+  const q = new URLSearchParams(location.search);
+  const seed = Number(q.get("seed"));
+  const scenario = q.get("scenario") ?? undefined;
+  return { ...(seed > 0 ? { seed } : {}), ...(scenario ? { scenario } : {}) };
 }

@@ -44,6 +44,8 @@ export interface Settings {
   tableStyle: TableStyle;
   /** Corner index on tiles: none, man + winds, or all. */
   tileHints: TileHints;
+  /** Result screen: "How it's scored" section expanded. */
+  scoreDetails?: boolean;
   theme: ThemeMode;
   styleVersion?: number;
   gameRules: GameRules;

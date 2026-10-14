@@ -6,6 +6,7 @@ import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
 import { RewardChips } from "./RewardChips";
 import { Portrait } from "./Portrait";
+import { ScoreCalc } from "./ScoreCalc";
 import styles from "./Overlay.module.css";
 
 interface RoundResultProps {
@@ -110,6 +111,15 @@ function WinBody({
       {result.winners.map((w) => {
         const yakuHan = w.yaku.reduce((sum, y) => sum + y.han, 0);
         const dora = w.yakuman ? 0 : Math.max(0, w.han - yakuHan);
+        // Dora split into dora / red fives / ura when the engine reports it.
+        const doraRows: [StringKey, number][] = w.calc
+          ? [
+              ["doraHan", w.calc.dora],
+              ["akaHan", w.calc.aka],
+              ["uraHan", w.calc.ura],
+            ]
+          : [["doraHan", dora]];
+        const payer = !result.tsumo && result.from !== null ? nameOf(result.from) : null;
         return (
           <section key={w.seat} className={styles.winner}>
             <h2 className={styles.title}>
@@ -144,10 +154,23 @@ function WinBody({
                   <span>{w.yakuman ? t("yakuman") : t("han", { n: y.han })}</span>
                 </li>
               ))}
-              {dora > 0 && (
+              {!w.yakuman &&
+                doraRows
+                  .filter(([, v]) => v > 0)
+                  .map(([key, v]) => (
+                    <li key={key}>
+                      <span>{t(key)}</span>
+                      <span>{t("han", { n: v })}</span>
+                    </li>
+                  ))}
+              {!w.yakuman && w.calc?.uraIndicators && w.calc.uraIndicators.length > 0 && (
                 <li>
-                  <span>{t("doraHan")}</span>
-                  <span>{t("han", { n: dora })}</span>
+                  <span>{t("uraIndicator")}</span>
+                  <span className={styles.calcTiles}>
+                    {w.calc.uraIndicators.map((c, i) => (
+                      <Tile key={i} code={c} size="meld" />
+                    ))}
+                  </span>
                 </li>
               )}
             </ul>
@@ -155,6 +178,7 @@ function WinBody({
               {w.yakuman ? t("yakuman") : `${t("han", { n: w.han })} · ${t("fu", { n: w.fu })}`}
               <b>{t("points", { n: w.points.toLocaleString() })}</b>
             </div>
+            <ScoreCalc winner={w} payer={payer} />
           </section>
         );
       })}

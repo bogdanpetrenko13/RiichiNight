@@ -205,3 +205,63 @@
   color: var(--ink-soft);
   font-size: 13px;
 }
+
+/* "How it's scored" (ScoreCalc.tsx). */
+.calc {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.calcToggle {
+  align-self: flex-start;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  color: var(--accent, var(--gold));
+  font: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.calcBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.calcHead {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.calcPart,
+.calcTiles {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calcPart > :global(*) {
+  --meld-tile: 18px;
+}
+
+.calcSum {
+  text-align: right;
+  font-weight: 700;
+}
+
+.calcNote {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 12px;
+}

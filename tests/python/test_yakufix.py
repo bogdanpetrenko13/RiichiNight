@@ -62,3 +62,20 @@ if __name__ == "__main__":
         if name.startswith("test_"):
             fn()
             print("PASS", name)
+
+
+def test_winning_tiles_counts_melds_and_win_tile_once():
+    from types import SimpleNamespace
+    from yakufix import winning_tiles
+
+    t = lambda code: SimpleNamespace(code=code)  # noqa: E731
+    pon = SimpleNamespace(tiles=[t("6z"), t("6z"), t("6z")])
+    # Tsumo: the drawn tile is already among the 11 closed tiles.
+    closed = [t(c) for c in ("1m", "2m", "3m", "4p", "4p", "5p", "6p", "7p", "8s", "8s", "8s")]
+    tsumo_hand = SimpleNamespace(tiles=closed, melds=[pon])
+    assert len(winning_tiles(tsumo_hand, closed[-1])) == 14
+    # Ron: 10 closed tiles + the discard + the pon.
+    ron_hand = SimpleNamespace(tiles=closed[:-1], melds=[pon])
+    tiles = winning_tiles(ron_hand, t("8s"))
+    assert len(tiles) == 14
+    assert sum(1 for x in tiles if x.code == "6z") == 3

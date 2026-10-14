@@ -10,3 +10,5 @@ android/.gradle/
 *.keystore
 .DS_Store
 !signing/debug.keystore
+test-results/
+.preview/

@@ -97,6 +97,38 @@ export interface WinnerInfo {
   /** Winning tile (drawn on tsumo, the discard on ron), shown apart. */
   winTile?: TileCode | null;
   melds: Meld[];
+  /** How the hand was scored (public/py/calcinfo.py); absent in old saves. */
+  calc?: WinCalc;
+}
+
+export interface FuPart {
+  /** base, closedRon, tsumo, closedTriplet, openTriplet, closedKan, openKan,
+   *  valuePair, wait_tanki / wait_penchan / wait_kanchan, chiitoitsu,
+   *  pinfuTsumo, pinfuRon, openMinimum */
+  key: string;
+  tile?: TileCode;
+  fu: number;
+}
+
+export interface WinCalc {
+  fuParts: FuPart[] | null;
+  fuRaw: number | null;
+  /** mangan, haneman, baiman, sanbaiman, kazoe, yakuman or null (fu × han). */
+  limit: string | null;
+  yakumanCount: number;
+  /** fu × 2^(han+2) when below mangan. */
+  base: number | null;
+  dealer: boolean;
+  /** Honba bonus in total (300 per honba) and riichi sticks collected. */
+  honba: number;
+  sticks: number;
+  /** Ron: total paid by the discarder; tsumo: per-person payments. Honba included. */
+  payments: { ron: number } | { dealer: number; nonDealer: number };
+  dora: number;
+  aka: number;
+  ura: number;
+  /** Ura indicators if the winner was in riichi, else null. */
+  uraIndicators: TileCode[] | null;
 }
 
 export interface WinResult {
@@ -169,6 +201,8 @@ export interface HumanCommand {
 
 export interface NewGameConfig {
   seed?: number;
+  /** Rigged first deal for tests (public/py/scenarios.py). */
+  scenario?: string;
   levels: Level[];
   rules?: GameRules;
 }

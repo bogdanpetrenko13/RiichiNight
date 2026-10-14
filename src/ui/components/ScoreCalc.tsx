@@ -1,0 +1,132 @@
+import type { WinCalc, WinnerInfo } from "../../engine/protocol";
+import { useApp } from "../../app/AppContext";
+import type { StringKey } from "../../i18n/strings";
+import { Tile } from "./Tile";
+import styles from "./Overlay.module.css";
+
+const n = (v: number) => v.toLocaleString();
+
+/**
+ * "How it's scored": fu parts with rounding, base points or the limit name,
+ * and who pays what (honba and riichi sticks apart). Collapsed by default;
+ * the open/closed state is remembered in settings.
+ */
+export function ScoreCalc({ winner, payer }: { winner: WinnerInfo; payer: string | null }) {
+  const { t, settings, updateSettings } = useApp();
+  const calc = winner.calc;
+  if (!calc) return null;
+  const open = settings.scoreDetails ?? false;
+  return (
+    <div className={styles.calc}>
+      <button
+        type="button"
+        className={styles.calcToggle}
+        aria-expanded={open}
+        onClick={() => updateSettings({ scoreDetails: !open })}
+      >
+        {t("calcToggle")}
+        <span aria-hidden>{open ? "▴" : "▾"}</span>
+      </button>
+      {open && <CalcBody winner={winner} calc={calc} payer={payer} />}
+    </div>
+  );
+}
+
+function CalcBody({ winner, calc, payer }: { winner: WinnerInfo; calc: WinCalc; payer: string | null }) {
+  const { t } = useApp();
+  const honbaCount = Math.round(calc.honba / 300);
+  const honbaEach = honbaCount * 100;
+  const pay = calc.payments;
+
+  return (
+    <div className={styles.calcBody}>
+      {!winner.yakuman && calc.fuParts && (
+        <>
+          <h3 className={styles.calcHead}>{t("calcFu")}</h3>
+          <ul className={styles.yaku}>
+            {calc.fuParts.map((p, i) => (
+              <li key={i}>
+                <span className={styles.calcPart}>
+                  {t(`fu_${p.key}` as StringKey)}
+                  {p.tile && <Tile code={p.tile} size="meld" />}
+                </span>
+                <span>{i === 0 ? p.fu : `+${p.fu}`}</span>
+              </li>
+            ))}
+          </ul>
+          <div className={styles.calcSum}>
+            {calc.fuRaw !== null && calc.fuRaw !== winner.fu
+              ? t("fuRounded", { raw: calc.fuRaw, n: winner.fu })
+              : t("fuTotal", { n: winner.fu })}
+          </div>
+        </>
+      )}
+
+      <h3 className={styles.calcHead}>{t("calcPoints")}</h3>
+      <ul className={styles.yaku}>
+        {calc.limit ? (
+          <li>
+            <span>
+              {t(`limit_${calc.limit}` as StringKey)}
+              {calc.yakumanCount > 1 ? ` ×${calc.yakumanCount}` : ""}
+            </span>
+            <span>{calc.limit === "yakuman" ? "" : t("han", { n: winner.han })}</span>
+          </li>
+        ) : (
+          calc.base !== null && (
+            <li>
+              <span>
+                {t("calcBase", { fu: winner.fu })}
+                <sup>
+                  {winner.han}+2
+                </sup>
+              </span>
+              <span>
+                {n(calc.base)} <small>{t("calcBaseHint")}</small>
+              </span>
+            </li>
+          )
+        )}
+
+        {"ron" in pay ? (
+          <li>
+            <span>
+              {payer ? t("calcPaidBy", { name: payer }) : t("ronWin")}
+              {calc.base !== null && <small className={styles.calcNote}>{t("calcRonMul", { k: calc.dealer ? 6 : 4 })}</small>}
+            </span>
+            <span>{n(pay.ron - calc.honba)}</span>
+          </li>
+        ) : calc.dealer ? (
+          <li>
+            <span>{t("calcTsumoEach")}</span>
+            <span>{n(pay.nonDealer - honbaEach)}</span>
+          </li>
+        ) : (
+          <>
+            <li>
+              <span>{t("calcTsumoDealer")}</span>
+              <span>{n(pay.dealer - honbaEach)}</span>
+            </li>
+            <li>
+              <span>{t("calcTsumoOthers")}</span>
+              <span>{n(pay.nonDealer - honbaEach)}</span>
+            </li>
+          </>
+        )}
+
+        {calc.honba > 0 && (
+          <li>
+            <span>{t("calcHonba", { k: honbaCount })}</span>
+            <span>+{n(calc.honba)}</span>
+          </li>
+        )}
+        {calc.sticks > 0 && (
+          <li>
+            <span>{t("calcSticks")}</span>
+            <span>+{n(calc.sticks)}</span>
+          </li>
+        )}
+      </ul>
+    </div>
+  );
+}

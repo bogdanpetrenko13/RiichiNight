@@ -58,6 +58,28 @@ jobs:
           set -o pipefail
           npm run build 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
+      # Browser tests on the built app: rigged deals (?scenario=), seeded games,
+      # layout screenshots in portrait / landscape and both table styles.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - id: e2e
+        name: Browser tests (Playwright)
+        run: |
+          set -o pipefail
+          pip install pytest playwright 2>&1 | tail -1
+          python -m playwright install --with-deps chromium > /dev/null
+          E2E_DIST=dist python -m pytest tests/e2e -q 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: test-results/e2e/*.png
+          if-no-files-found: ignore
+
       - id: java
         uses: actions/setup-java@v5
         with:

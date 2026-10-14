@@ -23,11 +23,14 @@ from pyriichi.player import PublicInfo  # noqa: F401  (kept for future AI varian
 
 import fastpatch
 import yakufix
+import calcinfo
+import scenarios
 import rules as game_rules
 from ai import Brain, tile_index
 
 fastpatch.apply()
 yakufix.apply()
+calcinfo.apply()
 game_rules.apply_patches()
 
 SAVE_VERSION = 1
@@ -111,12 +114,15 @@ class Game:
         self.events: List[dict] = []
         self.round_index = 0
         self.game_end_emitted = False
+        self.scenario = config.get("scenario") or None
         self._start_round()
 
     # ---------------------------------------------------------------- rounds
     def _start_round(self) -> None:
         self.engine.start_round()
         self.engine.deal()
+        if self.scenario and self.round_index == 0:
+            scenarios.rig(self.engine, self.scenario)
         self.round_result = None
         self.round_index += 1
         self.round_start_scores = list(self.engine.game_state.scores)
@@ -250,6 +256,7 @@ class Game:
                     "hand": [tstr(t) for t in sorted(concealed, key=tile_sort_key)],
                     "winTile": tstr(win_tile),
                     "melds": self._melds(seat),
+                    "calc": calcinfo.describe(self.engine, seat, wr, win_tile),
                 }
             )
         seats = [w["seat"] for w in winners]
