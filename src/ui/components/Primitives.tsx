@@ -2,6 +2,7 @@
 // control, settings row and bottom sheet.
 import { useEffect, type ReactNode } from "react";
 import { Icon } from "../icons";
+import { useApp } from "../../app/AppContext";
 import styles from "./Primitives.module.css";
 
 export function AppBar({
@@ -13,10 +14,11 @@ export function AppBar({
   onBack?: () => void;
   right?: ReactNode;
 }) {
+  const { t } = useApp();
   return (
     <header className={styles.appBar}>
       {onBack ? (
-        <button className={styles.iconBtn} onClick={onBack} aria-label="back">
+        <button className={styles.iconBtn} onClick={onBack} aria-label={t("back")}>
           <Icon name="back" />
         </button>
       ) : (

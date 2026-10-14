@@ -189,7 +189,12 @@
   min-height: 0;
 }
 
-/* Riichi stick: its own line in front of the discards. */
+/* Riichi stick: its own line in front of the discards. Reserved from the
+   start of the hand (invisible), so declaring riichi does not move the river. */
+.riichiLine[data-empty] {
+  visibility: hidden;
+}
+
 .riichiLine {
   flex-basis: 100%;
   display: flex;

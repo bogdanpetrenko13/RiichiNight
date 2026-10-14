@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ActionName, CallKind, TileCode } from "../../engine/protocol";
 import { CUTAWAY_MS, type GameController } from "../../game/useGameController";
 import type { CharacterDef } from "../../game/characters";
@@ -45,6 +45,9 @@ function scenesFor(changes: StageChange[], cast: CharacterDef[]): Scene[] {
   return out;
 }
 
+/** The deal that already played its animation (survives leaving the table). */
+let dealtKey = "";
+
 export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const { t, settings } = useApp();
   const layout = useLayout();
@@ -89,15 +92,22 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
     setChiFirst(null);
   }, [promptKey]);
 
-  // Tiles fly in for a moment after each new deal.
+  // Tiles fly in for a moment after each new deal: once per deal (not again
+  // when the table is re-opened from the tutorial or settings), and set
+  // before the first paint so the finished hand never flashes first.
   const roundIndex = view?.round.index ?? 0;
+  const dealKey = view ? `${view.seed}:${roundIndex}` : "";
+  const freshDeal = Boolean(view && view.players[0].discards.length === 0 && view.players.every((p) => p.discards.length === 0));
   const [dealing, setDealing] = useState(false);
-  useEffect(() => {
-    if (!settings.dealAnimation || !roundIndex) return;
+  useLayoutEffect(() => {
+    if (!settings.dealAnimation || !roundIndex || !dealKey || dealtKey === dealKey) return;
+    dealtKey = dealKey;
+    if (!freshDeal) return;
     setDealing(true);
     const timer = window.setTimeout(() => setDealing(false), 1100);
     return () => window.clearTimeout(timer);
-  }, [roundIndex, settings.dealAnimation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dealKey, settings.dealAnimation]);
 
   // In riichi the only legal move is discarding the drawn tile: do it for the player.
   const onlyDiscard =

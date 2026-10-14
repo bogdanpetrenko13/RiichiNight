@@ -2,6 +2,7 @@
 that does not sway on draw / discard, and no transforms left behind."""
 
 import math
+import re
 import os
 
 from conftest import PORTRAIT
@@ -138,3 +139,35 @@ def test_no_transforms_left_after_animations(make_app):
         bad = [b for b in bad if b[0] != "running"]
         assert bad == [], bad
     assert not app.errors, app.errors
+
+
+def test_returning_from_tutorial_does_not_replay_the_deal(make_app):
+    app = make_app(PORTRAIT).open("?seed=53", {"aiDelay": 300, "dealAnimation": True}).start_game()
+    # A real new deal does animate.
+    assert app.page.locator("[data-dealing]").count() == 1, "no deal animation on a new hand"
+    play(app, 2)
+    app.page.get_by_role("button", name="Яку").click()
+    app.page.get_by_role("button", name=re.compile("^(Назад|back)$")).first.click()
+    app.page.locator("[class*=dock] [data-k]").first.wait_for(state="attached")
+    # Sample the first frames after the table is back: no deal animation.
+    seen = app.page.evaluate(
+        """() => new Promise((done) => {
+          let dealing = false, frames = 0;
+          const tick = () => {
+            if (document.querySelector('[data-dealing]')) dealing = true;
+            if (++frames < 40) requestAnimationFrame(tick); else done(dealing);
+          };
+          tick();
+        })"""
+    )
+    assert seen is False, "the deal animation replayed after returning from the tutorial"
+    assert not app.errors, app.errors
+
+
+def test_riichi_stick_space_is_reserved(make_app):
+    """Every river has its (hidden) riichi stick line from the first discard,
+    so a riichi declaration does not push the river down."""
+    app = make_app(PORTRAIT).open("?seed=41", {"aiDelay": 300}).start_game()
+    play(app, 1)
+    lines = app.page.locator("[class*=river] > [class*=riichiLine]")
+    assert lines.count() == 4, lines.count()

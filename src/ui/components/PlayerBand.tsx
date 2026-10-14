@@ -80,11 +80,11 @@ export function PlayerBand({
         ref={riverRef}
         style={{ ["--river-cols" as string]: riverCols }}
       >
-        {me.riichi && (
-          <div className={styles.riichiLine}>
-            <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
-          </div>
-        )}
+        {/* The stick's line is always there (hidden until riichi), so the river
+            does not jump down when she declares. */}
+        <div className={styles.riichiLine} data-empty={!me.riichi || undefined} aria-hidden={!me.riichi || undefined}>
+          <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
+        </div>
         {me.discards.map((code, i) => (
           <Tile key={`${i}-${code}`} code={code} size="river" sideways={me.riichiIndex === i} />
         ))}

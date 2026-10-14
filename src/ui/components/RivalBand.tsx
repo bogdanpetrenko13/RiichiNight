@@ -133,11 +133,11 @@ export function RivalBand({ character, player, stage, emotion, callout, speech, 
         style={{ ["--river-cols" as string]: riverCols }}
       >
         {/* Riichi: a 1 000 stick laid in front of the river, as on a real table. */}
-        {player.riichi && (
-          <div className={styles.riichiLine}>
-            <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
-          </div>
-        )}
+        {/* The stick's line is always there (hidden until riichi), so the river
+            does not jump down when she declares. */}
+        <div className={styles.riichiLine} data-empty={!player.riichi || undefined} aria-hidden={!player.riichi || undefined}>
+          <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
+        </div>
         {player.discards.map((code, i) => (
           <Tile
             key={`${i}-${code}`}
