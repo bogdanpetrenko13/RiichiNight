@@ -11,6 +11,7 @@ const n = (v: number) => v.toLocaleString();
  * and who pays what (honba and riichi sticks apart). Collapsed by default;
  * the open/closed state is remembered in settings.
  */
+/** payer: the discarder's name on ron (null on tsumo), "you" for the player. */
 export function ScoreCalc({ winner, payer }: { winner: WinnerInfo; payer: string | null }) {
   const { t, settings, updateSettings } = useApp();
   const calc = winner.calc;
@@ -91,7 +92,7 @@ function CalcBody({ winner, calc, payer }: { winner: WinnerInfo; calc: WinCalc; 
         {"ron" in pay ? (
           <li>
             <span>
-              {payer ? t("calcPaidBy", { name: payer }) : t("ronWin")}
+              {payer === "you" ? t("calcPaidByYou") : payer ? t("calcPaidBy", { name: payer }) : t("ronWin")}
               {calc.base !== null && <small className={styles.calcNote}>{t("calcRonMul", { k: calc.dealer ? 6 : 4 })}</small>}
             </span>
             <span>{n(pay.ron - calc.honba)}</span>

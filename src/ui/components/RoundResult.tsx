@@ -119,7 +119,7 @@ function WinBody({
               ["uraHan", w.calc.ura],
             ]
           : [["doraHan", dora]];
-        const payer = !result.tsumo && result.from !== null ? nameOf(result.from) : null;
+        const payer = !result.tsumo && result.from !== null ? (result.from === 0 ? "you" : nameOf(result.from)) : null;
         return (
           <section key={w.seat} className={styles.winner}>
             <h2 className={styles.title}>
