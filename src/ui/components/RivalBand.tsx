@@ -68,7 +68,7 @@ export function RivalBand({ character, player, stage, emotion, callout, speech, 
         {/* Riichi: a 1 000 stick laid in front of the river, as on a real table. */}
         {player.riichi && (
           <div className={styles.riichiLine}>
-            <Tenbo kind="1000" width="calc(var(--river-tile) * 3.4)" />
+            <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
           </div>
         )}
         {player.discards.map((code, i) => (

@@ -48,7 +48,7 @@ export function PlayerBand({ view, active }: { view: GameView; active: boolean }
       <div className={styles.river} data-rows={Math.ceil(me.discards.length / 6)}>
         {me.riichi && (
           <div className={styles.riichiLine}>
-            <Tenbo kind="1000" width="calc(var(--river-tile) * 3.4)" />
+            <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
           </div>
         )}
         {me.discards.map((code, i) => (

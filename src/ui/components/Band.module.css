@@ -190,9 +190,9 @@
 .riichiLine {
   flex-basis: 100%;
   display: flex;
-  justify-content: center;
-  max-width: calc(var(--river-tile) * 6 + 5px);
-  padding-bottom: calc(var(--river-tile) * 0.08);
+  justify-content: flex-start;
+  padding: 0 0 calc(var(--river-tile) * 0.1) 1px;
+  opacity: 0.92;
   animation: none !important;
 }
 

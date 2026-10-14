@@ -82,7 +82,7 @@ export function bandVars(orientation: Layout["orientation"], areaW: number, area
   if (areaW <= 0 || areaH <= 0) return {};
   // One river row: tile + 3D edge + row gap; the riichi stick line ≈ half a tile.
   const rowH = TILE_RATIO + 0.16;
-  const rows = 3 * rowH + 0.55;
+  const rows = 3 * rowH + 0.38;
   if (orientation === "landscape") {
     const colW = (areaW - 12 - 3 * GAP) / 4;
     const colH = areaH - 4;

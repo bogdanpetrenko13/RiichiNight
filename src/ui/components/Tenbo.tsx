@@ -36,8 +36,8 @@ export function Tenbo({ kind, width = 64, className }: { kind: TenboKind; width?
     <svg
       className={className}
       viewBox={`0 0 ${w} ${h}`}
-      width={width}
-      style={{ aspectRatio: `${w} / ${h}`, height: "auto", display: "block", flex: "none" }}
+      // Width goes through CSS: the SVG width attribute does not accept calc().
+      style={{ width, aspectRatio: `${w} / ${h}`, height: "auto", display: "block", flex: "none" }}
       role="img"
       aria-label={`${kind}`}
     >
