@@ -123,15 +123,17 @@
 }
 
 
+/* The hand sits well above the bottom edge, where the thumb reaches it
+   (the app is full screen, so this space comes from the hidden system bars). */
 .table[data-orientation="portrait"] .dock {
-  padding: 6px 0 calc(34px + var(--safe-bottom));
+  padding: 6px 0 calc(clamp(56px, 9vh, 112px) + var(--safe-bottom));
 }
 
 /* Landscape: hand on the left, buttons stacked on the right. */
 .table[data-orientation="landscape"] .dock {
   flex-direction: row;
   align-items: flex-end;
-  padding: 0 8px 8px;
+  padding: 0 8px calc(clamp(12px, 4vh, 24px) + var(--safe-bottom));
 }
 
 .table[data-orientation="landscape"] .dock > :first-child {

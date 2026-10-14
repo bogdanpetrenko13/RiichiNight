@@ -31,6 +31,7 @@ The owner writes in Russian; reply in Russian.
 | `public/py/calcinfo.py` | Score explanation for the result screen (fu parts, dora split, payments) + open-hand ron 30 fu minimum |
 | `public/py/scenarios.py` | Rigged first deals for tests (`?scenario=tsumo`, `redfive`) |
 | `public/py/fastpatch.py` | Speed-up of pyriichi's tenpai search |
+| `resources/android/java/MainActivity.java` | Full-screen (immersive) activity, copied over the generated one by CI; the page keeps clear of the camera cutout with `env(safe-area-inset-*)` |
 | `src/engine/pyBoot.js` | `PY_MODULES`: every new Python module must be listed here |
 | `src/engine/protocol.ts` | Types of everything the bridge returns |
 | `src/game/useGameController.ts` | Game flow, cutaway banner timing, `?seed=` / `?scenario=` |
