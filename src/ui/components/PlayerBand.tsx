@@ -23,7 +23,7 @@ export function PlayerBand({
 }: {
   view: GameView;
   active: boolean;
-  /** Waits / furiten chip (under the score in portrait, below the river in landscape). */
+  /** Waits / furiten chip under the score (portrait; in landscape it sits right of the hand). */
   waits?: ReactNode;
   /** Discards per row: 9 in portrait (like the rivals), 6 in landscape. */
   riverCols?: number;
@@ -33,6 +33,8 @@ export function PlayerBand({
   // Dora indicators face up, the rest of the dead-wall row as backs (5 total).
   const hidden = Math.max(0, 5 - view.dora.length);
   const small = { ["--tw" as string]: "calc(var(--band-back, 14px) * 0.95)" };
+  // Landscape: the dora indicators are shown large, near the rivers' size.
+  const doraBig = { ["--tw" as string]: "calc(var(--band-river, 24px) * 0.85)" };
   // The newest discard flies in from the hand.
   const riverRef = useRef<HTMLDivElement>(null);
   const count = me.discards.length;
@@ -41,6 +43,31 @@ export function PlayerBand({
     if (count > lastCount.current) landDiscard(riverRef.current?.lastElementChild ?? null);
     lastCount.current = count;
   }, [count]);
+  const big = riverCols !== 9;
+  const deadWall = (
+    <div className={styles.table}>
+      <div className={styles.dora} aria-label={t("dora")}>
+        {big && <span className={styles.doraLabel}>{t("dora")}</span>}
+        {view.dora.map((d, i) => (
+          <Tile key={i} code={d} size="river" style={big ? doraBig : small} />
+        ))}
+        {Array.from({ length: hidden }, (_, i) => (
+          <Tile key={`b${i}`} back size="river" style={big ? doraBig : small} />
+        ))}
+      </div>
+      <div className={styles.counters}>
+        <span title={t("riichiSticks")}>
+          <Tenbo kind="1000" width={24} />×{view.round.riichiSticks}
+        </span>
+        <span title={t("honba", { n: view.round.honba })}>
+          <Tenbo kind="100" width={24} />×{view.round.honba}
+        </span>
+        <span title={t("wall", { n: view.wall ?? 0 })}>
+          <i className={styles.wall} />×{view.wall ?? 0}
+        </span>
+      </div>
+    </div>
+  );
   return (
     <section className={`${styles.band} ${styles.me}`} data-active={active || undefined}>
       <div className={styles.left}>
@@ -49,33 +76,14 @@ export function PlayerBand({
         </span>
         <span className={styles.score}>{me.score.toLocaleString()}</span>
         {riverCols === 9 && waits && <div className={styles.waitsSlot}>{waits}</div>}
-        <div className={styles.table}>
-          <div className={styles.dora} aria-label={t("dora")}>
-            {view.dora.map((d, i) => (
-              <Tile key={i} code={d} size="river" style={small} />
-            ))}
-            {Array.from({ length: hidden }, (_, i) => (
-              <Tile key={`b${i}`} back size="river" style={small} />
-            ))}
-          </div>
-          <div className={styles.counters}>
-            <span title={t("riichiSticks")}>
-              <Tenbo kind="1000" width={24} />×{view.round.riichiSticks}
-            </span>
-            <span title={t("honba", { n: view.round.honba })}>
-              <Tenbo kind="100" width={24} />×{view.round.honba}
-            </span>
-            <span title={t("wall", { n: view.wall ?? 0 })}>
-              <i className={styles.wall} />×{view.wall ?? 0}
-            </span>
-          </div>
-        </div>
+        {riverCols === 9 && deadWall}
+        {riverCols !== 9 && waits && <div className={styles.waitsHead}>{waits}</div>}
       </div>
       <div
         className={styles.river}
         data-rows={Math.ceil(me.discards.length / riverCols)}
-        // Same shrink rule as the rivals: a third row of 9 makes the tiles smaller.
-        data-over={riverCols === 9 ? Math.max(0, Math.ceil(me.discards.length / 9) - 2) || undefined : undefined}
+        // Same shrink rule as the rivals (portrait: a third row of 9; landscape: a fourth of 6).
+        data-over={Math.max(0, Math.ceil(me.discards.length / riverCols) - (riverCols === 9 ? 2 : 3)) || undefined}
         data-flight
         ref={riverRef}
         style={{ ["--river-cols" as string]: riverCols }}
@@ -89,7 +97,8 @@ export function PlayerBand({
           <Tile key={`${i}-${code}`} code={code} size="river" sideways={me.riichiIndex === i} />
         ))}
       </div>
-      {riverCols !== 9 && waits && <div className={styles.side}>{waits}</div>}
+      {/* Landscape: dora + counters where the rivals have their closed hand. */}
+      {riverCols !== 9 && <div className={styles.meLower}>{deadWall}</div>}
     </section>
   );
 }

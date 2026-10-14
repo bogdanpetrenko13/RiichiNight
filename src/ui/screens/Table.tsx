@@ -199,7 +199,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
     />
   );
   const waitsChip = (
-    <WaitsChip player={me} prompt={prompt} selectedCode={selectedTile} riichiMode={riichiMode} />
+    <WaitsChip player={me} prompt={prompt} selectedCode={selectedTile} riichiMode={riichiMode} inline={!portrait} />
   );
 
   const showRound =
@@ -245,7 +245,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
         <PlayerBand
           view={view}
           active={view.current === 0 && view.status === "human"}
-          waits={waitsChip}
+          waits={portrait ? waitsChip : undefined}
           riverCols={portrait ? 9 : 6}
         />
       </div>
@@ -281,7 +281,11 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
         />
         {/* Portrait: a reserved row under the hand (the hand never moves when
             buttons appear); landscape: a column to its right. */}
-        <div className={portrait ? styles.actionsRow : styles.actions}>{actionBar}</div>
+        <div className={portrait ? styles.actionsRow : styles.actions}>
+          {actionBar}
+          {/* Landscape: waits / furiten above the buttons (column-reverse). */}
+          {!portrait && waitsChip}
+        </div>
       </div>
 
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title={t("menu")}>

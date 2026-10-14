@@ -151,6 +151,8 @@
 }
 
 .table[data-orientation="landscape"] .actions {
+  display: flex;
+  gap: 6px;
   flex-direction: column-reverse;
   align-items: stretch;
   justify-content: flex-start;

@@ -90,7 +90,10 @@ export function bandVars(orientation: Layout["orientation"], areaW: number, area
     const header = 54;
     const back = clamp((colW - 20) / 14.5, 9, 16);
     const byH = (colH - header - back * TILE_RATIO - 28) / rows;
-    const river = clamp(Math.min((colW - 18) / 6.6, byH), 14, 40);
+    // The player's column has the large dora row (0.85 river) + counters
+    // (~16 px) at the bottom instead of a closed hand: same river size for all.
+    const byHMe = (colH - header - 16 - 28) / (rows + 0.85 * TILE_RATIO);
+    const river = clamp(Math.min((colW - 18) / 6.6, byH, byHMe), 14, 40);
     return { ["--band-river" as string]: px(river), ["--band-back" as string]: px(back) };
   }
   const bandH = (areaH - 3 * GAP) / 4;

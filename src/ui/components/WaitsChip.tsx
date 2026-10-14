@@ -10,6 +10,8 @@ interface WaitsChipProps {
   /** Tile lifted in the hand: shows what discarding it would wait on. */
   selectedCode: TileCode | null;
   riichiMode: boolean;
+  /** One line (caption and tiles side by side), for the landscape header. */
+  inline?: boolean;
 }
 
 function findHint(prompt: Prompt | null | undefined, code: TileCode) {
@@ -22,9 +24,9 @@ function findHint(prompt: Prompt | null | undefined, code: TileCode) {
  * Waits / furiten indicator (top right of the player's band). Shows the waits
  * after discarding the lifted tile, otherwise the current waits while tenpai.
  */
-export function WaitsChip({ player, prompt, selectedCode, riichiMode }: WaitsChipProps) {
+export function WaitsChip({ player, prompt, selectedCode, riichiMode, inline = false }: WaitsChipProps) {
   const { t, settings } = useApp();
-  if (riichiMode) return <div className={styles.chip}>{t("chooseRiichiTile")}</div>;
+  if (riichiMode) return <div className={styles.chip} data-inline={inline || undefined}>{t("chooseRiichiTile")}</div>;
   const selectedHint = selectedCode && settings.showWaitHints ? findHint(prompt, selectedCode) : null;
   const standing =
     !selectedHint && player.waits?.length
@@ -32,10 +34,10 @@ export function WaitsChip({ player, prompt, selectedCode, riichiMode }: WaitsChi
       : null;
   const hint = selectedHint ?? standing;
   if (!hint) {
-    return player.furiten ? <div className={styles.chip} data-furiten>{t("furiten")}</div> : null;
+    return player.furiten ? <div className={styles.chip} data-furiten data-inline={inline || undefined}>{t("furiten")}</div> : null;
   }
   return (
-    <div className={styles.chip} data-furiten={hint.furiten || undefined} aria-live="polite">
+    <div className={styles.chip} data-furiten={hint.furiten || undefined} data-inline={inline || undefined} aria-live="polite">
       <span className={styles.label}>{hint.furiten ? t("furiten") : t("waits")}</span>
       <span className={styles.list}>
         {hint.waits.map((w) => (

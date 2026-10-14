@@ -21,6 +21,12 @@
   color: var(--on-danger);
 }
 
+.chip[data-inline] {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
 .label {
   white-space: nowrap;
 }

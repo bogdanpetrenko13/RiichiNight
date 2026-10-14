@@ -216,10 +216,7 @@
 }
 
 /* Player in landscape (6 per row): four rows are planned; a fifth shrinks. */
-:global([data-orientation="landscape"]) .me .river[data-rows="5"],
-:global([data-orientation="landscape"]) .me .river[data-rows="6"] {
-  --river-tile: calc(var(--me-river, 24px) * 0.8);
-}
+
 
 
 
@@ -398,22 +395,48 @@
 }
 
 :global([data-orientation="landscape"]) .me .left {
-  grid-template-columns: auto 1fr;
+  /* Same height as a rival's header (portrait), so all rivers start on one line. */
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--band-portrait, 46px);
 }
 
 :global([data-orientation="landscape"]) .me {
-  --river-tile: var(--me-river, var(--band-river, 24px));
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr) auto;
   grid-template-areas:
     "left"
     "river"
-    "side";
+    "lower";
 }
 
-:global([data-orientation="landscape"]) .me .table {
-  grid-column: 1 / -1;
+/* Landscape: dora (large) and counters at the bottom, level with the rivals'
+   closed hands. */
+.meLower {
+  grid-area: lower;
+  min-width: 0;
+}
+
+.meLower .table {
   margin-top: 0;
+  gap: 4px;
+}
+
+.meLower .dora {
+  align-items: center;
+  gap: 2px;
+}
+
+.doraLabel {
+  margin-right: 6px;
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 :global([data-orientation="landscape"]) .lower {
