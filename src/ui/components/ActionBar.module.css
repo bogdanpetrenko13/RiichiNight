@@ -1,5 +1,5 @@
-/* Action buttons. Portrait: a column in the player band (2×2 grid for four
-   buttons). Landscape: a column to the right of the hand. Look comes from the
+/* Action buttons. Portrait: one row under the hand (data-row). Landscape: a
+   column to the right of the hand (2×2 grid for four or five buttons). Look comes from the
    table style tokens (tokens.css). */
 .bar {
   display: flex;
@@ -13,6 +13,27 @@
 .bar[data-count="5"] {
   display: grid;
   grid-template-columns: 1fr 1fr;
+}
+
+/* Portrait: a row of equal buttons under the hand, in thumb reach. */
+.bar[data-row] {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.bar[data-row] > .action {
+  flex: 1 1 0;
+  max-width: 190px;
+  min-height: 46px;
+}
+
+.bar[data-row] > .label {
+  flex: 1 1 auto;
+  text-align: left;
 }
 
 @keyframes barIn {

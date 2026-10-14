@@ -210,9 +210,9 @@
   --river-tile: calc(var(--band-river, 24px) * 0.53);
 }
 
-/* Player: four rows of 6 are planned; a fifth row shrinks. */
-.me .river[data-rows="5"],
-.me .river[data-rows="6"] {
+/* Player in landscape (6 per row): four rows are planned; a fifth shrinks. */
+:global([data-orientation="landscape"]) .me .river[data-rows="5"],
+:global([data-orientation="landscape"]) .me .river[data-rows="6"] {
   --river-tile: calc(var(--me-river, 24px) * 0.8);
 }
 
@@ -316,11 +316,19 @@
 
 /* Player band: dead wall + counters in the left part, river in the middle,
    waits and the action buttons in a side column on the right (portrait). */
+/* Portrait: like a rival band without the closed hand: the river has the
+   rivals' tile size and left edge (9 per row). */
 .me {
-  --river-tile: var(--me-river, var(--band-river, 24px));
-  grid-template-columns: var(--band-left, 104px) minmax(0, 1fr) var(--band-side, 104px);
-  grid-template-areas: "left river side";
+  --river-tile: var(--band-river, 24px);
+  grid-template-columns: var(--band-left, 104px) minmax(0, 1fr);
+  grid-template-areas: "left river";
   grid-template-rows: minmax(0, 1fr);
+}
+
+/* Waits / furiten under the score. */
+.waitsSlot {
+  width: 100%;
+  margin-top: 4px;
 }
 
 .side {
@@ -329,10 +337,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-.actions {
-  margin-top: auto;
 }
 
 /* The player's discards fly in from the hand (motion.ts) instead of dropping. */

@@ -40,7 +40,7 @@ export function WaitsChip({ player, prompt, selectedCode, riichiMode }: WaitsChi
       <span className={styles.list}>
         {hint.waits.map((w) => (
           <span key={w.tile} className={styles.wait}>
-            <Tile code={w.tile} size="mini" style={{ ["--tw" as string]: "15px" }} />
+            <Tile code={w.tile} size="mini" style={{ ["--tw" as string]: "18px" }} />
             {w.remaining >= 0 && <small>×{w.remaining}</small>}
           </span>
         ))}

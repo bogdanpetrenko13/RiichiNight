@@ -11,6 +11,12 @@ def test_tsumo_result_shows_score_breakdown(make_app):
     if app.page.locator("[class*=dock] button[aria-label='1z']").count():
         app.discard("1z")  # the player deals: cut the junk tile first
     app.button("Цумо").first.wait_for(timeout=60_000)
+    app.page.wait_for_timeout(400)
+    # Buttons sit in a row under the hand and are never clipped.
+    assert app.in_viewport("button:has-text('Цумо')")
+    box = app.page.locator("button:has-text('Цумо')").first.bounding_box()
+    hand = app.page.locator("[class*=dock] [data-k]").first.bounding_box()
+    assert box["y"] > hand["y"] + hand["height"] - 1, (box, hand)
     app.button("Цумо").first.click()
     panel = app.page.get_by_role("button", name="Как посчитано")
     panel.wait_for(timeout=30_000)

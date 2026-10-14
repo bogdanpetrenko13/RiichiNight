@@ -126,7 +126,16 @@
 /* The hand sits well above the bottom edge, where the thumb reaches it
    (the app is full screen, so this space comes from the hidden system bars). */
 .table[data-orientation="portrait"] .dock {
-  padding: 6px 0 calc(clamp(56px, 9vh, 112px) + var(--safe-bottom));
+  padding: 6px 0 calc(8px + var(--safe-bottom));
+}
+
+/* Portrait: action buttons in one row under the hand. The row's height is
+   reserved, so the hand stays put (and in thumb reach) when buttons appear. */
+.actionsRow {
+  min-height: clamp(48px, 8vh, 104px);
+  display: flex;
+  align-items: center;
+  padding: 6px 12px 0;
 }
 
 /* Landscape: hand on the left, buttons stacked on the right. */

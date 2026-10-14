@@ -185,6 +185,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
         setRiichiMode(on);
       }}
       onChiPicker={setChiPicker}
+      row={portrait}
     />
   );
   const waitsChip = (
@@ -235,7 +236,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
           view={view}
           active={view.current === 0 && view.status === "human"}
           waits={waitsChip}
-          actions={portrait ? actionBar : undefined}
+          riverCols={portrait ? 9 : 6}
         />
       </div>
 
@@ -268,7 +269,9 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
             else if (matches.length > 1) setChiFirst(i);
           }}
         />
-        {!portrait && <div className={styles.actions}>{actionBar}</div>}
+        {/* Portrait: a reserved row under the hand (the hand never moves when
+            buttons appear); landscape: a column to its right. */}
+        <div className={portrait ? styles.actionsRow : styles.actions}>{actionBar}</div>
       </div>
 
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title={t("menu")}>

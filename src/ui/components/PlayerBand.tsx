@@ -9,22 +9,24 @@ import { Tenbo } from "./Tenbo";
 import styles from "./Band.module.css";
 
 /**
- * The player's band: wind and score, then the dead wall with the dora
- * indicators and the table counters (riichi sticks, honba, tiles left in the
- * wall); the player's river on the right. The hand itself sits below.
+ * The player's band: wind and score, the waits / furiten chip, then the dead
+ * wall with the dora indicators and the table counters (riichi sticks, honba,
+ * tiles left in the wall); the player's river on the right, the same size and
+ * 9 per row like the rivals' rivers in portrait. The hand and the action
+ * buttons sit below the band (Table.tsx).
  */
 export function PlayerBand({
   view,
   active,
   waits,
-  actions,
+  riverCols = 6,
 }: {
   view: GameView;
   active: boolean;
-  /** Waits / furiten chip, top right of the band. */
+  /** Waits / furiten chip (under the score in portrait, below the river in landscape). */
   waits?: ReactNode;
-  /** Action buttons, bottom right of the band (portrait). */
-  actions?: ReactNode;
+  /** Discards per row: 9 in portrait (like the rivals), 6 in landscape. */
+  riverCols?: number;
 }) {
   const { t } = useApp();
   const me = view.players[0];
@@ -46,6 +48,7 @@ export function PlayerBand({
           {t(`wind_${me.wind}` as StringKey)}
         </span>
         <span className={styles.score}>{me.score.toLocaleString()}</span>
+        {riverCols === 9 && waits && <div className={styles.waitsSlot}>{waits}</div>}
         <div className={styles.table}>
           <div className={styles.dora} aria-label={t("dora")}>
             {view.dora.map((d, i) => (
@@ -68,7 +71,15 @@ export function PlayerBand({
           </div>
         </div>
       </div>
-      <div className={styles.river} data-rows={Math.ceil(me.discards.length / 6)} data-flight ref={riverRef}>
+      <div
+        className={styles.river}
+        data-rows={Math.ceil(me.discards.length / riverCols)}
+        // Same shrink rule as the rivals: a third row of 9 makes the tiles smaller.
+        data-over={riverCols === 9 ? Math.max(0, Math.ceil(me.discards.length / 9) - 2) || undefined : undefined}
+        data-flight
+        ref={riverRef}
+        style={{ ["--river-cols" as string]: riverCols }}
+      >
         {me.riichi && (
           <div className={styles.riichiLine}>
             <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
@@ -78,12 +89,7 @@ export function PlayerBand({
           <Tile key={`${i}-${code}`} code={code} size="river" sideways={me.riichiIndex === i} />
         ))}
       </div>
-      {(waits || actions) && (
-        <div className={styles.side}>
-          {waits}
-          {actions && <div className={styles.actions}>{actions}</div>}
-        </div>
-      )}
+      {riverCols !== 9 && waits && <div className={styles.side}>{waits}</div>}
     </section>
   );
 }

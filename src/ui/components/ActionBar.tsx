@@ -14,6 +14,8 @@ interface ActionBarProps {
   onAction: (action: ActionName, option?: number) => void;
   onRiichiMode: (on: boolean) => void;
   onChiPicker: (on: boolean) => void;
+  /** One horizontal row (portrait, under the hand) instead of a column. */
+  row?: boolean;
 }
 
 // Wins first, then riichi, calls, abort, skip.
@@ -29,13 +31,14 @@ export function ActionBar({
   onAction,
   onRiichiMode,
   onChiPicker,
+  row = false,
 }: ActionBarProps) {
   const { t } = useApp();
   if (!prompt) return null;
 
   if (riichiMode) {
     return (
-      <div className={styles.bar}>
+      <div className={styles.bar} data-row={row || undefined}>
         <span className={styles.label}>{t("chooseRiichiTile")}</span>
         <button className={`btn ${styles.action}`} onClick={() => onRiichiMode(false)}>
           {t("cancel")}
@@ -47,7 +50,7 @@ export function ActionBar({
   // Several Chi options: the tiles are picked in the hand (highlighted there).
   if (chiPicker && prompt.chiOptions) {
     return (
-      <div className={styles.bar}>
+      <div className={styles.bar} data-row={row || undefined}>
         <span className={styles.label}>{t("chooseChiTiles")}</span>
         <button className={styles.action} data-kind="pass" onClick={() => onChiPicker(false)}>
           {t("cancel")}
@@ -61,7 +64,7 @@ export function ActionBar({
   const count = buttons.length + (canDiscard && selectedTile ? 1 : 0);
   if (!count) return null;
   return (
-    <div className={styles.bar} data-count={count}>
+    <div className={styles.bar} data-count={count} data-row={row || undefined}>
       {buttons.map((action) => {
         const kind =
           action === "tsumo" || action === "ron" ? "win" : action === "riichi" ? "riichi" : action === "pass" ? "pass" : "call";
