@@ -17,7 +17,7 @@
   /* Bands share the free height; --band-h is only used to size the tiles. */
   flex: 1 1 0;
   min-height: 0;
-  padding: 8px 8px 8px 10px;
+  padding: 10px;
   border-radius: var(--band-radius);
   background: var(--band-bg);
   border: var(--band-border);
@@ -236,10 +236,10 @@
 .lower {
   grid-area: lower;
   display: flex;
-  /* Calls that do not fit next to the closed hand move above it. */
-  flex-wrap: wrap-reverse;
+  flex-wrap: nowrap;
   align-items: flex-end;
-  justify-content: flex-end;
+  /* Left edge shared with the river: hand and river line up. */
+  justify-content: flex-start;
   gap: 6px;
   min-width: 0;
   padding-top: 4px;
@@ -263,15 +263,14 @@
   }
 }
 
-/* Her drawn tile, apart from the hand; lifts while she thinks. */
+.back {
+  display: inline-flex;
+}
+
+/* Her drawn tile, apart from the hand. */
 .drawn {
   display: inline-flex;
   margin-left: calc(var(--band-back, 14px) * 0.35);
-  transition: transform var(--dur-base) var(--ease-std);
-}
-
-.drawn[data-thinking] {
-  transform: translateY(-28%);
 }
 
 .melds {

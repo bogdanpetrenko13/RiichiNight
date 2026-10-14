@@ -227,6 +227,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
               dealer={view.round.dealer === seat}
               claimed={prompt?.claim?.from === seat ? prompt.claim.tile : null}
               riverCols={layout.orientation === "portrait" ? 9 : 6}
+              tsumogiri={game.tsumogiri[seat]}
             />
           );
         })}

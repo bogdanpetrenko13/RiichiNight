@@ -38,6 +38,7 @@ export interface GameController {
   cast: CharacterDef[];
   session: SessionStages;
   emotions: Record<number, Emotion>;
+  tsumogiri: Record<number, boolean>;
   callouts: Callout[];
   speech: Record<number, Speech>;
   cutaway: Cutaway | null;
@@ -69,6 +70,8 @@ export function useGameController(): GameController {
   const [emotions, setEmotions] = useState<Record<number, Emotion>>({});
   const [callouts, setCallouts] = useState<Callout[]>([]);
   const [speech, setSpeech] = useState<Record<number, Speech>>({});
+  /** Per seat: was the last discard the tile just drawn (tsumogiri)? */
+  const [tsumogiri, setTsumogiri] = useState<Record<number, boolean>>({});
   const [cutaway, setCutaway] = useState<Cutaway | null>(null);
   /** Re-schedules the next opponent step (after skipping a banner). */
   const [nudge, setNudge] = useState(0);
@@ -121,6 +124,9 @@ export function useGameController(): GameController {
       const result = step.view.result;
       for (const ev of step.events) {
         switch (ev.t) {
+          case "discard":
+            setTsumogiri((prev) => ({ ...prev, [ev.seat]: Boolean(ev.tsumogiri) }));
+            break;
           case "round_start":
             setEmotions({});
             setRoundChanges([]);
@@ -339,6 +345,7 @@ export function useGameController(): GameController {
     cast,
     session,
     emotions,
+    tsumogiri,
     callouts,
     speech,
     cutaway,

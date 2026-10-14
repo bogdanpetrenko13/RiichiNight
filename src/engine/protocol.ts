@@ -148,7 +148,7 @@ export interface GameView {
 export type EngineEvent =
   | { t: "round_start"; wind: Wind; number: number; honba: number; dealer: number }
   | { t: "call"; seat: number; kind: CallKind }
-  | { t: "discard"; seat: number; tile: TileCode; riichi: boolean }
+  | { t: "discard"; seat: number; tile: TileCode; riichi: boolean; tsumogiri?: boolean }
   | { t: "meld"; seat: number; kind: "pon" | "chi" | "kan"; tile: TileCode; from: number | null }
   | { t: "win"; winners: number[]; from: number | null; tsumo: boolean }
   | { t: "draw_game"; kind: string }

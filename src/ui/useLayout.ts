@@ -94,14 +94,20 @@ export function bandVars(orientation: Layout["orientation"], areaW: number, area
     return { ["--band-river" as string]: px(river), ["--band-back" as string]: px(back) };
   }
   const bandH = (areaH - 3 * GAP) / 4;
-  const field = areaW - 12 - 2 - left - 26;
+  // Band: 10 px padding on every side + 8 px between columns + 2 px border.
+  const field = areaW - 12 - 2 - left - 28;
   // The player band also holds the waits + buttons column on the right.
   const side = clamp(Math.round(areaW * 0.26), 96, 124);
   const meField = field - side - 8;
-  const back = clamp((field - 6) / 14.8, 12, 24);
-  const byH = (bandH - back * TILE_RATIO - 28) / rows;
-  // Rivals: 9 tiles per row (2 rows usually, 3 at most) across the field.
-  const river = clamp(Math.min((field - 14) / 9.6, byH), 14, 40);
+  // Rivals: 9 river tiles per row and 13 closed tiles below share one width W
+  // and one left edge (W = 9 river + 8 gaps = 13 backs + 12 gaps); the drawn
+  // tile sits right of W after a small gap.
+  const wMax = (field - 2 + (12 * 1.35) / 13) / (1 + 1.35 / 13);
+  let river = (wMax - 8) / 9;
+  let back = (9 * river + 8 - 12) / 13;
+  const byH = (bandH - 20 - back * TILE_RATIO - 10) / rows;
+  river = clamp(Math.min(river, byH), 14, 40);
+  back = (9 * river + 8 - 12) / 13;
   // Player: 6 per row next to the waits/buttons column; up to 4 rows.
   const meRiver = clamp(Math.min((meField - 4) / 6.6, (bandH - 16) / (4 * rowH + 0.38)), 14, 40);
   // Portrait under wind / score / name (~68 px of labels): never covers them.

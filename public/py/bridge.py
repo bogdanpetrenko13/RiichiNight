@@ -132,6 +132,7 @@ class Game:
     # -------------------------------------------------------------- execution
     def _exec(self, seat: int, action: GameAction, tile: Optional[Tile] = None, **kwargs):
         discarder = self.engine.get_last_discard_player()
+        drawn_before = self.engine.get_hand(seat).last_drawn_tile
         result = self.engine.execute_action(seat, action, tile, **kwargs)
         if action in CALLOUTS:
             self.events.append({"t": "call", "seat": seat, "kind": CALLOUTS[action]})
@@ -143,6 +144,8 @@ class Game:
                     "seat": seat,
                     "tile": tstr(discards[-1]) if discards else tstr(tile),
                     "riichi": action == GameAction.DECLARE_RIICHI,
+                    # The tile just drawn was thrown (tsumogiri), not one from the hand.
+                    "tsumogiri": drawn_before is not None and tile is not None and tstr(tile) == tstr(drawn_before),
                 }
             )
         if result.called_action in (GameAction.PON, GameAction.CHI, GameAction.KAN):
