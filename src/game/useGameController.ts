@@ -6,7 +6,7 @@ import { music, voice } from "./audio";
 import { getCharacter, pickLine, rivalsUnlockedBy, type CharacterDef, type Emotion, type SpeechKind } from "./characters";
 import { applyGameEnd, applyRound, freshSession, mergeUnlocks, type SessionStages, type StageChange } from "./rewards";
 import { applyEvents } from "./stats";
-import { clearGame, saveGame, type SavedGame } from "./storage";
+import { clearGame, loadGame, saveGame, type SavedGame } from "./storage";
 
 export interface Callout {
   id: number;
@@ -47,7 +47,12 @@ export interface GameController {
   /** Changes from the final placement bonus. */
   endChanges: StageChange[];
   busy: boolean;
-  error: string | null;
+  /** Engine failure: the table shows a dialog instead of a traceback. */
+  error: GameError | null;
+  /** Repeats the action that failed. */
+  retry: () => Promise<void>;
+  /** Reloads the last saved state of the match; false if there is none or it fails. */
+  recover: () => Promise<boolean>;
   start: (castIds: string[]) => Promise<void>;
   resume: (saved: SavedGame) => Promise<void>;
   act: (command: HumanCommand) => Promise<void>;
@@ -56,6 +61,21 @@ export interface GameController {
   sayIdle: () => void;
   /** Tap on the banner: hide it and continue without waiting. */
   skipCutaway: () => void;
+}
+
+export interface GameError {
+  /** Short, last line of the engine message (e.g. "RuleError: ..."). */
+  message: string;
+  /** Full message / Python traceback, for the copied report. */
+  detail: string;
+  at: number;
+}
+
+function toGameError(err: unknown): GameError {
+  const detail = err instanceof Error ? `${err.message}\n${err.stack ?? ""}` : String(err);
+  const raw = err instanceof Error ? err.message : String(err);
+  const lines = raw.split("\n").map((l) => l.trim()).filter(Boolean);
+  return { message: lines[lines.length - 1] ?? raw, detail, at: Date.now() };
 }
 
 export function useGameController(): GameController {
@@ -78,7 +98,9 @@ export function useGameController(): GameController {
   const [roundChanges, setRoundChanges] = useState<StageChange[]>([]);
   const [endChanges, setEndChanges] = useState<StageChange[]>([]);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<GameError | null>(null);
+  /** The last engine call, for "Try again". */
+  const lastOp = useRef<(() => Promise<StepResult>) | null>(null);
 
   // Refs keep async handlers consistent without stale closures.
   const castRef = useRef<CharacterDef[]>([]);
@@ -256,10 +278,12 @@ export function useGameController(): GameController {
       busyRef.current = true;
       setBusy(true);
       setError(null);
+      lastOp.current = fn;
       try {
         await handleStep(await fn());
       } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
+        console.error("[engine]", err);
+        setError(toGameError(err));
       } finally {
         busyRef.current = false;
         setBusy(false);
@@ -270,13 +294,15 @@ export function useGameController(): GameController {
 
   // Opponents move one action at a time so discards are readable.
   useEffect(() => {
-    if (!view || view.status !== "ai" || busy) return;
+    // After an engine error the opponents wait for the player's choice in the
+    // error dialog (no endless retries in the background).
+    if (!view || view.status !== "ai" || busy || error) return;
     const delay = settings.aiDelay + pauseRef.current;
     const timer = window.setTimeout(() => {
       void run(() => engine.aiStep());
     }, delay);
     return () => window.clearTimeout(timer);
-  }, [view, busy, settings.aiDelay, run, engine, nudge]);
+  }, [view, busy, error, settings.aiDelay, run, engine, nudge]);
 
   const begin = (chars: CharacterDef[], stages: SessionStages, dealIns: number) => {
     castRef.current = chars;
@@ -332,6 +358,19 @@ export function useGameController(): GameController {
     await run(() => engine.nextRound());
   }, [run, engine]);
 
+  const retry = useCallback(async () => {
+    const op = lastOp.current;
+    if (op) await run(op);
+    else setError(null);
+  }, [run]);
+
+  const recover = useCallback(async () => {
+    const saved = await loadGame();
+    if (!saved) return false;
+    await resume(saved);
+    return true;
+  }, [resume]);
+
   const sayIdle = useCallback(() => say(randomRival(), "idle"), [say]);
 
   const skipCutaway = useCallback(() => {
@@ -353,6 +392,8 @@ export function useGameController(): GameController {
     endChanges,
     busy,
     error,
+    retry,
+    recover,
     start,
     resume,
     act,

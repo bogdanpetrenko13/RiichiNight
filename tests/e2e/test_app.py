@@ -144,3 +144,63 @@ def test_landscape_result_hand_on_one_line(make_app):
     )
     assert len(tops) >= 14 and max(tops) - min(tops) <= 2, tops
     app.shot("landscape_result")
+
+
+def _inject_engine_failures(app, count):
+    """Serve bridge.py with act() failing `count` times (no hooks in the app)."""
+    patch = f"""
+
+_fail_left = [{count}]
+_real_act = act
+
+
+def act(command_json, run_ai=False):
+    if _fail_left[0]:
+        _fail_left[0] -= 1
+        raise RuntimeError("injected test failure")
+    return _real_act(command_json, run_ai)
+"""
+
+    def handle(route):
+        resp = route.fetch()
+        route.fulfill(response=resp, body=resp.text() + patch)
+
+    app.page.context.route("**/py/bridge.py", handle)
+
+
+def test_engine_error_shows_a_dialog_and_recovers(make_app):
+    app = make_app()
+    _inject_engine_failures(app, 2)
+    app.open("?seed=7", {"aiDelay": 300}).start_game()
+    for _ in range(300):
+        if app.my_turn() and not app.button("Пропуск").count():
+            break
+        app.step()
+    river_before = app.page.locator("[class*=me] [class*=river] > [aria-label]").count()
+    app.discard()
+    dialog = app.page.get_by_role("alertdialog")
+    dialog.wait_for(timeout=15_000)
+    text = dialog.inner_text()
+    assert "Что-то пошло не так" in text and "Traceback" not in text, text
+    assert "Traceback" not in app.page.locator("header").first.inner_text()
+    app.page.wait_for_timeout(500)
+    app.shot("engine_error")
+    # Details can be opened and contain the engine message for a report.
+    dialog.get_by_role("button", name="Подробности").click()
+    assert "injected test failure" in dialog.inner_text()
+    # "Try again" repeats the failed discard; the second injected failure shows the dialog again.
+    dialog.get_by_role("button", name="Повторить").click()
+    dialog.wait_for(timeout=15_000)
+    # "Continue from the last save" reloads the match; then the discard works.
+    app.page.get_by_role("button", name="Продолжить с сохранения").click()
+    app.page.get_by_role("alertdialog").wait_for(state="detached", timeout=15_000)
+    for _ in range(300):
+        if app.my_turn() and not app.button("Пропуск").count():
+            break
+        app.step()
+    app.discard()
+    app.page.wait_for_function(
+        f"() => document.querySelectorAll('[class*=me] [class*=river] > [aria-label]').length > {river_before}",
+        timeout=15_000,
+    )
+    assert app.page.get_by_role("alertdialog").count() == 0

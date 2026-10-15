@@ -14,6 +14,7 @@ import { RoundResult } from "../components/RoundResult";
 import { GameOver } from "../components/GameOver";
 import { RewardScene } from "../components/RewardScene";
 import { CallCutaway } from "../components/CallCutaway";
+import { ErrorDialog } from "../components/ErrorDialog";
 import { RivalBand } from "../components/RivalBand";
 import { PlayerBand } from "../components/PlayerBand";
 import { WaitsChip } from "../components/WaitsChip";
@@ -171,7 +172,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
 
   const claimer = prompt?.claim ? cast[prompt.claim.from - 1] : undefined;
   const statusText = error
-    ? t("engineError", { msg: error })
+    ? t("errTitle")
     : view.status === "human"
       ? claimer
         ? t("claimFrom", { name: claimer.name[settings.lang].split(" ")[0] })
@@ -310,6 +311,8 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
           <p className={styles.menuNote}>{t("savedNote")}</p>
         </div>
       </Sheet>
+
+      {error && <ErrorDialog error={error} onRetry={() => void game.retry()} onRecover={game.recover} onTitle={onTitle} />}
 
       {cutaway && <CallCutaway key={cutaway.id} cutaway={cutaway} cast={cast} onSkip={holding ? skipHold : game.skipCutaway} />}
       {holding && !cutaway && <button className={styles.skipLayer} onClick={skipHold} aria-label={t("continue")} />}

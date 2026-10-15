@@ -44,7 +44,13 @@ jobs:
         name: Install dependencies
         run: |
           set -o pipefail
-          npm install --no-audit --no-fund 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
+          # Exact versions from package-lock.json (reproducible builds); the
+          # lock file is produced by the "Refresh package-lock.json" workflow.
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
+          else
+            npm install --no-audit --no-fund 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
+          fi
 
       - id: smoke
         name: Engine inside Pyodide (full hanchan)

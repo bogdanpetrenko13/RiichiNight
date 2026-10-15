@@ -1,0 +1,33 @@
+name: Refresh package-lock.json
+
+# Run by hand (Actions -> "Refresh package-lock.json" -> Run workflow) after
+# changing dependencies in package.json: resolves them with the same Node /
+# npm as the APK build and commits package-lock.json, which the build then
+# installs exactly with `npm ci`. (Claude's container cannot reach the npm
+# registry, so the lock file is produced here.)
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Resolve dependencies
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Commit package-lock.json
+        run: |
+          if git diff --quiet --exit-code -- package-lock.json 2>/dev/null && git ls-files --error-unmatch package-lock.json >/dev/null 2>&1; then
+            echo "package-lock.json is up to date"; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "Lock dependency versions (package-lock.json)"
+          git push
