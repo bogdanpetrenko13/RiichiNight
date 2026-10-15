@@ -47,9 +47,22 @@ def game_ids(year: int) -> list:
     match = [u for u in links if str(year) in u] or links[-1:]
     if not match:
         raise RuntimeError(f"no archives on the index page: {index[:300]!r}")
-    url = urllib.parse.urljoin("https://tenhou.net/sc/raw/", match[0])
-    print(f"::notice::using {url}")
-    data = get(url)
+    name = match[0]
+    pos = index.find(name)
+    print(f"::notice::index around the link: {index[max(0, pos - 300):pos + 100]!r}")
+    print(f"::notice::base tags: {re.findall(r'<base[^>]*>', index)}")
+    data = b""
+    for base in ("https://tenhou.net/sc/raw/", "https://tenhou.net/sc/raw/dat/", "https://tenhou.net/sc/raw/zip/",
+                 "https://tenhou.net/sc/"):
+        url = urllib.parse.urljoin(base, name)
+        try:
+            data = get(url, tries=1)
+            print(f"::notice::using {url}")
+            break
+        except Exception as e:  # noqa: BLE001
+            print(f"::notice::{url}: {e}")
+    if not data:
+        raise RuntimeError("archive not found")
     ids = []
     with zipfile.ZipFile(io.BytesIO(data)) as z:
         names = sorted(z.namelist())
