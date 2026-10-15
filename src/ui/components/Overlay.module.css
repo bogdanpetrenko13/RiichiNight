@@ -69,11 +69,14 @@
   gap: 10px;
 }
 
+/* The winning hand stays on one line: tiles are sized from the panel width. */
 .hand {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 2px;
   align-items: flex-end;
+  container-type: inline-size;
+  --meld-tile: min(40px, calc((100cqw - var(--n, 14) * 2px) / var(--n, 14)));
 }
 
 /* Winning tile, apart from the hand. */

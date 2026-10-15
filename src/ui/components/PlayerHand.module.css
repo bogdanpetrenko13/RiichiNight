@@ -1,8 +1,12 @@
+/* The hand is sized from this box's real width (cqw), not the screen: in
+   full-screen landscape the camera-cutout inset and the buttons column take
+   part of the row, and the drawn tile must never slide under the buttons. */
 .wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
+  container-type: inline-size;
 }
 
 .hintRow {

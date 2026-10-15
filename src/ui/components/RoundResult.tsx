@@ -130,7 +130,14 @@ function WinBody({
                 {result.from === 0 ? t("dealtInByYou") : t("dealtInBy", { name: nameOf(result.from) })}
               </div>
             )}
-            <div className={styles.hand}>
+            <div
+              className={styles.hand}
+              style={{
+                // Tile slots on the line: hand + winning tile + calls, plus the gaps.
+                ["--n" as string]:
+                  w.hand.length + (w.winTile ? 1.25 : 0) + w.melds.reduce((n, m) => n + m.tiles.length + 0.25, 0),
+              }}
+            >
               {w.hand.map((c, i) => (
                 <Tile key={i} code={c} size="meld" />
               ))}

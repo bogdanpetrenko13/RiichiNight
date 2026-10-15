@@ -85,3 +85,62 @@ def test_first_hand_plays_to_a_result(make_app):
     app.page.wait_for_timeout(600)
     app.shot("first_result")
     assert not app.errors, app.errors
+
+
+# Landscape with a camera-cutout inset on the left, as on a phone in full screen.
+CUTOUT = "[class*=Table_table] { padding-left: 44px !important; }"
+
+
+def _rect(page, selector):
+    return page.locator(selector).first.bounding_box()
+
+
+def test_landscape_drawn_tiles_stay_in_place(make_app):
+    from conftest import LANDSCAPE
+
+    app = make_app(LANDSCAPE).open("?seed=7", {"aiDelay": 600})
+    app.page.add_style_tag(content=CUTOUT)
+    app.start_game()
+    app.page.add_style_tag(content=CUTOUT)
+    checked_me = checked_rival = 0
+    for _ in range(600):
+        if checked_me >= 2 and checked_rival >= 2:
+            break
+        # A rival holding her drawn tile: it stays inside her column.
+        drawn = app.page.locator("section [data-drawn]")
+        if drawn.count():
+            box = drawn.first.bounding_box()
+            band = drawn.first.locator("xpath=ancestor::section[1]").bounding_box()
+            if box and band:
+                assert box["x"] + box["width"] <= band["x"] + band["width"] - 2, (box, band)
+                checked_rival += 1
+        if app.my_turn() and not app.button("Пропуск").count():
+            app.page.wait_for_timeout(500)
+            tiles = app.page.locator("[class*=dock] [data-k]")
+            last = tiles.last.bounding_box()
+            actions = app.page.locator("[class*=Table_actions]").first.bounding_box()
+            assert last["x"] + last["width"] <= actions["x"] + 1, ("drawn tile under the buttons", last, actions)
+            checked_me += 1
+        if app.step() == "result":
+            break
+        app.page.wait_for_timeout(100)
+    assert checked_me >= 2 and checked_rival >= 1, (checked_me, checked_rival)
+    assert not app.errors, app.errors
+
+
+def test_landscape_result_hand_on_one_line(make_app):
+    from conftest import LANDSCAPE
+
+    app = make_app(LANDSCAPE).open("?scenario=tsumo&seed=5", {"aiDelay": 300}).start_game()
+    app.wait_my_turn()
+    if app.page.locator("[class*=dock] button[aria-label='1z']").count():
+        app.discard("1z")
+    app.button("Цумо").first.wait_for(timeout=60_000)
+    app.button("Цумо").first.click()
+    app.page.get_by_role("button", name="Как посчитано").wait_for(timeout=30_000)
+    app.page.wait_for_timeout(700)
+    tops = app.page.evaluate(
+        "() => [...document.querySelectorAll('[class*=Overlay_hand] [class*=Tile_tile]')].map(e => Math.round(e.getBoundingClientRect().bottom))"
+    )
+    assert len(tops) >= 14 and max(tops) - min(tops) <= 2, tops
+    app.shot("landscape_result")

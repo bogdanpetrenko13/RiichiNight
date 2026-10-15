@@ -88,7 +88,9 @@ export function bandVars(orientation: Layout["orientation"], areaW: number, area
     const colW = (areaW - 12 - 3 * GAP) / 4;
     const colH = areaH - 4;
     const header = 54;
-    const back = clamp((colW - 20) / 14.5, 9, 16);
+    // 13 backs (1 px gaps) + 6 px row gap + 0.35 gap + drawn tile must fit the
+    // column's content box (8 px padding each side + 1 px borders).
+    const back = clamp((colW - 18 - 18) / 14.35, 8, 16);
     const byH = (colH - header - back * TILE_RATIO - 28) / rows;
     // The player's column has the large dora row (0.85 river) + counters
     // (~16 px) at the bottom instead of a closed hand: same river size for all.

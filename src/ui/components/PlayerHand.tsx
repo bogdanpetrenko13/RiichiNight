@@ -109,7 +109,7 @@ export function PlayerHand({
       (player.melds.length ? 0.3 + meldTiles * (MELD_SCALE + 0.02) + (player.melds.length - 1) * 0.3 : 0) +
       0.2,
   );
-  const rowStyle = { ["--hand-tile" as string]: `min(var(--hand-max), calc(var(--hand-avail) / ${units.toFixed(2)}))` };
+  const rowStyle = { ["--hand-tile" as string]: `min(var(--hand-max), calc((100cqw - 4px) / ${units.toFixed(2)}))` };
 
   // FLIP: tiles that moved glide from their old place; new tiles slide in.
   const rowRef = useRef<HTMLDivElement>(null);
