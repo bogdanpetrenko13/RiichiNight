@@ -17,6 +17,7 @@ import random
 import re
 import sys
 import time
+import urllib.parse
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -40,7 +41,15 @@ def get(url: str, tries: int = 4) -> bytes:
 
 
 def game_ids(year: int) -> list:
-    data = get(f"https://tenhou.net/sc/raw/scraw{year}.zip")
+    index = get("https://tenhou.net/sc/raw/").decode("utf-8", "replace")
+    links = re.findall(r'href="([^"]+\.zip)"', index)
+    print(f"::notice::archives: {links}")
+    match = [u for u in links if str(year) in u] or links[-1:]
+    if not match:
+        raise RuntimeError(f"no archives on the index page: {index[:300]!r}")
+    url = urllib.parse.urljoin("https://tenhou.net/sc/raw/", match[0])
+    print(f"::notice::using {url}")
+    data = get(url)
     ids = []
     with zipfile.ZipFile(io.BytesIO(data)) as z:
         names = sorted(z.namelist())
