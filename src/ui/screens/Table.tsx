@@ -263,6 +263,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
           onDiscard={(tile) => act("discard", { tile })}
           onRiichi={(tile) => act("riichi", { tile })}
           dealing={dealing}
+          dealId={dealKey}
           chiMode={chiPicker ? { first: chiFirst } : null}
           onChiTile={(i) => {
             const options = prompt?.chiOptions ?? [];

@@ -171,3 +171,36 @@ def test_riichi_stick_space_is_reserved(make_app):
     play(app, 1)
     lines = app.page.locator("[class*=river] > [class*=riichiLine]")
     assert lines.count() == 4, lines.count()
+
+
+def test_next_hand_deals_in_without_a_flash(make_app):
+    """At the start of a new hand the tiles appear only through the deal
+    animation: none is visible first, the count never drops, and the deal
+    is not restarted when the tiles become tappable."""
+    app = make_app(PORTRAIT).open("?seed=11", {"aiDelay": 200, "dealAnimation": True}).start_game()
+    for _ in range(3000):
+        if app.step() == "result":
+            break
+    app.page.wait_for_timeout(800)
+    app.page.evaluate(
+        """() => { window.__f = []; const t0 = performance.now();
+          const tick = () => {
+            const tiles = [...document.querySelectorAll('[class*=dock] [data-k]')];
+            const visible = tiles.filter(e => parseFloat(getComputedStyle(e).opacity) > 0.5).length;
+            window.__f.push([tiles.slice(0, 3).map(e => e.dataset.k).join(','), tiles.length, visible]);
+            if (performance.now() - t0 < 2500) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick); }"""
+    )
+    app.page.locator("text=/Следующая раздача/").first.click()
+    app.page.wait_for_timeout(2700)
+    frames = app.page.evaluate("window.__f")
+    first_keys = frames[0][0]
+    new = [f for f in frames if f[0] != first_keys]
+    assert new, "the new hand never appeared"
+    assert new[0][2] <= 1, f"new hand visible before the deal: {new[0]}"
+    seen = 0
+    for keys, count, visible in new:
+        assert visible >= seen - 1, f"tiles vanished mid-deal: {visible} after {seen}"
+        seen = max(seen, visible)
+    assert not app.errors, app.errors

@@ -21,13 +21,17 @@ interface TileProps {
   /** Discarding it keeps tenpai: small bar under the tile. */
   hint?: boolean;
   onClick?: () => void;
+  /** Always render as a button (inactive without onClick). The hand uses it so
+   *  tiles are not re-created when they become tappable (that restarted the
+   *  deal animation). */
+  button?: boolean;
   label?: string;
   style?: CSSProperties;
   /** Stable identity for animations (data-k attribute). */
   dataKey?: string;
 }
 
-export function Tile({ code, back, size = "hand", selected, dimmed, highlight, sideways, marked, eligible, hint, onClick, label, style, dataKey }: TileProps) {
+export function Tile({ code, back, size = "hand", selected, dimmed, highlight, sideways, marked, eligible, hint, onClick, label, style, dataKey, button }: TileProps) {
   const { settings } = useApp();
   const variant = settings.tileset === "dark" ? "black" : "regular";
   const classes = [
@@ -63,7 +67,7 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
     </>
   );
 
-  const Tag = onClick ? "button" : "span";
+  const Tag = onClick || button ? "button" : "span";
   return (
     <Tag
       className={index ? `${classes} ${styles.withIdx}` : classes}
@@ -73,7 +77,9 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
       onClick={onClick}
       aria-label={label ?? code}
       style={style}
-      type={onClick ? "button" : undefined}
+      type={Tag === "button" ? "button" : undefined}
+      aria-disabled={Tag === "button" && !onClick ? true : undefined}
+      tabIndex={Tag === "button" && !onClick ? -1 : undefined}
     >
       {face}
     </Tag>

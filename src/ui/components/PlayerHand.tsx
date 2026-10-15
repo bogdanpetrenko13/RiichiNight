@@ -17,6 +17,8 @@ interface PlayerHandProps {
   onRiichi: (code: TileCode) => void;
   /** True for a moment after a new deal: tiles fly in. */
   dealing?: boolean;
+  /** Changes with every new deal (seed:round): no slide-ins for a new hand. */
+  dealId?: string;
   /** Chi with several options: pick the tiles in the hand. */
   chiMode?: { first: number | null } | null;
   onChiTile?: (index: number) => void;
@@ -37,6 +39,7 @@ export function PlayerHand({
   onDiscard,
   onRiichi,
   dealing,
+  dealId,
   chiMode,
   onChiTile,
 }: PlayerHandProps) {
@@ -114,13 +117,20 @@ export function PlayerHand({
   // FLIP: tiles that moved glide from their old place; new tiles slide in.
   const rowRef = useRef<HTMLDivElement>(null);
   const prev = useRef<Map<string, { x: number; y: number }>>(new Map());
+  const prevDeal = useRef(dealId);
   useLayoutEffect(() => {
     const row = rowRef.current;
     if (!row) return;
     const next = new Map<string, { x: number; y: number }>();
     const nodes = Array.from(row.querySelectorAll<HTMLElement>("[data-k]"));
     for (const n of nodes) next.set(n.dataset.k!, { x: n.offsetLeft, y: n.offsetTop });
-    if (!dealing && prev.current.size) {
+    // A new deal (dealId changed):
+    // the deal animation shows it, so no slide-ins here. This effect runs
+    // before the table switches `dealing` on, and its slide-ins used to show
+    // the whole hand for a moment before the deal started.
+    const newDeal = dealId !== prevDeal.current;
+    prevDeal.current = dealId;
+    if (!dealing && !newDeal && prev.current.size) {
       for (const n of nodes) {
         const old = prev.current.get(n.dataset.k!);
         const now = next.get(n.dataset.k!)!;
@@ -174,9 +184,11 @@ export function PlayerHand({
                 eligible={pick === true}
                 hint={pick === null && showsWait}
                 onClick={canDiscard || riichiMode || chiMode ? () => tap(i) : undefined}
+                button
                 style={{
                   ...(isDrawn ? { marginLeft: "calc(var(--hand-tile) * 0.3)" } : null),
-                  ...(dealing ? { animationDelay: `${i * 40}ms` } : null),
+                  // The drawn tile may arrive mid-deal: it flies in at once.
+                  ...(dealing ? { animationDelay: isDrawn ? "0ms" : `${i * 40}ms` } : null),
                 }}
               />
             );
