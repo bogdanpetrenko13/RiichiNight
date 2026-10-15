@@ -43,7 +43,9 @@ def game_ids(year: int) -> list:
     data = get(f"https://tenhou.net/sc/raw/scraw{year}.zip")
     ids = []
     with zipfile.ZipFile(io.BytesIO(data)) as z:
-        for name in sorted(z.namelist()):
+        names = sorted(z.namelist())
+        print(f"::notice::archive {len(data)} bytes, {len(names)} files, e.g. {names[:3]}")
+        for name in names:
             if not name.split("/")[-1].startswith("scc"):
                 continue
             raw = z.read(name)
@@ -101,4 +103,14 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit:
+        raise
+    except BaseException:  # noqa: BLE001
+        import traceback
+
+        # Job logs are not readable from Claude's container; annotations are.
+        for line in traceback.format_exc().strip().splitlines()[-6:]:
+            print(f"::error::{line.strip()}")
+        sys.exit(1)
