@@ -1,0 +1,37 @@
+name: Fetch Tenhou logs
+
+# Run by hand: downloads a sample of Tenhou phoenix-room games (player names
+# removed) for the rules tests in tests/python/test_tenhou.py and commits it.
+# Claude's container cannot reach tenhou.net, so the download happens here.
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: Archive year
+        default: "2024"
+      count:
+        description: Number of games
+        default: "300"
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download logs
+        run: python scripts/tenhou/fetch_logs.py --year "${{ inputs.year }}" --count "${{ inputs.count }}"
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/python/data/tenhou/phoenix.jsonl.gz
+          git diff --cached --quiet && { echo "no changes"; exit 0; }
+          git commit -m "Tenhou phoenix logs for the rules tests"
+          git pull --rebase
+          git push
