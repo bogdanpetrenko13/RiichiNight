@@ -11,7 +11,6 @@ one {"id": ..., "xml": ...} object per line.
 
 import argparse
 import gzip
-import io
 import json
 import random
 import re
@@ -19,7 +18,6 @@ import sys
 import time
 import urllib.parse
 import urllib.request
-import zipfile
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parents[2] / "tests/python/data/tenhou/phoenix.jsonl.gz"
@@ -41,41 +39,33 @@ def get(url: str, tries: int = 4) -> bytes:
 
 
 def game_ids(year: int) -> list:
+    """Phoenix games of the last days (the daily lists on Tenhou's raw page).
+
+    The yearly archives (scrawYYYY.zip, ~450 MB) are not downloadable by
+    scripts; the daily lists are."""
     index = get("https://tenhou.net/sc/raw/").decode("utf-8", "replace")
-    links = re.findall(r'href="([^"]+\.zip)"', index)
-    print(f"::notice::archives: {links}")
-    match = [u for u in links if str(year) in u] or links[-1:]
-    if not match:
-        raise RuntimeError(f"no archives on the index page: {index[:300]!r}")
-    name = match[0]
-    pos = index.find(name)
-    print(f"::notice::index around the link: {index[max(0, pos - 300):pos + 100]!r}")
-    print(f"::notice::base tags: {re.findall(r'<base[^>]*>', index)}")
-    data = b""
-    for base in ("https://tenhou.net/sc/raw/", "https://tenhou.net/sc/raw/dat/", "https://tenhou.net/sc/raw/zip/",
-                 "https://tenhou.net/sc/"):
-        url = urllib.parse.urljoin(base, name)
+    links = sorted(set(re.findall(r'(?:href|file)="?([^" >]*scc\d+\.html(?:\.gz)?)', index)))
+    if not links:
+        # The list may come from a script; take dates from any scc file names.
+        links = sorted(set(re.findall(r"(scc\d{8,10}\.html(?:\.gz)?)", index)))
+    print(f"::notice::{len(links)} daily lists, e.g. {links[:3]}")
+    if not links:
+        print(f"::notice::index: {index[:1500]!r}")
+        raise RuntimeError("no daily lists on the index page")
+    ids = []
+    for link in links:
+        url = urllib.parse.urljoin("https://tenhou.net/sc/raw/dat/", link.split("/")[-1])
+        if link.startswith("http") or "/" in link:
+            url = urllib.parse.urljoin("https://tenhou.net/sc/raw/", link)
         try:
-            data = get(url, tries=1)
-            print(f"::notice::using {url}")
-            break
+            raw = get(url, tries=2)
         except Exception as e:  # noqa: BLE001
             print(f"::notice::{url}: {e}")
-    if not data:
-        raise RuntimeError("archive not found")
-    ids = []
-    with zipfile.ZipFile(io.BytesIO(data)) as z:
-        names = sorted(z.namelist())
-        print(f"::notice::archive {len(data)} bytes, {len(names)} files, e.g. {names[:3]}")
-        for name in names:
-            if not name.split("/")[-1].startswith("scc"):
-                continue
-            raw = z.read(name)
-            if name.endswith(".gz"):
-                raw = gzip.decompress(raw)
-            for line in raw.decode("utf-8", "replace").splitlines():
-                if GAME_TYPE not in line:
-                    continue
+            continue
+        if raw[:2] == b"\x1f\x8b":
+            raw = gzip.decompress(raw)
+        for line in raw.decode("utf-8", "replace").splitlines():
+            if GAME_TYPE in line:
                 m = re.search(r"log=([0-9a-z\-]+)", line)
                 if m:
                     ids.append(m.group(1))
