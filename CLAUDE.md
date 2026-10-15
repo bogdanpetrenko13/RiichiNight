@@ -65,6 +65,15 @@ If the npm or PyPI registry is unreachable:
   (`ESBUILD=`), the Pyodide files (`PYODIDE_DIR=`) and React reachable via
   `NODE_PATH`. Then point `E2E_DIST` at `.preview`.
 
+Dependencies: CI installs exactly what `package-lock.json` pins (`npm ci`).
+After changing `package.json`, run the **Refresh package-lock.json** workflow
+(`gh api -X POST repos/bogdanpetrenko13/RiichiNight/actions/workflows/lockfile.yml/dispatches -f ref=main`),
+then `git pull` the commit it pushes; Claude's container cannot reach npm.
+
+Engine errors reach the player as `ErrorDialog` (retry / continue from the
+last save / title) with a copyable report; e2e injects a failure by serving a
+patched `bridge.py` (`_inject_engine_failures`).
+
 CI (`.github/workflows/android.yml`):
 
 1. Engine tests.
