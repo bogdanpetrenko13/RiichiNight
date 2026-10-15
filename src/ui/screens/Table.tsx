@@ -281,7 +281,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
         />
         {/* Portrait: a reserved row under the hand (the hand never moves when
             buttons appear); landscape: a column to its right. */}
-        <div className={portrait ? styles.actionsRow : styles.actions}>
+        <div className={portrait ? styles.actionsRow : styles.actions} data-actions>
           {actionBar}
           {/* Landscape: waits / furiten above the buttons (column-reverse). */}
           {!portrait && waitsChip}

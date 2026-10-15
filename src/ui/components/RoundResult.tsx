@@ -132,6 +132,7 @@ function WinBody({
             )}
             <div
               className={styles.hand}
+              data-win-hand
               style={{
                 // Tile slots on the line: hand + winning tile + calls, plus the gaps.
                 ["--n" as string]:
