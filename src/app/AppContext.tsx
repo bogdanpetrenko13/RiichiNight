@@ -2,20 +2,18 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { STRINGS, YAKU_RU, type Lang, type StringKey } from "../i18n/strings";
 import {
   defaultSettings,
+  dropRetiredData,
   loadAchievements,
   loadRivals,
   loadSettings,
   loadStats,
-  loadUnlocks,
   saveAchievements,
   saveRivals,
   saveSettings,
   saveStats,
-  saveUnlocks,
   type AchievementLog,
   type Settings,
 } from "../game/storage";
-import type { Unlocks } from "../game/rewards";
 import { emptyStats, newlyEarned, type Stats } from "../game/stats";
 import { music, voice } from "../game/audio";
 import { setMotionSpeed } from "../ui/motion";
@@ -27,8 +25,6 @@ interface AppState {
   ready: boolean;
   settings: Settings;
   updateSettings: (patch: Partial<Settings>) => void;
-  unlocks: Unlocks;
-  setUnlocks: (u: Unlocks) => void;
   stats: Stats;
   /** Persists new stats and awards any achievements they complete. */
   commitStats: (s: Stats) => void;
@@ -49,38 +45,22 @@ interface AppState {
 
 const Ctx = createContext<AppState | null>(null);
 
-const clearsOf = (u: Unlocks) => Object.values(u).reduce((n, x) => n + (x.clears ?? 0), 0);
-
 export function AppProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
-  const settingsRef = useRef(settings);
-  settingsRef.current = settings;
-  const [unlocks, setUnlocksState] = useState<Unlocks>({});
   const [stats, setStats] = useState<Stats>(emptyStats);
   const [achievements, setAchievements] = useState<AchievementLog>({});
   const [toasts, setToasts] = useState<string[]>([]);
   const [rivals, setRivals] = useState<string[]>([]);
   const rivalsRef = useRef<string[]>([]);
   const achievementsRef = useRef<AchievementLog>({});
-  const unlocksRef = useRef<Unlocks>({});
 
   useEffect(() => {
-    void Promise.all([loadSettings(), loadUnlocks(), loadStats(), loadAchievements(), loadRivals()]).then(([s, u, st, a, r]) => {
-      // Older builds counted reward stages before the code was entered: clear once.
-      if (!s.progressGate) {
-        if (!s.extrasUnlocked) {
-          u = {};
-          void saveUnlocks(u);
-        }
-        s = { ...s, progressGate: true };
-        void saveSettings(s);
-      }
+    void dropRetiredData();
+    void Promise.all([loadSettings(), loadStats(), loadAchievements(), loadRivals()]).then(([s, st, a, r]) => {
       rivalsRef.current = r;
       setRivals(r);
       setSettings(s);
-      setUnlocksState(u);
-      unlocksRef.current = u;
       setStats(st);
       setAchievements(a);
       achievementsRef.current = a;
@@ -118,8 +98,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const award = useCallback((s: Stats, u: Unlocks) => {
-    const earned = newlyEarned(s, clearsOf(u), achievementsRef.current, settingsRef.current.extrasUnlocked);
+  const award = useCallback((s: Stats) => {
+    const earned = newlyEarned(s, achievementsRef.current);
     if (!earned.length) return;
     const now = Date.now();
     const next = { ...achievementsRef.current };
@@ -130,24 +110,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setToasts((q) => [...q, ...earned]);
   }, []);
 
-  const setUnlocks = useCallback(
-    (u: Unlocks) => {
-      unlocksRef.current = u;
-      setUnlocksState(u);
-      void saveUnlocks(u);
-      setStats((s) => {
-        award(s, u);
-        return s;
-      });
-    },
-    [award],
-  );
-
   const commitStats = useCallback(
     (s: Stats) => {
       setStats(s);
       void saveStats(s);
-      award(s, unlocksRef.current);
+      award(s);
     },
     [award],
   );
@@ -182,8 +149,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ready,
       settings,
       updateSettings,
-      unlocks,
-      setUnlocks,
       stats,
       commitStats,
       resetStats,
@@ -197,7 +162,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       yakuName: (key, en) => (lang === "ru" ? YAKU_RU[key] ?? en : en),
       charName: (c) => c.name[lang],
     };
-  }, [ready, settings, updateSettings, unlocks, setUnlocks, stats, commitStats, resetStats, achievements, rivals, unlockRivals, toasts, dismissToast]);
+  }, [ready, settings, updateSettings, stats, commitStats, resetStats, achievements, rivals, unlockRivals, toasts, dismissToast]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

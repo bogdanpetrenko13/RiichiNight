@@ -107,9 +107,7 @@ export function applyEvents(
 export interface AchievementDef {
   id: string;
   icon: string;
-  check: (s: Stats, extra: { clears: number }) => boolean;
-  /** Belongs to the hidden extra content: not shown or awarded until unlocked. */
-  extra?: boolean;
+  check: (s: Stats) => boolean;
 }
 
 export const ACHIEVEMENTS: AchievementDef[] = [
@@ -122,13 +120,9 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: "yakuman", icon: "🌸", check: (s) => s.yakuman >= 1 },
   { id: "clean_match", icon: "🛡️", check: (s) => s.cleanMatches >= 1 },
   { id: "hands_100", icon: "📜", check: (s) => s.hands >= 100 },
-  { id: "clear_heroine", icon: "💖", check: (_s, x) => x.clears >= 1, extra: true },
 ];
 
 /** Ids that are earned now but not yet in the log. */
-export function newlyEarned(stats: Stats, clears: number, log: Record<string, number>, extras = false): string[] {
-  return ACHIEVEMENTS.filter((a) => (extras || !a.extra) && !log[a.id] && a.check(stats, { clears })).map((a) => a.id);
+export function newlyEarned(stats: Stats, log: Record<string, number>): string[] {
+  return ACHIEVEMENTS.filter((a) => !log[a.id] && a.check(stats)).map((a) => a.id);
 }
-
-/** Achievements visible with the current unlock state. */
-export const visibleAchievements = (extras: boolean) => ACHIEVEMENTS.filter((a) => extras || !a.extra);

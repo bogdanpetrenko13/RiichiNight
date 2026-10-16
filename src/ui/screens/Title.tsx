@@ -12,20 +12,18 @@ interface TitleProps {
   saved: SavedGame | null;
   onNew: () => void;
   onContinue: () => void;
-  onGallery: () => void;
   onSettings: () => void;
   onLearn: () => void;
   onStats: () => void;
 }
 
-export function Title({ saved, onNew, onContinue, onGallery, onSettings, onLearn, onStats }: TitleProps) {
-  const { t, settings, lang, stats, rivals } = useApp();
+export function Title({ saved, onNew, onContinue, onSettings, onLearn, onStats }: TitleProps) {
+  const { t, lang, stats, rivals } = useApp();
   useEffect(() => music.play("title"), []);
 
   const tiles: { icon: IconName; label: StringKey; onClick: () => void; hidden?: boolean }[] = [
     { icon: "book", label: "learn", onClick: onLearn },
     { icon: "chart", label: "stats", onClick: onStats },
-    { icon: "gallery", label: "gallery", onClick: onGallery, hidden: !settings.rewardScenes },
     { icon: "settings", label: "settings", onClick: onSettings },
   ];
 

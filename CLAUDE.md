@@ -8,13 +8,8 @@ The owner writes in Russian; reply in Russian.
 
 ## Hard rules
 
-- No explicit or sexual content from Claude. The owner may add his own reward
-  scenes; Claude only builds the mechanism.
+- No explicit or sexual content.
 - Every character is an adult and must look like one (art, text, ages).
-- Reward content stays hidden until the access code is entered in Settings.
-  Only a salted SHA-256 of the code is stored (`src/game/extras.ts`); never
-  write the code itself into the repo, commits or docs.
-- Reward stage progress counts only after the code has been entered.
 - Never commit the Sutemo source PSDs; only the finished images.
 - `signing/debug.keystore` is a debug key with the public `android` passwords,
   committed on purpose so every CI build updates in place. Never use it for

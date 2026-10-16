@@ -15,7 +15,7 @@ interface SetupProps {
 
 /** Pick three rivals (the wind each one gets is shown only at the table). */
 export function Setup({ initial, onBack, onStart }: SetupProps) {
-  const { t, lang, charName, unlocks, settings, rivals, updateSettings } = useApp();
+  const { t, lang, charName, settings, rivals, updateSettings } = useApp();
   const available = CHARACTERS.filter((c) => isUnlocked(c, rivals));
   const unlockHint = (c: CharacterDef) => {
     const names = (c.unlock?.with ?? []).map((id) => {
@@ -51,7 +51,6 @@ export function Setup({ initial, onBack, onStart }: SetupProps) {
           {CHARACTERS.map((c) => {
             const open = isUnlocked(c, rivals);
             const seat = cast.indexOf(c.id);
-            const progress = unlocks[c.id]?.unlocked ?? 0;
             return (
               <button
                 key={c.id}
@@ -80,11 +79,6 @@ export function Setup({ initial, onBack, onStart }: SetupProps) {
                     <span>· {c.age}</span>
                   </div>
                   <p className={styles.bio}>{open ? c.bio[lang] : unlockHint(c)}</p>
-                  {open && settings.rewardScenes && (
-                    <div className={styles.progress}>
-                      <i style={{ width: `${(progress / (c.stages - 1)) * 100}%` }} />
-                    </div>
-                  )}
                 </div>
                 <span className={styles.badge}>
                   {seat >= 0 ? <Icon name="check" size={18} /> : null}

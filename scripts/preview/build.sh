@@ -22,7 +22,7 @@ mkdir -p "$OUT/py" "$OUT/pyodide"
   --define:process.env.NODE_ENV='"production"' --define:__APP_VERSION__='"preview"' --log-level=warning
 "$ES" src/engine/engine.worker.ts --bundle --format=esm --outfile="$OUT/engine.worker.ts" --log-level=warning
 cp public/py/*.py public/py/pyriichi.zip "$OUT/py/"
-cp -r public/characters public/voice public/tiles "$OUT/" 2>/dev/null || true
+cp -r public/characters public/voice public/tiles public/mortal "$OUT/" 2>/dev/null || true
 cp "$PYO"/{pyodide.mjs,pyodide.asm.js,pyodide.asm.wasm,python_stdlib.zip,pyodide-lock.json} "$OUT/pyodide/"
 cat > "$OUT/index.html" <<'H'
 <!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">

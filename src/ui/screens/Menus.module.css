@@ -174,61 +174,6 @@
   font-size: 17px;
 }
 
-/* ---- gallery -------------------------------------------------------------- */
-.gallery {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.galleryRow {
-  padding: 12px;
-  border-radius: var(--radius-l);
-  background: var(--surface-2);
-  border: 1px solid var(--felt-line);
-}
-
-.galleryHead {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.stages {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
-  gap: 8px;
-}
-
-.stageTile {
-  aspect-ratio: 3 / 4;
-  border-radius: var(--radius-m);
-  border: 1px solid var(--c);
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), transparent);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-size: 22px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.stageTile small {
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--ink-soft);
-}
-
-.stageTile:disabled {
-  opacity: 0.4;
-  border-style: dashed;
-  cursor: default;
-}
-
 /* ---- settings ------------------------------------------------------------- */
 .form {
   display: flex;

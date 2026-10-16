@@ -4,7 +4,6 @@ import type { CallKind, GameView, HumanCommand, StepResult } from "../engine/pro
 import { useApp } from "../app/AppContext";
 import { music, voice } from "./audio";
 import { getCharacter, pickLine, rivalsUnlockedBy, type CharacterDef, type Emotion, type SpeechKind } from "./characters";
-import { applyGameEnd, applyRound, freshSession, mergeUnlocks, type SessionStages, type StageChange } from "./rewards";
 import { applyEvents } from "./stats";
 import { clearGame, loadGame, saveGame, type SavedGame } from "./storage";
 
@@ -36,16 +35,11 @@ const MANGAN = 8000;
 export interface GameController {
   view: GameView | null;
   cast: CharacterDef[];
-  session: SessionStages;
   emotions: Record<number, Emotion>;
   tsumogiri: Record<number, boolean>;
   callouts: Callout[];
   speech: Record<number, Speech>;
   cutaway: Cutaway | null;
-  /** Reward changes caused by the last finished hand (shown in the result panel). */
-  roundChanges: StageChange[];
-  /** Changes from the final placement bonus. */
-  endChanges: StageChange[];
   busy: boolean;
   /** Engine failure: the table shows a dialog instead of a traceback. */
   error: GameError | null;
@@ -79,14 +73,13 @@ function toGameError(err: unknown): GameError {
 }
 
 export function useGameController(): GameController {
-  const { settings, unlocks, setUnlocks, stats, commitStats, lang, rivals, unlockRivals } = useApp();
+  const { settings, stats, commitStats, lang, rivals, unlockRivals } = useApp();
   const rivalsRef = useRef(rivals);
   rivalsRef.current = rivals;
   const engine = getEngine();
 
   const [view, setView] = useState<GameView | null>(null);
   const [cast, setCast] = useState<CharacterDef[]>([]);
-  const [session, setSession] = useState<SessionStages>({});
   const [emotions, setEmotions] = useState<Record<number, Emotion>>({});
   const [callouts, setCallouts] = useState<Callout[]>([]);
   const [speech, setSpeech] = useState<Record<number, Speech>>({});
@@ -95,8 +88,6 @@ export function useGameController(): GameController {
   const [cutaway, setCutaway] = useState<Cutaway | null>(null);
   /** Re-schedules the next opponent step (after skipping a banner). */
   const [nudge, setNudge] = useState(0);
-  const [roundChanges, setRoundChanges] = useState<StageChange[]>([]);
-  const [endChanges, setEndChanges] = useState<StageChange[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<GameError | null>(null);
   /** The last engine call, for "Try again". */
@@ -104,8 +95,6 @@ export function useGameController(): GameController {
 
   // Refs keep async handlers consistent without stale closures.
   const castRef = useRef<CharacterDef[]>([]);
-  const sessionRef = useRef<SessionStages>({});
-  const unlocksRef = useRef(unlocks);
   const statsRef = useRef(stats);
   const settingsRef = useRef(settings);
   const langRef = useRef(lang);
@@ -113,7 +102,6 @@ export function useGameController(): GameController {
   const busyRef = useRef(false);
   const nextId = useRef(1);
   const pauseRef = useRef(0);
-  unlocksRef.current = unlocks;
   statsRef.current = stats;
   settingsRef.current = settings;
   langRef.current = lang;
@@ -151,7 +139,6 @@ export function useGameController(): GameController {
             break;
           case "round_start":
             setEmotions({});
-            setRoundChanges([]);
             break;
           case "call": {
             pause = Math.max(pause, CALL_PAUSE);
@@ -197,19 +184,6 @@ export function useGameController(): GameController {
                 setEmotion(w, "happy");
                 say(w, "pleased");
               }
-            // Reward stages only count once the extras code has been entered.
-            if (result && settingsRef.current.extrasUnlocked) {
-              const { session: next, changes } = applyRound(
-                sessionRef.current,
-                result,
-                castRef.current,
-                settingsRef.current.rewardRules,
-              );
-              sessionRef.current = next;
-              setSession(next);
-              setRoundChanges(changes);
-              if (changes.length) setUnlocks(mergeUnlocks(unlocksRef.current, changes));
-            }
             break;
           }
           case "draw_game":
@@ -219,17 +193,6 @@ export function useGameController(): GameController {
             // Progression: a 1st place opens the next, harder rivals.
             if (ev.placement[0] === 0)
               unlockRivals(rivalsUnlockedBy(castRef.current.map((c) => c.id), rivalsRef.current));
-            if (!settingsRef.current.extrasUnlocked) break;
-            const { session: next, changes } = applyGameEnd(
-              sessionRef.current,
-              ev.placement,
-              castRef.current,
-              settingsRef.current.rewardRules,
-            );
-            sessionRef.current = next;
-            setSession(next);
-            setEndChanges(changes);
-            if (changes.length) setUnlocks(mergeUnlocks(unlocksRef.current, changes));
             break;
           }
           default:
@@ -262,14 +225,13 @@ export function useGameController(): GameController {
           savedAt: Date.now(),
           cast: castRef.current.map((c) => c.id),
           levels: step.view.levels,
-          session: sessionRef.current,
           dealIns: matchDealIns.current,
           blob,
         });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setUnlocks, commitStats, say, unlockRivals],
+    [commitStats, say, unlockRivals],
   );
 
   const run = useCallback(
@@ -304,14 +266,10 @@ export function useGameController(): GameController {
     return () => window.clearTimeout(timer);
   }, [view, busy, error, settings.aiDelay, run, engine, nudge]);
 
-  const begin = (chars: CharacterDef[], stages: SessionStages, dealIns: number) => {
+  const begin = (chars: CharacterDef[], dealIns: number) => {
     castRef.current = chars;
-    sessionRef.current = stages;
     matchDealIns.current = dealIns;
     setCast(chars);
-    setSession(stages);
-    setRoundChanges([]);
-    setEndChanges([]);
     setEmotions({});
     setSpeech({});
     setCutaway(null);
@@ -324,7 +282,7 @@ export function useGameController(): GameController {
   const start = useCallback(
     async (castIds: string[]) => {
       const chars = castIds.map((id) => getCharacter(id)).filter((c): c is CharacterDef => Boolean(c));
-      begin(chars, freshSession(chars), 0);
+      begin(chars, 0);
       await run(() =>
         engine.newGame({ levels: chars.map((c) => c.level), styles: chars.map((c) => c.style), rules: settingsRef.current.gameRules, ...testParams() }),
       );
@@ -336,7 +294,7 @@ export function useGameController(): GameController {
   const resume = useCallback(
     async (saved: SavedGame) => {
       const chars = saved.cast.map((id) => getCharacter(id)).filter((c): c is CharacterDef => Boolean(c));
-      begin(chars, saved.session ?? freshSession(chars), saved.dealIns ?? 0);
+      begin(chars, saved.dealIns ?? 0);
       await run(() => engine.load(saved.blob));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -382,14 +340,11 @@ export function useGameController(): GameController {
   return {
     view,
     cast,
-    session,
     emotions,
     tsumogiri,
     callouts,
     speech,
     cutaway,
-    roundChanges,
-    endChanges,
     busy,
     error,
     retry,

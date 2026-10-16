@@ -87,23 +87,6 @@
   border-radius: var(--portrait-radius) !important;
 }
 
-.pips {
-  display: flex;
-  gap: 3px;
-}
-
-.pips i {
-  width: 7px;
-  height: 7px;
-  transform: rotate(45deg);
-  border-radius: 2px;
-  background: var(--border-strong);
-}
-
-.pips i[data-on] {
-  background: var(--accent);
-}
-
 .callout {
   position: absolute;
   top: -8px;
@@ -392,10 +375,6 @@
 }
 
 :global([data-orientation="landscape"]) .name,
-:global([data-orientation="landscape"]) .pips {
-  display: none;
-}
-
 :global([data-orientation="landscape"]) .me .left {
   /* Wind above the score, as tall as a rival's header (portrait), so all
      rivers start on one line. */

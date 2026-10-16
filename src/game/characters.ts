@@ -5,15 +5,14 @@ import type { Lang } from "../i18n/strings";
  * Character roster.
  *
  * Every heroine is an adult (18+). `validateRoster` refuses any entry whose
- * age is missing or under 18, so a typo can never put a minor into the
- * reward system. Keep her written profile adult as well (job, life, tone);
+ * age is missing or under 18. Keep her written profile adult as well (job,
+ * life, tone);
  * art must also read clearly as an adult.
  *
  * Art is loaded by convention from public/characters/<id>/ and falls back to
  * a generated placeholder card when a file is missing:
  *   portrait.webp                 table portrait (square, ~512px)
  *   emotions/<emotion>.webp       neutral | happy | troubled
- *   reward/stage<N>.webp          reward scene for stage N (1..stages-1)
  * Voice lines: public/voice/<id>/<riichi|pon|chi|kan|ron|tsumo>.mp3
  */
 
@@ -39,10 +38,6 @@ export interface CharacterDef {
   /** Theme colours for cards, callouts and placeholders. */
   color: string;
   accent: string;
-  /** Number of reward stages including the starting one (stage 0). */
-  stages: number;
-  /** Lines shown on the reward scene for stages 1..stages-1. */
-  stageLines: Record<Lang, string[]>;
   /** Speech-bubble lines at the table, picked at random per event. */
   lines: Record<Lang, Record<SpeechKind, string[]>>;
   /**
@@ -69,11 +64,6 @@ export const ROSTER: CharacterDef[] = [
     style: "reckless",
     color: "#f2a65a",
     accent: "#ffe3c4",
-    stages: 5,
-    stageLines: {
-      en: ["Lucky draw, huh?", "Okay, okay, you're good!", "Next hand is mine!", "...I'm all out of excuses."],
-      ru: ["Повезло с тайлом, да?", "Ладно, ладно, ты хорош!", "Следующая раздача моя!", "...Оправдания закончились."],
-    },
     lines: {
       en: {
         pleased: ["Yay! Coffee's on you!", "Told you I'm on a roll!"],
@@ -108,11 +98,6 @@ export const ROSTER: CharacterDef[] = [
     style: "precise",
     color: "#5b8def",
     accent: "#dbe6ff",
-    stages: 5,
-    stageLines: {
-      en: ["A statistical outlier.", "I underestimated you.", "Interesting. Again.", "Fine. You earned it."],
-      ru: ["Статистический выброс.", "Я тебя недооценила.", "Интересно. Ещё раз.", "Ладно. Ты заслужил."],
-    },
     lines: {
       en: {
         pleased: ["As calculated.", "The numbers were on my side."],
@@ -148,11 +133,6 @@ export const ROSTER: CharacterDef[] = [
     style: "sharp",
     color: "#c2456b",
     accent: "#ffd6e2",
-    stages: 5,
-    stageLines: {
-      en: ["Not bad, newcomer.", "You read me well.", "Now I'm serious.", "Take a bow. You beat the house."],
-      ru: ["Неплохо, новичок.", "Ты хорошо меня читаешь.", "Теперь я серьёзно.", "Поклонись. Ты обыграл хозяйку."],
-    },
     lines: {
       en: {
         pleased: ["The house always wins, dear.", "Thank you for playing at my table."],
@@ -187,11 +167,6 @@ export const ROSTER: CharacterDef[] = [
     style: "showy",
     color: "#8e6cd8",
     accent: "#ece2ff",
-    stages: 5,
-    stageLines: {
-      en: ["Chat, did you see that?!", "Okay that was clean.", "Rematch! Right now!", "GG... you win this one."],
-      ru: ["Чат, вы это видели?!", "Ладно, это было чисто.", "Реванш! Прямо сейчас!", "GG... эту ты выиграл."],
-    },
     lines: {
       en: {
         pleased: ["CHAT! Did you see that?!", "Clip it! Clip it!"],
@@ -227,11 +202,6 @@ export const ROSTER: CharacterDef[] = [
     style: "patient",
     color: "#6d5dfc",
     accent: "#e3e0ff",
-    stages: 5,
-    stageLines: {
-      en: ["Not in the plan. Noted.", "Fine, the meeting can wait.", "You're making me work overtime.", "Deadline missed. You win."],
-      ru: ["Этого не было в плане. Учту.", "Ладно, совещание подождёт.", "Из-за тебя у меня переработка.", "Дедлайн сорван. Ты победил."],
-    },
     lines: {
       en: {
         pleased: ["Delivered on schedule.", "That's how a project closes."],
@@ -266,11 +236,6 @@ export const ROSTER: CharacterDef[] = [
     style: "flush",
     color: "#2fb5a0",
     accent: "#d6f5ef",
-    stages: 5,
-    stageLines: {
-      en: ["Hey, that hand was pretty!", "Okay, I'm sketching your face as the villain.", "One more! I'm warmed up now.", "You win. I'll draw you a trophy."],
-      ru: ["Эй, красивая была рука!", "Всё, рисую тебя злодеем.", "Ещё одну! Я только разогрелась.", "Ты победил. Нарисую тебе кубок."],
-    },
     lines: {
       en: {
         pleased: ["Look at those colours!", "That one's going in my sketchbook."],
@@ -296,8 +261,8 @@ export const ROSTER: CharacterDef[] = [
 
 export function validateRoster(roster: CharacterDef[]): CharacterDef[] {
   return roster.filter((c) => {
-    const ok = Number.isFinite(c.age) && c.age >= 18 && c.stages >= 2;
-    if (!ok) console.error(`[roster] character "${c.id}" rejected: must be 18+ with at least 2 stages`);
+    const ok = Number.isFinite(c.age) && c.age >= 18;
+    if (!ok) console.error(`[roster] character "${c.id}" rejected: must be 18+`);
     return ok;
   });
 }
@@ -329,6 +294,5 @@ const base = () => new URL("./", window.location.href).href;
 export const assetPaths = {
   portrait: (id: string) => `${base()}characters/${id}/portrait.webp`,
   emotion: (id: string, emotion: Emotion) => `${base()}characters/${id}/emotions/${emotion}.webp`,
-  reward: (id: string, stage: number) => `${base()}characters/${id}/reward/stage${stage}.webp`,
   voice: (id: string, kind: string) => `${base()}voice/${id}/${kind}.mp3`,
 };

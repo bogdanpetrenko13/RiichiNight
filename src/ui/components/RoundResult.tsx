@@ -1,10 +1,8 @@
 import type { GameView, WinResult } from "../../engine/protocol";
 import type { CharacterDef } from "../../game/characters";
-import type { StageChange } from "../../game/rewards";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
-import { RewardChips } from "./RewardChips";
 import { Portrait } from "./Portrait";
 import { ScoreCalc } from "./ScoreCalc";
 import styles from "./Overlay.module.css";
@@ -12,18 +10,15 @@ import styles from "./Overlay.module.css";
 interface RoundResultProps {
   view: GameView;
   cast: CharacterDef[];
-  changes: StageChange[];
   busy: boolean;
   onNext: () => void;
-  onWatch: () => void;
 }
 
-export function RoundResult({ view, cast, changes, busy, onNext, onWatch }: RoundResultProps) {
-  const { t, charName, yakuName, settings } = useApp();
+export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
+  const { t, charName, yakuName } = useApp();
   const result = view.result;
   if (!result) return null;
   const nameOf = (seat: number) => (seat === 0 ? t("you") : cast[seat - 1] ? charName(cast[seat - 1]) : `#${seat}`);
-  const canWatch = settings.rewardScenes && changes.some((c) => c.to > c.from);
 
   // Close-up: a heroine who won smiles; the one who dealt in to you frowns.
   let featured: { seat: number; emotion: "happy" | "troubled" } | null = null;
@@ -79,14 +74,7 @@ export function RoundResult({ view, cast, changes, busy, onNext, onWatch }: Roun
           ))}
         </ul>
 
-        {settings.rewardScenes && <RewardChips changes={changes} />}
-
         <div className={styles.buttons}>
-          {canWatch && (
-            <button className="btn btn-primary" onClick={onWatch}>
-              {t("watchScene")}
-            </button>
-          )}
           <button className="btn" onClick={onNext} disabled={busy}>
             {view.gameOver ? t("continueBtn") : t("nextRound")}
           </button>

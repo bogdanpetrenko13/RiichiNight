@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { App as CapApp } from "@capacitor/app";
-import { useApp } from "./app/AppContext";
 import { getEngine } from "./engine/EngineClient";
 import type { BootStage } from "./engine/protocol";
 import { useGameController } from "./game/useGameController";
@@ -10,17 +9,14 @@ import { Boot } from "./ui/screens/Boot";
 import { Title } from "./ui/screens/Title";
 import { Setup } from "./ui/screens/Setup";
 import { Table } from "./ui/screens/Table";
-import { Gallery } from "./ui/screens/Gallery";
 import { SettingsScreen } from "./ui/screens/Settings";
-import { AgeGate } from "./ui/screens/AgeGate";
 import { Learn } from "./ui/screens/Learn";
 import { StatsScreen } from "./ui/screens/StatsScreen";
 import { AchievementToast } from "./ui/components/AchievementToast";
 
-type Screen = "boot" | "title" | "setup" | "table" | "gallery" | "settings" | "learn" | "stats";
+type Screen = "boot" | "title" | "setup" | "table" | "settings" | "learn" | "stats";
 
 export default function App() {
-  const { ready, settings } = useApp();
   const game = useGameController();
   const [screen, setScreen] = useState<Screen>("boot");
   const [stage, setStage] = useState<BootStage | null>(null);
@@ -89,7 +85,6 @@ export default function App() {
             setScreen("table");
             void game.resume(saved);
           }}
-          onGallery={() => setScreen("gallery")}
           onSettings={() => setScreen("settings")}
           onLearn={() => setScreen("learn")}
           onStats={() => setScreen("stats")}
@@ -112,9 +107,6 @@ export default function App() {
         />
       );
       break;
-    case "gallery":
-      content = <Gallery onBack={() => setScreen("title")} />;
-      break;
     case "settings":
       content = <SettingsScreen onBack={back} />;
       break;
@@ -130,7 +122,6 @@ export default function App() {
     <>
       {content}
       <AchievementToast />
-      {ready && settings.extrasUnlocked && settings.adultConfirmed === null && screen !== "boot" && <AgeGate />}
     </>
   );
 }

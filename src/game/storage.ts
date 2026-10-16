@@ -5,7 +5,6 @@ import { Preferences } from "@capacitor/preferences";
 import { DEFAULT_GAME_RULES, type GameRules, type Level } from "../engine/protocol";
 import type { Lang } from "../i18n/strings";
 import type { TileHints } from "../ui/tiles";
-import { DEFAULT_RULES, type RewardRules, type SessionStages, type Unlocks } from "./rewards";
 import { emptyStats, type Stats } from "./stats";
 
 export const AI_DELAY_MIN = 200;
@@ -49,16 +48,8 @@ export interface Settings {
   theme: ThemeMode;
   styleVersion?: number;
   gameRules: GameRules;
-  /** null until the age gate has been answered. */
-  /** Extra content unlocked with the code from Settings (see extras.ts). */
-  extrasUnlocked: boolean;
   /** Ids of lessons the player finished. */
   lessonsDone: string[];
-  /** Set once the pre-code reward progress of older builds has been cleared. */
-  progressGate?: boolean;
-  adultConfirmed: boolean | null;
-  rewardScenes: boolean;
-  rewardRules: RewardRules;
 }
 
 export interface SavedGame {
@@ -66,7 +57,6 @@ export interface SavedGame {
   savedAt: number;
   cast: string[];
   levels: Level[];
-  session: SessionStages;
   /** Deal-ins by the human in this match (for the "clean match" achievement). */
   dealIns?: number;
   blob: string;
@@ -77,7 +67,6 @@ export type AchievementLog = Record<string, number>;
 
 const KEYS = {
   settings: "settings.v1",
-  unlocks: "unlocks.v1",
   game: "game.v1",
   stats: "stats.v1",
   achievements: "achievements.v1",
@@ -102,11 +91,7 @@ export function defaultSettings(): Settings {
     theme: "system",
     styleVersion: STYLE_VERSION,
     gameRules: { ...DEFAULT_GAME_RULES },
-    extrasUnlocked: false,
     lessonsDone: [],
-    adultConfirmed: null,
-    rewardScenes: false,
-    rewardRules: { ...DEFAULT_RULES },
   };
 }
 
@@ -135,27 +120,28 @@ export async function loadSettings(): Promise<Settings> {
     table?: unknown;
     aiSpeed?: string;
   };
+  for (const key of ["extrasUnlocked", "adultConfirmed", "rewardScenes", "rewardRules", "progressGate"]) {
+    delete (rest as Record<string, unknown>)[key];
+  }
   if (rest.aiDelay === undefined && oldSpeed) rest.aiDelay = OLD_SPEED[oldSpeed] ?? AI_DELAY_DEFAULT;
-  // Until the code is entered nothing about reward scenes is active or shown.
-  const extras =
-    rest.extrasUnlocked === true ? {} : { extrasUnlocked: false, adultConfirmed: null, rewardScenes: false };
   return {
     ...base,
     ...rest,
     ...look,
-    ...extras,
-    rewardRules: { ...base.rewardRules, ...(stored?.rewardRules ?? {}) },
     gameRules: { ...base.gameRules, ...(stored?.gameRules ?? {}) },
   };
 }
 
 export const saveSettings = (s: Settings) => setJson(KEYS.settings, s);
 
-export async function loadUnlocks(): Promise<Unlocks> {
-  return (await getJson<Unlocks>(KEYS.unlocks)) ?? {};
+/** Removes data of features that no longer exist (the old reward stages). */
+export async function dropRetiredData(): Promise<void> {
+  try {
+    await Preferences.remove({ key: "unlocks.v1" });
+  } catch {
+    /* nothing stored */
+  }
 }
-
-export const saveUnlocks = (u: Unlocks) => setJson(KEYS.unlocks, u);
 
 export async function loadStats(): Promise<Stats> {
   return { ...emptyStats(), ...((await getJson<Partial<Stats>>(KEYS.stats)) ?? {}) };

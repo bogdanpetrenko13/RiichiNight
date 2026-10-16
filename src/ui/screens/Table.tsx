@@ -1,8 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ActionName, CallKind, TileCode } from "../../engine/protocol";
 import { CUTAWAY_MS, type GameController } from "../../game/useGameController";
-import type { CharacterDef } from "../../game/characters";
-import type { StageChange } from "../../game/rewards";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { bandVars, useLayout } from "../useLayout";
@@ -12,7 +10,6 @@ import { PlayerHand } from "../components/PlayerHand";
 import { ActionBar } from "../components/ActionBar";
 import { RoundResult } from "../components/RoundResult";
 import { GameOver } from "../components/GameOver";
-import { RewardScene } from "../components/RewardScene";
 import { CallCutaway } from "../components/CallCutaway";
 import { ErrorDialog } from "../components/ErrorDialog";
 import { RivalBand } from "../components/RivalBand";
@@ -30,29 +27,13 @@ interface TableProps {
   onOpen: (screen: "learn" | "settings") => void;
 }
 
-interface Scene {
-  character: CharacterDef;
-  stage: number;
-}
-
-/** One scene per newly reached stage, in seat order. */
-function scenesFor(changes: StageChange[], cast: CharacterDef[]): Scene[] {
-  const out: Scene[] = [];
-  for (const c of changes) {
-    const character = cast[c.seat - 1];
-    if (!character) continue;
-    for (let s = c.from + 1; s <= c.to; s++) out.push({ character, stage: s });
-  }
-  return out;
-}
-
 /** The deal that already played its animation (survives leaving the table). */
 let dealtKey = "";
 
 export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const { t, settings } = useApp();
   const layout = useLayout();
-  const { view, cast, session, emotions, callouts, speech, cutaway, roundChanges, endChanges, busy, error } = game;
+  const { view, cast, emotions, callouts, speech, cutaway, busy, error } = game;
 
   // Stable handle for timers: the controller object changes identity every render.
   const gameRef = useRef(game);
@@ -63,7 +44,6 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const [chiPicker, setChiPicker] = useState(false);
   /** Chi with several options: index of the first hand tile picked. */
   const [chiFirst, setChiFirst] = useState<number | null>(null);
-  const [scenes, setScenes] = useState<Scene[]>([]);
   const [ackRound, setAckRound] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -231,7 +211,6 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
               key={seat}
               character={character}
               player={view.players[seat]}
-              stage={session[seat] ?? 0}
               emotion={emotions[seat]}
               callout={calloutBySeat[seat] ?? null}
               speech={speech[seat]?.text ?? null}
@@ -321,9 +300,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
         <RoundResult
           view={view}
           cast={cast}
-          changes={roundChanges}
           busy={busy}
-          onWatch={() => setScenes(scenesFor(roundChanges, cast))}
           onNext={() => {
             if (view.status === "game_over") setAckRound(view.round.index);
             else void game.nextRound();
@@ -335,21 +312,11 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
         <GameOver
           view={view}
           cast={cast}
-          changes={endChanges}
-          onWatch={() => setScenes(scenesFor(endChanges, cast))}
           onAgain={onAgain}
           onTitle={onTitle}
         />
       )}
 
-      {settings.rewardScenes && scenes.length > 0 && (
-        <RewardScene
-          key={`${scenes[0].character.id}-${scenes[0].stage}`}
-          character={scenes[0].character}
-          stage={scenes[0].stage}
-          onDone={() => setScenes((q) => q.slice(1))}
-        />
-      )}
     </div>
   );
 }

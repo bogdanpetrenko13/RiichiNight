@@ -1,6 +1,6 @@
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
-import { visibleAchievements } from "../../game/stats";
+import { ACHIEVEMENTS } from "../../game/stats";
 import { AppBar } from "../components/Primitives";
 import styles from "./StatsScreen.module.css";
 
@@ -8,7 +8,7 @@ const pct = (a: number, b: number) => (b > 0 ? `${((a / b) * 100).toFixed(1)}%` 
 const num = (n: number | null) => (n === null ? "—" : n.toLocaleString());
 
 export function StatsScreen({ onBack }: { onBack: () => void }) {
-  const { t, stats: s, achievements, resetStats, yakuName, settings } = useApp();
+  const { t, stats: s, achievements, resetStats, yakuName } = useApp();
   const avgPlace =
     s.matches > 0 ? (s.placements.reduce((sum, n, i) => sum + n * (i + 1), 0) / s.matches).toFixed(2) : "—";
   const topYaku = Object.entries(s.yaku)
@@ -78,7 +78,7 @@ export function StatsScreen({ onBack }: { onBack: () => void }) {
         <section className={styles.card}>
           <h2>{t("achievements")}</h2>
           <ul className={styles.achievements}>
-            {visibleAchievements(settings.extrasUnlocked).map((a) => {
+            {ACHIEVEMENTS.map((a) => {
               const at = achievements[a.id];
               return (
                 <li key={a.id} data-done={at ? "" : undefined}>

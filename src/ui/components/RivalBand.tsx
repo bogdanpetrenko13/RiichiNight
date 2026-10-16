@@ -12,7 +12,6 @@ import styles from "./Band.module.css";
 interface RivalBandProps {
   character: CharacterDef;
   player: PlayerView;
-  stage: number;
   emotion?: Emotion;
   callout?: CallKind | null;
   speech?: string | null;
@@ -30,9 +29,8 @@ interface RivalBandProps {
  * One rival: wind, score and name with her portrait on the left; her river
  * (6 per row) on the right, closed hand and calls underneath.
  */
-export function RivalBand({ character, player, stage, emotion, callout, speech, active, dealer, claimed, riverCols = 6, tsumogiri = false }: RivalBandProps) {
-  const { t, charName, settings } = useApp();
-  const pips = character.stages - 1;
+export function RivalBand({ character, player, emotion, callout, speech, active, dealer, claimed, riverCols = 6, tsumogiri = false }: RivalBandProps) {
+  const { t, charName } = useApp();
   const lastIndex = player.discards.length - 1;
   const backStyle = { ["--tw" as string]: "var(--band-back, 14px)" };
 
@@ -101,13 +99,6 @@ export function RivalBand({ character, player, stage, emotion, callout, speech, 
         </span>
         <span className={styles.score}>{player.score.toLocaleString()}</span>
         <span className={styles.name}>{charName(character).split(" ")[0]}</span>
-        {settings.rewardScenes && (
-          <span className={styles.pips} aria-label={t("stageOf", { n: stage, total: pips })}>
-            {Array.from({ length: pips }, (_, i) => (
-              <i key={i} data-on={i < stage || undefined} />
-            ))}
-          </span>
-        )}
         <div className={styles.portrait}>
           <Portrait character={character} emotion={emotion} size={88} className={styles.face} />
           {callout && (

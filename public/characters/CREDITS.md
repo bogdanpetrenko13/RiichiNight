@@ -1,6 +1,6 @@
 # Character art credits
 
-All heroine portraits, expressions and reward scenes are built by
+All heroine portraits and expressions are built by
 `scripts/import-sutemo-art.py` from two layered sprite sets by **Sutemo**
 (itch.io):
 
@@ -10,8 +10,8 @@ All heroine portraits, expressions and reward scenes are built by
 | Female Character Sprite for Visual Novel (`Female_Sprite_by_Sutemo.psd`) | https://sutemo.itch.io/female-character | Yuzu, Nanami |
 
 Each heroine is a different combination of the sprite's layers (hairstyle,
-hair colour, outfit, accessories, expressions), composited over generated
-backgrounds. Only adult outfits are used.
+hair colour, outfit, accessories, expressions), cropped to the face. Only
+adult outfits are used.
 
 The author's terms allow use in personal and commercial projects; the sprite
 itself may not be resold on its own (including as a character creator). This
