@@ -72,6 +72,9 @@ export function PlayerBand({
           {t(`wind_${me.wind}` as StringKey)}
         </span>
         <span className={styles.score}>{me.score.toLocaleString()}</span>
+        {/* Landscape: a name line like the rivals', so every column's header
+            is the same height and all rivers start on one line. */}
+        {riverCols !== 9 && <span className={styles.name}>{t("you")}</span>}
         {riverCols === 9 && waits && <div className={styles.waitsSlot}>{waits}</div>}
         {riverCols !== 9 && waits && <div className={styles.waitsHead}>{waits}</div>}
       </div>

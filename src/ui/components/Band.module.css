@@ -367,30 +367,39 @@
 :global([data-orientation="landscape"]) .left {
   display: grid;
   grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto;
+  /* Portrait on the left; wind, score and name stacked to its right, so the
+     river starts right under the header. */
+  grid-template-rows: auto auto auto;
+  align-content: center;
   column-gap: 8px;
   row-gap: 0;
   align-items: center;
 }
 
 :global([data-orientation="landscape"]) .portrait {
-  grid-row: 1 / span 2;
+  grid-column: 1;
+  grid-row: 1 / span 3;
   margin: 0;
+}
+
+:global([data-orientation="landscape"]) .left > .wind,
+:global([data-orientation="landscape"]) .left > .score,
+:global([data-orientation="landscape"]) .left > .name {
+  grid-column: 2;
 }
 
 :global([data-orientation="landscape"]) .left > .wind {
   justify-self: start;
 }
 
-:global([data-orientation="landscape"]) .name,
 :global([data-orientation="landscape"]) .me .left {
-  /* Wind above the score, as tall as a rival's header (portrait), so all
-     rivers start on one line. */
+  /* Wind, score and "You" with no gaps, like a rival's header (rows without
+     gaps right of her portrait), so all rivers start on one line. */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 2px;
+  gap: 0;
   min-height: var(--band-portrait, 46px);
 }
 
@@ -482,24 +491,37 @@
   height: 14px;
 }
 
-/* Rival in riichi: a badge in place of her name. */
-.riichiBadge {
-  align-self: flex-start;
-  padding: 2px 9px;
-  border-radius: 999px;
-  background: #d2452f;
-  color: #ffffff;
-  font-size: 11.5px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  line-height: 1.35;
-  animation: riichiIn var(--dur-slow, 320ms) var(--ease-out) both;
+/* Rival in riichi: the band is tinted red with a solid edge on the left
+   (portrait) or on top (landscape columns). The turn frame (::after) stays
+   on top of it. */
+.band[data-riichi] {
+  background:
+    linear-gradient(90deg, rgba(210, 69, 47, 0.3), rgba(210, 69, 47, 0.06) 75%),
+    var(--band-bg);
 }
 
-@keyframes riichiIn {
-  from {
-    opacity: 0;
-    transform: scale(0.7);
-  }
+.band[data-riichi]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: var(--band-radius) 0 0 var(--band-radius);
+  background: #d2452f;
+  pointer-events: none;
+}
+
+:global([data-orientation="landscape"]) .band[data-riichi] {
+  background:
+    linear-gradient(180deg, rgba(210, 69, 47, 0.3), rgba(210, 69, 47, 0.06) 75%),
+    var(--band-bg);
+}
+
+:global([data-orientation="landscape"]) .band[data-riichi]::before {
+  right: 0;
+  bottom: auto;
+  width: auto;
+  height: 4px;
+  border-radius: var(--band-radius) var(--band-radius) 0 0;
 }

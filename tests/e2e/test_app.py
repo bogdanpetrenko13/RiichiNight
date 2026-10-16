@@ -113,9 +113,9 @@ def test_table_centre_shows_dora_and_counters(make_app):
     assert not app.errors and not land.errors
 
 
-def test_rival_riichi_shows_a_badge(make_app):
-    """A rival in riichi gets a "Риичи" badge in place of her name (seed 2: Hikari
-    declares riichi in the first hand)."""
+def test_rival_riichi_tints_her_band(make_app):
+    """A rival in riichi gets her band tinted with a red edge (seed 2: Hikari
+    declares riichi in the first hand); the others stay plain."""
     app = make_app(PORTRAIT).open("?seed=2", {"aiDelay": 200}).start_game()
     page = app.page
     in_riichi = "() => document.querySelectorAll('section[aria-label] [class*=riichiLine]:not([data-empty])').length"
@@ -124,9 +124,24 @@ def test_rival_riichi_shows_a_badge(make_app):
         if state == "result" or page.evaluate(in_riichi):
             break
     assert page.evaluate(in_riichi), "no rival riichi in this deal"
-    band = page.locator("section[aria-label]:has([class*=riichiLine]:not([data-empty]))").first
-    assert band.locator("[class*=riichiBadge]").inner_text().strip().lower() == "риичи"
-    assert page.locator("[class*=riichiBadge]").count() == 1
+    assert page.locator("section[data-riichi]").count() == 1
+    band = page.locator("section[data-riichi]").first
+    assert band.locator("[class*=riichiLine]:not([data-empty])").count() == 1
+    edge = band.evaluate("e => getComputedStyle(e, '::before').backgroundColor")
+    assert edge == "rgb(210, 69, 47)", edge
+    assert "риичи" in band.get_attribute("aria-label").lower()
+    assert not app.errors, app.errors
+
+
+def test_landscape_rivers_start_on_one_line(make_app):
+    """Landscape: rivals (portrait + wind/score/name) and the player (wind/score/
+    "You") have headers of one height, so every river starts on the same line."""
+    app = make_app(LANDSCAPE).open("?seed=7").start_game()
+    app.wait_my_turn()
+    tops = app.page.evaluate(
+        "() => Array.from(document.querySelectorAll('section')).map(s => Math.round(s.querySelector('[class*=river]').getBoundingClientRect().top))"
+    )
+    assert len(tops) == 4 and max(tops) - min(tops) <= 1, tops
     assert not app.errors, app.errors
 
 
@@ -161,13 +176,15 @@ def test_landscape_drawn_tiles_stay_in_place(make_app):
         if checked_me >= 2 and checked_rival >= 2:
             break
         # A rival holding her drawn tile: it stays inside her column.
-        drawn = app.page.locator("section [data-drawn]")
-        if drawn.count():
-            box = drawn.first.bounding_box()
-            band = drawn.first.locator("xpath=ancestor::section[1]").bounding_box()
-            if box and band:
-                assert box["x"] + box["width"] <= band["x"] + band["width"] - 2, (box, band)
-                checked_rival += 1
+        # Tile and band measured in one call: the turn may move between two.
+        pair = app.page.evaluate(
+            """() => { const d = document.querySelector('section [data-drawn]'); if (!d) return null;
+                 const b = d.getBoundingClientRect(), s = d.closest('section').getBoundingClientRect();
+                 return [b.right, s.right]; }"""
+        )
+        if pair:
+            assert pair[0] <= pair[1] - 2, pair
+            checked_rival += 1
         if app.my_turn() and not app.button("Пропуск").count():
             app.page.wait_for_timeout(500)
             tiles = app.page.locator("[class*=dock] [data-k]")

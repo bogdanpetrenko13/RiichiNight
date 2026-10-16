@@ -90,8 +90,11 @@ export function RivalBand({ character, player, emotion, callout, speech, active,
     <section
       className={styles.band}
       data-active={active || undefined}
+      // In riichi the whole band is tinted (Band.module.css): the first thing
+      // to check before a dangerous discard.
+      data-riichi={player.riichi || undefined}
       style={{ ["--c" as string]: character.color }}
-      aria-label={charName(character)}
+      aria-label={player.riichi ? `${charName(character)} · ${t("act_riichi")}` : charName(character)}
     >
       <div className={styles.left}>
         <span className={styles.wind} data-dealer={dealer || undefined}>
@@ -100,9 +103,7 @@ export function RivalBand({ character, player, emotion, callout, speech, active,
         <span className={styles.score}>{player.score.toLocaleString()}</span>
         {/* In riichi a badge takes the name's place: the first thing to check
             before a dangerous discard. */}
-        <span className={styles.name}>
-          {player.riichi ? <span className={styles.riichiBadge}>{t("act_riichi")}</span> : charName(character).split(" ")[0]}
-        </span>
+        <span className={styles.name}>{charName(character).split(" ")[0]}</span>
         <div className={styles.portrait}>
           <Portrait character={character} emotion={emotion} size={88} className={styles.face} />
           {callout && (
