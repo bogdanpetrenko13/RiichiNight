@@ -48,6 +48,8 @@ export const RING_SWATCH: Record<Exclude<TurnRing, "auto">, string> = {
   sky: "#6cb6ff",
   lime: "#a5e05a",
 };
+/** Colour of the dealer's wind badge; same choices as the turn highlight. */
+export type DealerChip = TurnRing;
 export type TurnRingStyle = "line" | "glow";
 export const TURN_RING_STYLES: TurnRingStyle[] = ["line", "glow"];
 
@@ -73,6 +75,8 @@ export interface Settings {
   /** Turn frame colour and look. */
   turnRing: TurnRing;
   turnRingStyle: TurnRingStyle;
+  /** Dealer badge colour. */
+  dealerChip: DealerChip;
   /** Corner index on tiles: none, man + winds, or all. */
   tileHints: TileHints;
   /** Result screen: "How it's scored" section expanded. */
@@ -122,6 +126,7 @@ export function defaultSettings(): Settings {
     feltColor: "emerald",
     turnRing: "auto",
     turnRingStyle: "line",
+    dealerChip: "auto",
     tileHints: "man",
     theme: "system",
     styleVersion: STYLE_VERSION,
@@ -162,6 +167,7 @@ export async function loadSettings(): Promise<Settings> {
   if (rest.tableStyle !== undefined && !TABLE_STYLES.includes(rest.tableStyle)) delete rest.tableStyle;
   if (rest.feltColor !== undefined && !FELT_COLORS.includes(rest.feltColor)) delete rest.feltColor;
   if (rest.turnRing !== undefined && !TURN_RINGS.includes(rest.turnRing)) delete rest.turnRing;
+  if (rest.dealerChip !== undefined && !TURN_RINGS.includes(rest.dealerChip)) delete rest.dealerChip;
   if (rest.turnRingStyle !== undefined && !TURN_RING_STYLES.includes(rest.turnRingStyle)) delete rest.turnRingStyle;
   if (rest.aiDelay === undefined && oldSpeed) rest.aiDelay = OLD_SPEED[oldSpeed] ?? AI_DELAY_DEFAULT;
   return {

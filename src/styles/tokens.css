@@ -263,6 +263,16 @@
 [data-ring="sky"] [data-zone] { --active-ring: #6cb6ff; }
 [data-ring="lime"] [data-zone] { --active-ring: #a5e05a; }
 
+/* Dealer badge colour (Settings → Dealer badge), data-dealer-chip next to
+   data-style; without it the badge uses the style's --primary. */
+[data-dealer-chip="gold"] [data-zone] { --dealer-bg: #f2c14e; --dealer-text: #221a0c; }
+[data-dealer-chip="ivory"] [data-zone] { --dealer-bg: #f3efe2; --dealer-text: #221a0c; }
+[data-dealer-chip="coral"] [data-zone] { --dealer-bg: #ff7a59; --dealer-text: #221a0c; }
+[data-dealer-chip="aqua"] [data-zone] { --dealer-bg: #3fd6cf; --dealer-text: #221a0c; }
+[data-dealer-chip="sakura"] [data-zone] { --dealer-bg: #ff7ab6; --dealer-text: #221a0c; }
+[data-dealer-chip="sky"] [data-zone] { --dealer-bg: #6cb6ff; --dealer-text: #221a0c; }
+[data-dealer-chip="lime"] [data-zone] { --dealer-bg: #a5e05a; --dealer-text: #221a0c; }
+
 /* ---- tile sets (data-tileset on <html>) ----------------------------------- */
 /* Traditional look: warm face, amber edge, golden backs. */
 :root[data-tileset="classic"] {

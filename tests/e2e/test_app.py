@@ -77,9 +77,9 @@ def test_table_layout_after_a_few_turns(make_app, name, viewport, style):
 
 
 def test_table_look_settings_reach_the_table(make_app):
-    """Felt colour and turn highlight from Settings land on the table and the
-    active band's frame takes the chosen colour."""
-    look = {"tableStyle": "felt", "feltColor": "burgundy", "turnRing": "aqua", "turnRingStyle": "glow"}
+    """Felt colour, turn highlight and dealer badge from Settings land on the
+    table: the active band's frame and the dealer's wind take the chosen colours."""
+    look = {"tableStyle": "felt", "feltColor": "burgundy", "turnRing": "aqua", "turnRingStyle": "glow", "dealerChip": "sakura"}
     app = make_app(PORTRAIT).open("?seed=7", look).start_game()
     app.wait_my_turn()
     page = app.page
@@ -91,6 +91,8 @@ def test_table_look_settings_reach_the_table(make_app):
         "() => getComputedStyle(document.querySelector('[data-active]'), '::after').boxShadow"
     )
     assert "rgb(63, 214, 207)" in ring and ring.count("inset") == 2, ring
+    chip = page.evaluate("() => getComputedStyle(document.querySelector('[data-dealer]')).backgroundColor")
+    assert chip == "rgb(255, 122, 182)", chip
     app.shot("table_look_burgundy_aqua_glow")
     assert not app.errors, app.errors
 

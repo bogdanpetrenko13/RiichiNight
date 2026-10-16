@@ -63,8 +63,9 @@
 }
 
 .wind[data-dealer] {
-  background: var(--primary);
-  color: var(--on-primary);
+  /* --dealer-* come from Settings → Dealer badge (tokens.css). */
+  background: var(--dealer-bg, var(--primary));
+  color: var(--dealer-text, var(--on-primary));
 }
 
 .score {

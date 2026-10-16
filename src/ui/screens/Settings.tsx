@@ -101,6 +101,19 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
                   onChange={(turnRingStyle) => updateSettings({ turnRingStyle })}
                 />
               </div>
+            </div>
+          </Row>
+          <Row label={t("dealerChip")} hint={t(`turnRing_${settings.dealerChip}` as StringKey)} stacked>
+            <div className={styles.ringControls}>
+              <Swatches
+                value={settings.dealerChip}
+                options={TURN_RINGS.map((r) => ({
+                  value: r,
+                  label: t(`turnRing_${r}` as StringKey),
+                  color: r === "auto" ? undefined : RING_SWATCH[r],
+                }))}
+                onChange={(dealerChip) => updateSettings({ dealerChip })}
+              />
               <LookPreview settings={settings} />
             </div>
           </Row>
@@ -227,12 +240,17 @@ function Swatches<T extends string>({
 
 /** Two small bands in the chosen look; the upper one has the turn. */
 function LookPreview({ settings }: { settings: Settings }) {
+  const { t } = useApp();
   return (
     <div className={styles.look} data-style={settings.tableStyle} {...lookAttrs(settings)} aria-hidden>
       <div className={styles.lookBand} data-zone data-active>
+        <span className={styles.lookWind} data-dealer>
+          {t("wind_east")}
+        </span>
         <TileRow text="345m 77p" size={22} />
       </div>
       <div className={styles.lookBand} data-zone>
+        <span className={styles.lookWind}>{t("wind_south")}</span>
         <TileRow text="1z 9s" size={22} />
       </div>
     </div>
