@@ -1,0 +1,75 @@
+name: Mortal kit
+
+# Run by hand. Builds everything the Mortal port needs that Claude's container
+# cannot download (crates.io, Hugging Face and PyPI are blocked there) and
+# publishes it as the pre-release "mortal-kit":
+#   mortal-src.tar.gz       Mortal at the pinned commit + `cargo vendor` crates
+#   rustlib-wasm32.tar.gz   the wasm32 standard library for the pinned rustc
+#   s42.bin / s42.json      Mortal S42 weights (Apache-2.0) as flat float32
+#   reference.tar.gz        self-play mjai logs + encoder / Q-value reference
+on:
+  workflow_dispatch:
+    inputs:
+      games:
+        description: Self-play hanchan sets (x4 games)
+        default: "1"
+
+permissions:
+  contents: write
+
+env:
+  MORTAL_COMMIT: 0cff2b52982be5b1163aa9a62fb01f03ce91e0d2
+  RUST_VERSION: 1.97.0
+  S42_URL: https://huggingface.co/haor/Mortal-S42/resolve/main
+
+jobs:
+  kit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rust
+        run: |
+          rustup toolchain install $RUST_VERSION --profile minimal --target wasm32-unknown-unknown
+          rustup default $RUST_VERSION
+      - name: Mortal source and vendored crates
+        run: |
+          git clone https://github.com/Equim-chan/Mortal.git
+          cd Mortal && git checkout $MORTAL_COMMIT
+          mkdir -p .cargo
+          cargo vendor --versioned-dirs vendor > .cargo/config.toml
+          cd .. && tar czf mortal-src.tar.gz --exclude=Mortal/.git Mortal
+          tar czf rustlib-wasm32.tar.gz -C ~/.rustup/toolchains/$RUST_VERSION-x86_64-unknown-linux-gnu/lib/rustlib wasm32-unknown-unknown
+          ls -la *.tar.gz
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python packages
+        run: pip install --index-url https://download.pytorch.org/whl/cpu torch && pip install numpy
+      - name: Weights
+        run: |
+          curl -fsSL -o s42.pth "$S42_URL/weights/s42-inference.pth"
+          curl -fsSL -o model-identity.json "$S42_URL/model-identity.json"
+          want=$(python -c "import json;print(json.load(open('model-identity.json'))['sha256'])")
+          have=$(sha256sum s42.pth | cut -d' ' -f1)
+          echo "::notice::s42 sha256 $have (expected $want)"
+          test "$want" = "$have"
+          python scripts/mortal/export_weights.py s42.pth s42
+      - name: libriichi Python module
+        run: |
+          cd Mortal && cargo build --release -p libriichi --lib
+          cp target/release/libriichi.so mortal/libriichi.so
+      - name: Reference data
+        env:
+          GAMES: ${{ inputs.games }}
+        run: |
+          mkdir -p ref
+          python scripts/mortal/make_reference.py Mortal/mortal s42.pth ref
+          tar czf reference.tar.gz -C ref .
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete mortal-kit --yes --cleanup-tag 2>/dev/null || true
+          gh release create mortal-kit --prerelease --title "Mortal kit" \
+            --notes "Build inputs for the Mortal port (Mortal $MORTAL_COMMIT, AGPL-3.0; S42 weights by haor, Apache-2.0)." \
+            mortal-src.tar.gz rustlib-wasm32.tar.gz s42.bin s42.json model-identity.json reference.tar.gz
