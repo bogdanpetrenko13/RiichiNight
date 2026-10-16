@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useApp } from "../../app/AppContext";
 import { CHARACTERS, getCharacter, isUnlocked, type CharacterDef } from "../../game/characters";
-import type { StringKey } from "../../i18n/strings";
 import { Portrait } from "../components/Portrait";
 import { AppBar, IconButton, Segmented } from "../components/Primitives";
 import { Icon } from "../icons";
@@ -43,49 +42,76 @@ export function Setup({ initial, onBack, onStart }: SetupProps) {
     setCast(pool.slice(0, 3).map((c) => c.id));
   };
 
+  // The heroine shown in the card under the grid: the last one tapped.
+  const [focus, setFocus] = useState<string>(() => cast[cast.length - 1] ?? CHARACTERS[0].id);
+  const focused = getCharacter(focus) ?? CHARACTERS[0];
+  const focusedOpen = isUnlocked(focused, rivals);
+  const tiers = [
+    { label: t("ladderTier1"), list: CHARACTERS.filter((c) => c.step <= 6) },
+    { label: t("ladderTier2"), list: CHARACTERS.filter((c) => c.step > 6) },
+  ];
+
   return (
     <div className="screen">
       <AppBar title={t("chooseRivals")} onBack={onBack} right={<IconButton icon="dice" label={t("random")} onClick={randomize} />} />
       <div className="screen-body">
-        <div className={styles.list}>
-          {CHARACTERS.map((c) => {
-            const open = isUnlocked(c, rivals);
-            const seat = cast.indexOf(c.id);
-            return (
-              <button
-                key={c.id}
-                className={styles.card}
-                data-picked={seat >= 0 || undefined}
-                data-locked={!open || undefined}
-                disabled={!open}
-                onClick={() => toggle(c.id)}
-                style={{ ["--c" as string]: c.color }}
-              >
-                <div className={styles.portrait}>
-                  <Portrait character={c} size={76} round />
-                  {!open && (
-                    <span className={styles.lock}>
-                      <Icon name="lock" />
+        {tiers.map((tier) => (
+          <section key={tier.label} className={styles.tier}>
+            <h2 className={styles.tierTitle}>{tier.label}</h2>
+            <div className={styles.grid}>
+              {tier.list.map((c) => {
+                const open = isUnlocked(c, rivals);
+                const picked = cast.includes(c.id);
+                return (
+                  <button
+                    key={c.id}
+                    className={styles.cell}
+                    data-picked={picked || undefined}
+                    data-locked={!open || undefined}
+                    data-focus={focus === c.id || undefined}
+                    aria-pressed={picked}
+                    aria-label={open ? charName(c) : t("ladderStep", { n: c.step })}
+                    onClick={() => {
+                      setFocus(c.id);
+                      if (open) toggle(c.id);
+                    }}
+                    style={{ ["--c" as string]: c.color }}
+                  >
+                    <span className={styles.face}>
+                      <Portrait character={c} size={78} round />
+                      {!open && (
+                        <span className={styles.lock}>
+                          <Icon name="lock" />
+                        </span>
+                      )}
+                      <i className={styles.step}>{c.step}</i>
                     </span>
-                  )}
-                </div>
-                <div className={styles.body}>
-                  <div className={styles.name}>{charName(c)}</div>
-                  <div className={styles.meta}>
-                    <span className={styles.chip} data-level={c.level}>
-                      {t(`level_${c.level}` as StringKey)}
-                    </span>
-                    <span>{c.title[lang]}</span>
-                    <span>· {c.age}</span>
-                  </div>
-                  <p className={styles.bio}>{open ? c.bio[lang] : unlockHint(c)}</p>
-                </div>
-                <span className={styles.badge}>
-                  {seat >= 0 ? <Icon name="check" size={18} /> : null}
-                </span>
-              </button>
-            );
-          })}
+                    <span className={styles.cellName}>{open ? c.name[lang].split(" ")[0] : "???"}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+
+        {/* Card of the last tapped heroine: profile, or how to unlock her. */}
+        <div className={styles.detail} style={{ ["--c" as string]: focused.color }}>
+          <span className={styles.detailFace} data-locked={!focusedOpen || undefined}>
+            <Portrait character={focused} size={72} round />
+          </span>
+          <div className={styles.body}>
+            <div className={styles.name}>
+              {focused.step} · {focusedOpen ? charName(focused) : "???"}
+            </div>
+            <Pips step={focused.step} />
+            {focusedOpen && (
+              <div className={styles.meta}>
+                <span>{focused.title[lang]}</span>
+                <span>· {focused.age}</span>
+              </div>
+            )}
+            <p className={styles.bio}>{focusedOpen ? focused.bio[lang] : unlockHint(focused)}</p>
+          </div>
         </div>
       </div>
 
@@ -104,5 +130,16 @@ export function Setup({ initial, onBack, onStart }: SetupProps) {
         </button>
       </footer>
     </div>
+  );
+}
+
+/** Difficulty: one bar per ladder step, filled up to hers. */
+function Pips({ step }: { step: number }) {
+  return (
+    <span className={styles.pips} aria-hidden>
+      {Array.from({ length: CHARACTERS.length }, (_, i) => (
+        <b key={i} data-on={i < step || undefined} />
+      ))}
+    </span>
   );
 }

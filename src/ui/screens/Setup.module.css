@@ -1,51 +1,67 @@
-.list {
+/* Rival picker: the ladder as a grid of portraits in two tiers, and a card
+   with the last tapped heroine under it. */
+.tier {
+  margin-bottom: 14px;
+}
+
+.tierTitle {
+  margin: 4px 2px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 8px;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.cell {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-bottom: 140px;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border: 0;
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
 }
 
-.card {
+.cell[data-focus] {
+  background: color-mix(in srgb, var(--c) 10%, transparent);
+}
+
+.face {
   position: relative;
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 14px;
-  align-items: center;
-  padding: 12px 14px;
-  border-radius: var(--radius-m);
-  border: 1px solid var(--line);
-  background: var(--surface-1);
-  box-shadow: var(--shadow-sm);
-  color: var(--ink);
-  text-align: left;
-  cursor: pointer;
-  transition:
-    border-color 160ms,
-    background 160ms,
-    transform 120ms var(--ease-out);
+  border-radius: 50%;
+  transition: box-shadow 160ms;
 }
 
-.card:active {
-  transform: scale(0.985);
+/* Open but not picked: dimmed, so the three picked ones stand out. */
+.cell:not([data-picked]):not([data-locked]) .face {
+  opacity: 0.55;
 }
 
-.card[data-picked] {
-  border-color: var(--c);
-  background: color-mix(in srgb, var(--c) 8%, var(--surface));
-  box-shadow: inset 4px 0 0 var(--c);
+/* Picked: a thick ring in her colour. */
+.cell[data-picked] .face {
+  box-shadow: 0 0 0 4px var(--bg), 0 0 0 7px var(--c);
 }
 
-.card[data-locked] {
-  cursor: default;
-  opacity: 0.7;
-}
-
-.portrait {
-  position: relative;
-}
-
-.card[data-locked] .portrait {
-  filter: grayscale(1) brightness(0.5);
+.cell[data-locked] .face > :first-child,
+.detailFace[data-locked] {
+  filter: grayscale(1) brightness(0.45);
 }
 
 .lock {
@@ -56,66 +72,98 @@
   color: white;
 }
 
+.step {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-alt);
+  color: var(--ink);
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.cell[data-picked] .step {
+  border-color: var(--c);
+  background: var(--c);
+  color: #ffffff;
+}
+
+.cellName {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.cell[data-locked] .cellName {
+  color: var(--ink-faint);
+}
+
+.detail {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  margin: 6px 0 150px;
+  padding: 14px;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--c);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.detailFace {
+  display: grid;
+}
+
 .body {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .name {
   font-size: 17px;
   font-weight: 800;
-  padding-right: 80px;
 }
 
 .meta {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 6px;
   font-size: 12.5px;
   color: var(--ink-soft);
 }
 
-.chip {
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-weight: 800;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: rgba(100, 214, 162, 0.18);
-  color: var(--ok);
+.pips {
+  display: flex;
+  gap: 3px;
 }
 
-.chip[data-level="normal"] {
-  background: rgba(242, 193, 78, 0.18);
-  color: var(--gold);
+.pips b {
+  width: 10px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--border);
 }
 
-.chip[data-level="hard"] {
-  background: rgba(255, 107, 94, 0.18);
-  color: var(--danger);
+.pips b[data-on] {
+  background: var(--warning, #e0b058);
 }
 
 .bio {
   margin: 0;
   font-size: 13px;
-  line-height: 1.35;
+  line-height: 1.4;
   color: var(--ink-soft);
-}
-
-.badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--c);
 }
 
 .footer {

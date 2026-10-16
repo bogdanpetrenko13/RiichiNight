@@ -16,22 +16,67 @@
   padding-top: 24px;
 }
 
-.cast {
-  display: flex;
-  margin-bottom: 8px;
+/* Difficulty ladder under the tagline (Title.tsx). */
+.ladder {
+  margin-top: 18px;
+  width: 100%;
+  max-width: 380px;
 }
 
-.castItem {
-  margin: 0 -10px;
-  transform: translateY(calc((var(--i) - 1.5) * (var(--i) - 1.5) * 4px));
-  animation: float 4s ease-in-out infinite;
-  animation-delay: calc(var(--i) * -0.9s);
+.steps {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px 0;
+  justify-items: center;
 }
 
-@keyframes float {
-  50% {
-    translate: 0 -6px;
-  }
+.stepItem {
+  position: relative;
+  display: grid;
+  border-radius: 50%;
+}
+
+.stepItem[data-locked] > :first-child {
+  filter: grayscale(1) brightness(0.45);
+}
+
+.stepItem[data-next] {
+  outline: 2px dashed var(--warning, #e0b058);
+  outline-offset: 4px;
+}
+
+.stepItem i {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-alt);
+  color: var(--ink);
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.stepItem:not([data-locked]) i {
+  border-color: var(--warning, #e0b058);
+  background: var(--warning, #e0b058);
+  color: #221a0c;
+}
+
+.ladderText {
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.ladderText b {
+  color: var(--warning, #e0b058);
 }
 
 .logo {

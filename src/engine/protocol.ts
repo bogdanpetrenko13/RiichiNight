@@ -5,7 +5,13 @@
 export type TileCode = string;
 
 export type Wind = "east" | "south" | "west" | "north";
-export type Level = "easy" | "normal" | "hard";
+/**
+ * A heroine's strength (public/py/ai.py parse_level): the heuristic AI at
+ * "easy" / "normal" / "hard", "heur:<r>" (hard with a share r of random
+ * discards), or Mortal: "mortal" / "mortal:<p>" (a share p of moves left to
+ * the heuristic AI).
+ */
+export type Level = "easy" | "normal" | "hard" | `heur:${number}` | "mortal" | `mortal:${number}`;
 
 export type ActionName =
   | "discard"

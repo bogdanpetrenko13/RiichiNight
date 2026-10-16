@@ -18,7 +18,7 @@ interface TitleProps {
 }
 
 export function Title({ saved, onNew, onContinue, onSettings, onLearn, onStats }: TitleProps) {
-  const { t, lang, stats, rivals } = useApp();
+  const { t, lang, stats } = useApp();
   useEffect(() => music.play("title"), []);
 
   const tiles: { icon: IconName; label: StringKey; onClick: () => void; hidden?: boolean }[] = [
@@ -30,18 +30,12 @@ export function Title({ saved, onNew, onContinue, onSettings, onLearn, onStats }
   return (
     <div className={`screen ${styles.home}`}>
       <section className={styles.hero}>
-        <div className={styles.cast}>
-          {CHARACTERS.filter((c) => isUnlocked(c, rivals)).slice(0, 4).map((c, i) => (
-            <div key={c.id} className={styles.castItem} style={{ ["--i" as string]: i }}>
-              <Portrait character={c} size={84} round />
-            </div>
-          ))}
-        </div>
         <h1 className={styles.logo}>
           <span>Riichi Mahjong</span>
           {t("appTitle")}
         </h1>
         <p className={styles.tagline}>{t("subtitle")}</p>
+        <Ladder />
       </section>
 
       <section className={styles.actions}>
@@ -88,6 +82,45 @@ export function Title({ saved, onNew, onContinue, onSettings, onLearn, onStats }
           </p>
         )}
       </section>
+    </div>
+  );
+}
+
+/** The difficulty ladder: 12 portraits, the next locked step outlined. */
+function Ladder() {
+  const { t, lang, rivals } = useApp();
+  const open = CHARACTERS.filter((c) => isUnlocked(c, rivals));
+  const next = CHARACTERS.find((c) => !isUnlocked(c, rivals));
+  const total = CHARACTERS.length;
+  return (
+    <div className={styles.ladder}>
+      <div className={styles.steps}>
+        {CHARACTERS.map((c) => {
+          const unlocked = isUnlocked(c, rivals);
+          return (
+            <span
+              key={c.id}
+              className={styles.stepItem}
+              data-locked={!unlocked || undefined}
+              data-next={c === next || undefined}
+              title={unlocked ? c.name[lang] : t("ladderStep", { n: c.step })}
+            >
+              <Portrait character={c} size={46} round />
+              <i>{c.step}</i>
+            </span>
+          );
+        })}
+      </div>
+      <p className={styles.ladderText}>
+        {next ? (
+          <>
+            {t("ladderProgress", { n: open.length, total })} · {t("ladderNext", { name: "" })}
+            <b>{next.name[lang].split(" ")[0]}</b>
+          </>
+        ) : (
+          t("ladderDone", { total })
+        )}
+      </p>
     </div>
   );
 }
