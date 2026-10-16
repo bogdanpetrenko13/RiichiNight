@@ -228,6 +228,13 @@
   color: var(--ink);
 }
 
+/* Landscape: the bands are columns, so the felt seams run vertically
+   (as in portrait, where a band's top edge is dark and its bottom light:
+   here the left edge is dark and the right one light). */
+[data-style="felt"][data-orientation="landscape"] [data-zone] {
+  --band-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.07), inset 1px 0 0 rgba(0, 0, 0, 0.25);
+}
+
 /* Felt colours (Settings → Felt colour), set as data-felt next to data-style.
    Emerald is the base felt above. --btn-call-text is the felt's deep tone. */
 [data-style="felt"][data-felt="sapphire"] {
