@@ -1,7 +1,21 @@
 import { useApp } from "../../app/AppContext";
 import { LANGS, type StringKey } from "../../i18n/strings";
 import type { GameRules } from "../../engine/protocol";
-import { AI_DELAY_MAX, AI_DELAY_MIN, STYLE_TILESET, TABLE_STYLES, THEME_MODES, TILESETS, type Settings } from "../../game/storage";
+import {
+  AI_DELAY_MAX,
+  AI_DELAY_MIN,
+  FELT_COLORS,
+  FELT_SWATCH,
+  RING_SWATCH,
+  STYLE_TILESET,
+  TABLE_STYLES,
+  THEME_MODES,
+  TILESETS,
+  TURN_RINGS,
+  TURN_RING_STYLES,
+  type Settings,
+} from "../../game/storage";
+import { lookAttrs } from "../tableLook";
 import { TileRow } from "../components/TileRow";
 import { AppBar, Group, Row, Segmented, Switch } from "../components/Primitives";
 import styles from "./SettingsScreen.module.css";
@@ -59,6 +73,36 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
               options={TABLE_STYLES.map((st) => ({ value: st, label: t(`tableStyle_${st}` as StringKey) }))}
               onChange={(tableStyle) => updateSettings({ tableStyle, tileset: STYLE_TILESET[tableStyle] })}
             />
+          </Row>
+          {settings.tableStyle === "felt" && (
+            <Row label={t("feltColor")} hint={t(`feltColor_${settings.feltColor}` as StringKey)} stacked>
+              <Swatches
+                value={settings.feltColor}
+                options={FELT_COLORS.map((c) => ({ value: c, label: t(`feltColor_${c}` as StringKey), color: FELT_SWATCH[c] }))}
+                onChange={(feltColor) => updateSettings({ feltColor })}
+              />
+            </Row>
+          )}
+          <Row label={t("turnRing")} hint={t(`turnRing_${settings.turnRing}` as StringKey)} stacked>
+            <div className={styles.ringControls}>
+              <Swatches
+                value={settings.turnRing}
+                options={TURN_RINGS.map((r) => ({
+                  value: r,
+                  label: t(`turnRing_${r}` as StringKey),
+                  color: r === "auto" ? undefined : RING_SWATCH[r],
+                }))}
+                onChange={(turnRing) => updateSettings({ turnRing })}
+              />
+              <div className={styles.ringStyle}>
+                <Segmented
+                  value={settings.turnRingStyle}
+                  options={TURN_RING_STYLES.map((m) => ({ value: m, label: t(`turnRingStyle_${m}` as StringKey) }))}
+                  onChange={(turnRingStyle) => updateSettings({ turnRingStyle })}
+                />
+              </div>
+              <LookPreview settings={settings} />
+            </div>
           </Row>
           <Row label={t("tileset")} stacked>
             <Segmented
@@ -146,6 +190,50 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
             </a>
           </Row>
         </Group>
+      </div>
+    </div>
+  );
+}
+
+/** Round colour chips; "auto" (no colour) shows a split chip. */
+function Swatches<T extends string>({
+  value,
+  options,
+  onChange,
+}: {
+  value: T;
+  options: { value: T; label: string; color?: string }[];
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div className={styles.swatches} role="radiogroup">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          role="radio"
+          aria-checked={o.value === value}
+          aria-label={o.label}
+          title={o.label}
+          data-on={o.value === value || undefined}
+          data-auto={o.color === undefined || undefined}
+          className={styles.swatch}
+          style={o.color ? { ["--sw" as string]: o.color } : undefined}
+          onClick={() => onChange(o.value)}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Two small bands in the chosen look; the upper one has the turn. */
+function LookPreview({ settings }: { settings: Settings }) {
+  return (
+    <div className={styles.look} data-style={settings.tableStyle} {...lookAttrs(settings)} aria-hidden>
+      <div className={styles.lookBand} data-zone data-active>
+        <TileRow text="345m 77p" size={22} />
+      </div>
+      <div className={styles.lookBand} data-zone>
+        <TileRow text="1z 9s" size={22} />
       </div>
     </div>
   );

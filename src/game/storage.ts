@@ -24,6 +24,33 @@ export const TABLE_STYLES: TableStyle[] = ["quiet", "felt"];
 /** Tile set that suits each table style (applied when the style changes). */
 export const STYLE_TILESET: Record<TableStyle, Tileset> = { quiet: "modern", felt: "classic" };
 
+/** Felt colour of the "felt" table style (src/styles/tokens.css). */
+export type FeltColor = "emerald" | "sapphire" | "burgundy" | "graphite" | "amethyst" | "wood";
+export const FELT_COLORS: FeltColor[] = ["emerald", "sapphire", "burgundy", "graphite", "amethyst", "wood"];
+/** Colour of the frame around the band whose turn it is; "auto" follows the table style. */
+export type TurnRing = "auto" | "gold" | "ivory" | "coral" | "aqua" | "sakura" | "sky" | "lime";
+export const TURN_RINGS: TurnRing[] = ["auto", "gold", "ivory", "coral", "aqua", "sakura", "sky", "lime"];
+/** Swatch colours for the settings screen (the table reads them from tokens.css). */
+export const FELT_SWATCH: Record<FeltColor, string> = {
+  emerald: "#1a3d2f",
+  sapphire: "#183354",
+  burgundy: "#4a1a24",
+  graphite: "#25282c",
+  amethyst: "#2c1f48",
+  wood: "#55391f",
+};
+export const RING_SWATCH: Record<Exclude<TurnRing, "auto">, string> = {
+  gold: "#f2c14e",
+  ivory: "#f3efe2",
+  coral: "#ff7a59",
+  aqua: "#3fd6cf",
+  sakura: "#ff7ab6",
+  sky: "#6cb6ff",
+  lime: "#a5e05a",
+};
+export type TurnRingStyle = "line" | "glow";
+export const TURN_RING_STYLES: TurnRingStyle[] = ["line", "glow"];
+
 /** Bumped when the look changes so old theme choices are replaced once. */
 const STYLE_VERSION = 3;
 
@@ -41,6 +68,11 @@ export interface Settings {
   tileset: Tileset;
   /** Table look: flat cards ("quiet") or one green felt ("felt"). */
   tableStyle: TableStyle;
+  /** Felt colour (felt style only). */
+  feltColor: FeltColor;
+  /** Turn frame colour and look. */
+  turnRing: TurnRing;
+  turnRingStyle: TurnRingStyle;
   /** Corner index on tiles: none, man + winds, or all. */
   tileHints: TileHints;
   /** Result screen: "How it's scored" section expanded. */
@@ -87,6 +119,9 @@ export function defaultSettings(): Settings {
     speechBubbles: true,
     tileset: "modern",
     tableStyle: "quiet",
+    feltColor: "emerald",
+    turnRing: "auto",
+    turnRingStyle: "line",
     tileHints: "man",
     theme: "system",
     styleVersion: STYLE_VERSION,
@@ -123,6 +158,11 @@ export async function loadSettings(): Promise<Settings> {
   for (const key of ["extrasUnlocked", "adultConfirmed", "rewardScenes", "rewardRules", "progressGate"]) {
     delete (rest as Record<string, unknown>)[key];
   }
+  // Unknown values (a build with other choices) fall back to the defaults.
+  if (rest.tableStyle !== undefined && !TABLE_STYLES.includes(rest.tableStyle)) delete rest.tableStyle;
+  if (rest.feltColor !== undefined && !FELT_COLORS.includes(rest.feltColor)) delete rest.feltColor;
+  if (rest.turnRing !== undefined && !TURN_RINGS.includes(rest.turnRing)) delete rest.turnRing;
+  if (rest.turnRingStyle !== undefined && !TURN_RING_STYLES.includes(rest.turnRingStyle)) delete rest.turnRingStyle;
   if (rest.aiDelay === undefined && oldSpeed) rest.aiDelay = OLD_SPEED[oldSpeed] ?? AI_DELAY_DEFAULT;
   return {
     ...base,

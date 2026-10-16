@@ -76,6 +76,25 @@ def test_table_layout_after_a_few_turns(make_app, name, viewport, style):
     assert not app.errors, app.errors
 
 
+def test_table_look_settings_reach_the_table(make_app):
+    """Felt colour and turn highlight from Settings land on the table and the
+    active band's frame takes the chosen colour."""
+    look = {"tableStyle": "felt", "feltColor": "burgundy", "turnRing": "aqua", "turnRingStyle": "glow"}
+    app = make_app(PORTRAIT).open("?seed=7", look).start_game()
+    app.wait_my_turn()
+    page = app.page
+    attrs = page.evaluate(
+        "() => { const e = document.querySelector('[data-style]'); return [e.dataset.style, e.dataset.felt, e.dataset.ring, e.dataset.glow]; }"
+    )
+    assert attrs == ["felt", "burgundy", "aqua", "true"], attrs
+    ring = page.evaluate(
+        "() => getComputedStyle(document.querySelector('[data-active]'), '::after').boxShadow"
+    )
+    assert "rgb(63, 214, 207)" in ring and ring.count("inset") == 2, ring
+    app.shot("table_look_burgundy_aqua_glow")
+    assert not app.errors, app.errors
+
+
 def test_first_hand_plays_to_a_result(make_app):
     app = make_app().open("?seed=11").start_game()
     for _ in range(600):

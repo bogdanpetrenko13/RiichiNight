@@ -228,6 +228,41 @@
   color: var(--ink);
 }
 
+/* Felt colours (Settings → Felt colour), set as data-felt next to data-style.
+   Emerald is the base felt above. --btn-call-text is the felt's deep tone. */
+[data-style="felt"][data-felt="sapphire"] {
+  --tbl-bg: radial-gradient(120% 80% at 50% 40%, #2a4f7a 0%, #183354 55%, #0b1b30 100%);
+}
+[data-style="felt"][data-felt="burgundy"] {
+  --tbl-bg: radial-gradient(120% 80% at 50% 40%, #6e2a36 0%, #4a1a24 55%, #260b11 100%);
+}
+[data-style="felt"][data-felt="graphite"] {
+  --tbl-bg: radial-gradient(120% 80% at 50% 40%, #3b3f45 0%, #25282c 55%, #131416 100%);
+}
+[data-style="felt"][data-felt="amethyst"] {
+  --tbl-bg: radial-gradient(120% 80% at 50% 40%, #43306a 0%, #2c1f48 55%, #170f27 100%);
+}
+[data-style="felt"][data-felt="wood"] {
+  --tbl-bg: repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.06) 0 3px, rgba(255, 255, 255, 0.03) 3px 9px, rgba(0, 0, 0, 0.04) 9px 15px),
+    radial-gradient(120% 80% at 50% 40%, #7a5434 0%, #55391f 55%, #2c1d10 100%);
+}
+[data-style="felt"][data-felt="sapphire"] [data-zone] { --btn-call-text: #183354; }
+[data-style="felt"][data-felt="burgundy"] [data-zone] { --btn-call-text: #4a1a24; }
+[data-style="felt"][data-felt="graphite"] [data-zone] { --btn-call-text: #25282c; }
+[data-style="felt"][data-felt="amethyst"] [data-zone] { --btn-call-text: #2c1f48; }
+[data-style="felt"][data-felt="wood"] [data-zone] { --btn-call-text: #55391f; }
+
+/* Turn frame colour (Settings → Turn highlight), data-ring next to data-style;
+   without it the style's own colour is used.
+   The look (data-glow) is in Band.module.css. */
+[data-ring="gold"] [data-zone] { --active-ring: #f2c14e; }
+[data-ring="ivory"] [data-zone] { --active-ring: #f3efe2; }
+[data-ring="coral"] [data-zone] { --active-ring: #ff7a59; }
+[data-ring="aqua"] [data-zone] { --active-ring: #3fd6cf; }
+[data-ring="sakura"] [data-zone] { --active-ring: #ff7ab6; }
+[data-ring="sky"] [data-zone] { --active-ring: #6cb6ff; }
+[data-ring="lime"] [data-zone] { --active-ring: #a5e05a; }
+
 /* ---- tile sets (data-tileset on <html>) ----------------------------------- */
 /* Traditional look: warm face, amber edge, golden backs. */
 :root[data-tileset="classic"] {

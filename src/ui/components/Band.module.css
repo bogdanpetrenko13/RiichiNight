@@ -33,6 +33,13 @@
   pointer-events: none;
 }
 
+/* Settings → Turn highlight → Glow. */
+:global([data-glow]) .band[data-active]::after {
+  box-shadow:
+    inset 0 0 0 2px var(--active-ring),
+    inset 0 0 22px color-mix(in srgb, var(--active-ring) 45%, transparent);
+}
+
 /* ---- left: labels and portrait ------------------------------------------ */
 .left {
   grid-area: left;

@@ -32,3 +32,78 @@
   margin-top: 10px;
   text-decoration: none;
 }
+
+/* ---- table look: colour chips and preview ------------------------------ */
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.swatch {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  background: var(--sw);
+  cursor: pointer;
+}
+
+.swatch[data-auto] {
+  background: linear-gradient(135deg, var(--primary) 0 50%, #f2c14e 50% 100%);
+}
+
+.swatch[data-on] {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--ink);
+}
+
+.ringControls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.ringControls .look {
+  align-self: stretch;
+}
+
+.ringStyle {
+  margin-top: 12px;
+}
+
+.look {
+  margin-top: 12px;
+  display: grid;
+  gap: var(--band-gap);
+  padding: var(--band-gap);
+  border-radius: var(--radius-m);
+  background: var(--tbl-bg);
+  overflow: hidden;
+}
+
+.lookBand {
+  position: relative;
+  padding: 10px 12px;
+  border-radius: var(--band-radius);
+  background: var(--band-bg);
+  border: var(--band-border);
+  box-shadow: var(--band-shadow);
+}
+
+.lookBand[data-active]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px var(--active-ring);
+  pointer-events: none;
+}
+
+.look[data-glow] .lookBand[data-active]::after {
+  box-shadow:
+    inset 0 0 0 2px var(--active-ring),
+    inset 0 0 22px color-mix(in srgb, var(--active-ring) 45%, transparent);
+}

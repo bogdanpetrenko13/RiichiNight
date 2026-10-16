@@ -17,6 +17,7 @@ import { PlayerBand } from "../components/PlayerBand";
 import { WaitsChip } from "../components/WaitsChip";
 import { IconButton, Sheet } from "../components/Primitives";
 import { Icon } from "../icons";
+import { lookAttrs } from "../tableLook";
 import styles from "./Table.module.css";
 
 interface TableProps {
@@ -190,7 +191,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const showGameOver = view.status === "game_over" && !showRound && !holding;
 
   return (
-    <div className={styles.table} data-orientation={layout.orientation} data-style={settings.tableStyle} style={layout.vars}>
+    <div className={styles.table} data-orientation={layout.orientation} data-style={settings.tableStyle} {...lookAttrs(settings)} style={layout.vars}>
       <header className={styles.topBar} data-zone>
         <IconButton icon="menu" label={t("menu")} onClick={() => setMenuOpen(true)} />
         <div className={styles.roundInfo}>
