@@ -104,6 +104,7 @@
 .list li,
 .yaku li {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 4px 0;
@@ -360,4 +361,33 @@
   white-space: pre-wrap;
   word-break: break-word;
   user-select: text;
+}
+
+/* Score rows on the round result: a small face (or "You") before the name. */
+.who {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* The round frame's ring sits outside the image: keep it inside the list. */
+.face {
+  flex: none;
+  margin-left: 3px;
+}
+
+.youFace {
+  flex: none;
+  margin-left: 3px;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-alt);
+  box-shadow: inset 0 0 0 2px var(--border-strong);
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 800;
 }

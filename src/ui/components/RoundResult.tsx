@@ -57,10 +57,24 @@ export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
           </>
         )}
 
+        {/* Scores: each heroine's face shows how the hand went for her. */}
         <ul className={styles.list}>
           {result.deltas.map((d, seat) => (
             <li key={seat}>
-              <span>{nameOf(seat)}</span>
+              <span className={styles.who}>
+                {seat > 0 && cast[seat - 1] ? (
+                  <Portrait
+                    character={cast[seat - 1]}
+                    emotion={d > 0 ? "happy" : d < 0 ? "troubled" : "neutral"}
+                    size={36}
+                    round
+                    className={styles.face}
+                  />
+                ) : (
+                  <span className={styles.youFace}>{t("you")}</span>
+                )}
+                {nameOf(seat)}
+              </span>
               <span className={styles.scoreCell}>
                 {result.scores[seat].toLocaleString()}
                 {d !== 0 && (
@@ -75,7 +89,7 @@ export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
         </ul>
 
         <div className={styles.buttons}>
-          <button className="btn" onClick={onNext} disabled={busy}>
+          <button className="btn btn-primary" onClick={onNext} disabled={busy}>
             {view.gameOver ? t("continueBtn") : t("nextRound")}
           </button>
         </div>

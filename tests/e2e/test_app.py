@@ -151,6 +151,11 @@ def test_first_hand_plays_to_a_result(make_app):
         if app.step() == "result":
             break
     assert app.result_shown(), "no round result after 600 steps"
+    # Score rows: three heroine faces (emotion by the hand's result) and "You".
+    faces = app.page.evaluate(
+        "() => Array.from(document.querySelectorAll('[class*=who] [data-emotion]')).map(e => e.dataset.emotion)"
+    )
+    assert len(faces) == 3 and all(f in ("happy", "troubled", "neutral") for f in faces), faces
     app.page.wait_for_timeout(600)
     app.shot("first_result")
     assert not app.errors, app.errors
