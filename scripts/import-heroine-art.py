@@ -24,20 +24,21 @@ from PIL import Image
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 EMOTIONS = ("neutral", "happy", "troubled")
 SIZE = 512
-# Face centre (x, y) in the 832x1216 portrait and the crop's side.
+# Crop centre (x, y) in the 832x1216 portrait (the nose, so the face sits in the
+# middle of the round frame) and the crop's side.
 CROP = {
-    "hikari": (330, 330, 600),
-    "nanami": (390, 300, 600),
-    "yuzu": (450, 400, 600),
-    "rin": (370, 330, 600),
-    "mai": (510, 350, 600),
-    "reiko": (540, 180, 600),
-    "kaede": (400, 390, 600),
-    "sora": (450, 380, 600),
-    "akane": (450, 350, 600),
-    "midori": (410, 370, 600),
-    "yuki": (470, 230, 600),
-    "tsukiko": (500, 390, 600),
+    "hikari": (395, 360, 640),
+    "nanami": (345, 290, 720),
+    "yuzu": (395, 430, 640),
+    "rin": (420, 320, 640),
+    "mai": (420, 410, 640),
+    "reiko": (455, 220, 460),
+    "kaede": (385, 390, 640),
+    "sora": (405, 390, 640),
+    "akane": (460, 370, 640),
+    "midori": (460, 360, 640),
+    "yuki": (413, 270, 640),
+    "tsukiko": (440, 410, 640),
 }
 
 
