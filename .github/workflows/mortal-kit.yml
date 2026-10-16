@@ -54,6 +54,8 @@ jobs:
           echo "::notice::s42 sha256 $have (expected $want)"
           test "$want" = "$have"
           python scripts/mortal/export_weights.py s42.pth s42
+          python -c "import numpy as np; np.fromfile('s42.bin', '<f4').astype('<f2').tofile('s42.f16.bin')"
+          echo "::notice::s42.f16.bin sha256 $(sha256sum s42.f16.bin | cut -d' ' -f1)"
       - name: libriichi Python module
         run: |
           cd Mortal && cargo build --release -p libriichi --lib
@@ -73,3 +75,10 @@ jobs:
           gh release create mortal-kit --prerelease --title "Mortal kit" \
             --notes "Build inputs for the Mortal port (Mortal $MORTAL_COMMIT, AGPL-3.0; S42 weights by haor, Apache-2.0)." \
             mortal-src.tar.gz rustlib-wasm32.tar.gz s42.bin s42.json model-identity.json reference.tar.gz
+          # The app's weights: a release of their own that the APK build
+          # downloads (checked against public/mortal/s42.f16.sha256).
+          if ! gh release view mortal-s42 > /dev/null 2>&1; then
+            gh release create mortal-s42 --prerelease --title "Mortal S42 weights" \
+              --notes "Mortal S42.8k (haor/Mortal-S42, Apache-2.0) as float16 for Riichi Night. Network code: Mortal, AGPL-3.0-or-later." \
+              s42.f16.bin s42.json model-identity.json
+          fi
