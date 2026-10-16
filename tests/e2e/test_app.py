@@ -114,17 +114,19 @@ def test_table_centre_shows_dora_and_counters(make_app):
 
 
 def test_rival_riichi_tints_her_band(make_app):
-    """A rival in riichi gets her band tinted with a red edge (seed 2: Hikari
-    declares riichi in the first hand); the others stay plain."""
-    app = make_app(PORTRAIT).open("?seed=2", {"aiDelay": 200}).start_game()
+    """A rival in riichi gets her band tinted with a red edge; the others stay
+    plain (scenario "riichi": all three rivals start tenpai)."""
+    app = make_app(PORTRAIT).open("?scenario=riichi", {"aiDelay": 200}).start_game()
     page = app.page
     in_riichi = "() => document.querySelectorAll('section[aria-label] [class*=riichiLine]:not([data-empty])').length"
-    for _ in range(900):
+    for _ in range(300):
         state = app.step()
         if state == "result" or page.evaluate(in_riichi):
             break
-    assert page.evaluate(in_riichi), "no rival riichi in this deal"
-    assert page.locator("section[data-riichi]").count() == 1
+    n = page.evaluate(in_riichi)
+    assert n, "no rival declared riichi"
+    # Every band with a riichi stick is tinted, and only those.
+    assert page.locator("section[data-riichi]").count() == n
     band = page.locator("section[data-riichi]").first
     assert band.locator("[class*=riichiLine]:not([data-empty])").count() == 1
     edge = band.evaluate("e => getComputedStyle(e, '::before').backgroundColor")

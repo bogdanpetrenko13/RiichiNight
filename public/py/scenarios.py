@@ -9,6 +9,9 @@ a few moves instead of waiting for it to happen by chance:
            screen with every fu part
   redfive  the player holds the red 5p and draws a plain 5p first (the red
            five must stay in the hand when the drawn 5p is discarded)
+  riichi   all three rivals start tenpai on a tanki wait the player holds
+           all other copies of, so one of them declares riichi within the
+           first go-around and nobody wins first (rival riichi display)
 
 Only the tiles named here are placed; everything else stays shuffled by the
 seed. The human is seat 0. Draw order follows the turn order from the dealer.
@@ -21,7 +24,9 @@ from pyriichi.hand import Hand
 HUMAN = 0
 
 # hand: the player's 13 tiles (a 14th junk tile is added when the player
-# deals); draws: the player's next draws in order; dora: first dora indicator.
+# deals; omitted = a shuffled hand); draws: the player's next draws in order;
+# rivals: 13-tile hands of seats 1, 2, 3 (the dealer gets a 14th from the
+# wall); dora: first dora indicator.
 SCENARIOS: Dict[str, dict] = {
     "tsumo": {
         "hand": "234m 789p 444s 68s 77z",
@@ -34,6 +39,15 @@ SCENARIOS: Dict[str, dict] = {
         "junk": "1z",
         "draws": ["5p"],
         "dora": "1m",
+    },
+    "riichi": {
+        # Each rival waits on one honour tile whose other three copies the
+        # player holds, so nobody can win before declaring riichi (the test
+        # autopilot cuts the drawn tile, the player's hand stays put).
+        "hand": "555z 666z 777z 1122z",
+        "junk": "9s",
+        "rivals": ["123m 456m 789p 234s 5z", "234p 567p 678s 345m 6z", "789m 123s 456s 345p 7z"],
+        "dora": "9p",
     },
 }
 
@@ -57,6 +71,30 @@ def _take(pool: list, code: str):
     raise ValueError(f"scenario tile {code} is not available")
 
 
+def _replace_dead(ts, old, new) -> None:
+    """Put `new` in the dead wall in place of `old` (in every list that holds
+    it; matched by identity, Tile.__eq__ ignores red fives)."""
+    for attr in ("_wall", "_rinshan_tiles", "_dora_indicators", "_ura_dora_indicators"):
+        tiles = getattr(ts, attr, None) or []
+        for i, t in enumerate(tiles):
+            if t is old:
+                tiles[i] = new
+
+
+def _take_any(ts, pool: list, code: str):
+    """A tile from the pool, or else from the dead wall (not the visible dora
+    indicator), with a pool tile put in its place."""
+    try:
+        return _take(pool, code)
+    except ValueError:
+        shown = ts._dora_indicators[0] if ts._dora_indicators else None
+        for t in list(ts._wall):
+            if str(t) == code and t is not shown:
+                _replace_dead(ts, t, pool.pop())
+                return t
+        raise
+
+
 def rig(engine, name: str) -> None:
     spec = SCENARIOS.get(name)
     if spec is None:
@@ -69,13 +107,7 @@ def rig(engine, name: str) -> None:
     pool = [t for h in engine._hands for t in h.tiles] + list(ts._tiles)
     total = len(pool)
 
-    mine = [_take(pool, c) for c in parse(spec["hand"])]
-    if len(mine) != 13:
-        raise ValueError(f"scenario {name}: the hand needs 13 tiles, has {len(mine)}")
-    if dealer == HUMAN:
-        mine.append(_take(pool, spec["junk"]))
-    draws = [_take(pool, c) for c in spec.get("draws", [])]
-
+    # The dora indicator first: the old one goes back to the pool.
     if spec.get("dora"):
         indicator = _take(pool, spec["dora"])
         old = ts._dora_indicators[0]
@@ -86,13 +118,25 @@ def rig(engine, name: str) -> None:
             ts._wall[slot] = indicator
         pool.append(old)
 
+    rivals = {seat: [_take_any(ts, pool, c) for c in parse(text)] for seat, text in enumerate(spec.get("rivals", []), start=1)}
+    for seat, tiles in rivals.items():
+        if len(tiles) != 13:
+            raise ValueError(f"scenario {name}: seat {seat} needs 13 tiles, has {len(tiles)}")
+    mine = [_take_any(ts, pool, c) for c in parse(spec["hand"])] if spec.get("hand") else []
+    if spec.get("hand") and len(mine) != 13:
+        raise ValueError(f"scenario {name}: the hand needs 13 tiles, has {len(mine)}")
+    if spec.get("hand") and dealer == HUMAN:
+        mine.append(_take_any(ts, pool, spec["junk"]))
+    draws = [_take_any(ts, pool, c) for c in spec.get("draws", [])]
+
     hands: List[list] = [[] for _ in range(n)]
     hands[HUMAN] = mine
+    for seat, tiles in rivals.items():
+        hands[seat] = tiles
     for seat in range(n):
-        if seat == HUMAN:
-            continue
         size = 14 if seat == dealer else 13
-        hands[seat] = [pool.pop(0) for _ in range(size)]
+        while len(hands[seat]) < size:
+            hands[seat].append(pool.pop(0))
 
     # The k-th draw of `seat` comes at position offset + n * k of the live wall.
     offset = (HUMAN - dealer - 1) % n

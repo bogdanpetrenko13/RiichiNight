@@ -12,7 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "public", "py"))
 
 import bridge  # noqa: E402
-from ai import Brain  # noqa: E402
+from ai import Brain, counts_of  # noqa: E402
 from shanten import shanten  # noqa: E402
 
 TILE_ORDER = {s: i for i, s in enumerate("mpsz")}
@@ -204,6 +204,35 @@ def test_scenario_tsumo_wins_on_first_draw():
     keys = [p["key"] for p in w["calc"]["fuParts"]]
     assert keys == ["base", "tsumo", "closedTriplet", "valuePair", "wait_kanchan"], keys
     assert w["calc"]["dora"] == 3
+
+
+def test_scenario_riichi_rivals_tenpai_and_one_declares():
+    """Scenario "riichi": every rival starts tenpai, the tile count is intact
+    and, whatever the dealer seat, a rival declares riichi before anyone wins."""
+    for seed in range(1, 13):
+        game = bridge.Game({"seed": seed, "scenario": "riichi", "levels": ["heur:0.25", "heur:0.33", "heur:0.3"],
+                            "styles": ["flush", "reckless", "showy"]})
+        ts = game.engine._tile_set
+        assert sum(len(h.tiles) for h in game.engine._hands) + len(ts._tiles) + len(ts._wall) == 136
+        dealer = game.engine.game_state.dealer
+        for seat in (1, 2, 3):
+            tiles = list(game.engine._hands[seat].tiles)
+            if seat == dealer:
+                assert any(shanten(counts_of(tiles[:i] + tiles[i + 1:])) == 0 for i in range(len(tiles))), seed
+            else:
+                assert shanten(counts_of(tiles)) == 0, (seed, seat)
+        declared = False
+        for _ in range(40):
+            game.run_ai()
+            if any(getattr(game.engine._hands[s], "is_riichi", False) for s in (1, 2, 3)):
+                declared = True
+                break
+            actions = game.engine.get_available_actions(0)
+            if game.round_result is not None or not actions:
+                break
+            a, t, kw = Brain("easy", random.Random(1)).decide(game.engine, 0, actions)
+            game._exec(0, a, t, **kw)
+        assert declared, seed
 
 
 def test_scenario_redfive_keeps_red_in_hand():
