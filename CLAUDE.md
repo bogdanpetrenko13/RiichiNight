@@ -151,6 +151,13 @@ emulator screen is 900×1600 (phone-like portrait).
   `test_old_save_without_new_attributes_keeps_playing`).
 - New engine data shown in the UI: add the type to `protocol.ts`, keep old
   saves working (optional fields), add a Python test that the numbers add up.
+- Difficulty ladder: each heroine's `step` (1–12) and `level` in
+  `src/game/characters.ts`; steps 1–4 are open, each next one unlocks with a
+  1st place in a match with the previous step's heroine. Levels are
+  calibrated with the **AI strength** workflow (`strength.yml`, sides
+  `"<level>/<style>|mortal"`, 400 east games): average place against three
+  Mortal seats runs evenly from ~3.59 (step 1) to ~2.46 (step 12), ~0.1 per
+  step. Re-run it after AI or rule changes.
 - AI changes: check `python tests/python/style_stats.py 8` (table of calls,
   riichi, win / deal-in rates, safe discards under riichi per style) and keep
   `tests/python/test_styles.py` passing.
