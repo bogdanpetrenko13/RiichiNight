@@ -6,6 +6,7 @@ attribute on the GameState, so it survives save/load with the rest of the game.
 """
 
 from pyriichi import GameState, RuleEngine, RulesetConfig, Tile, TileSet, Wind
+from pyriichi.rules_config import RenhouPolicy
 
 DEFAULT_RULES = {
     "gameLength": "hanchan",  # "east" (tonpuusen) or "hanchan" (East + South)
@@ -60,6 +61,15 @@ def make_game_state(rules: dict, num_players: int) -> GameState:
     cfg.agari_yame = bool(rules["agariYame"])
     cfg.kiriage_mangan = bool(rules["kiriageMangan"])
     cfg.open_tanyao_enabled = bool(rules["openTanyao"])
+    # Tenhou rules: no renhou; double yakuman only for real multiple yakuman.
+    cfg.renhou_policy = RenhouPolicy.OFF
+    cfg.suuankou_tanki_double = False
+    cfg.kokushi_musou_juusanmen_double = False
+    cfg.pure_chuuren_poutou_double = False
+    # Two players may ron the same discard; three is an abortive draw.
+    cfg.head_bump_only = False
+    cfg.allow_double_ron = True
+    cfg.allow_triple_ron = False
     state = GameState(num_players=num_players, ruleset=cfg)
     state.east_only = rules["gameLength"] == "east"
     state.red_fives = bool(rules["redFives"])

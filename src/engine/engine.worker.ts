@@ -59,9 +59,32 @@ async function boot(baseUrl: string): Promise<void> {
     if (!res.ok) throw new Error(`cannot load ${name}: ${res.status}`);
     return new Uint8Array(await res.arrayBuffer());
   };
+  // Mortal seats call into this object (public/py/mortal.py); it becomes
+  // ready once the network is loaded, in the background after boot.
+  const mortalJs: Record<string, unknown> = { ready: false };
+  pyodide.registerJsModule("mortal_js", mortalJs);
   const module = await bootPython(pyodide, readAsset);
   bridge = module as unknown as Bridge;
   progress("ready");
+  void loadMortalInto(mortalJs, new URL("mortal/", baseUrl).href);
+}
+
+/** Loads the Mortal WebAssembly module and weights; without them (e.g. a
+ * build without the weights) Mortal seats play with the heuristic AI. */
+async function loadMortalInto(target: Record<string, unknown>, mortalUrl: string) {
+  try {
+    const mod = (await import(/* @vite-ignore */ mortalUrl + "mortal.js")) as {
+      loadMortal: (read: (name: string) => Promise<Uint8Array>) => Promise<Record<string, unknown>>;
+    };
+    const m = await mod.loadMortal(async (name) => {
+      const res = await fetch(mortalUrl + name);
+      if (!res.ok) throw new Error(`cannot load ${name}: ${res.status}`);
+      return new Uint8Array(await res.arrayBuffer());
+    });
+    Object.assign(target, m, { ready: true });
+  } catch (e) {
+    console.warn("Mortal is not available:", e);
+  }
 }
 
 function parse(json: string): unknown {

@@ -124,7 +124,7 @@ def limit_name(sr) -> str | None:
     for han, name in LIMITS:
         if sr.han >= han:
             return name
-    if sr.han >= 5 or (sr.han == 4 and sr.fu >= 40):
+    if sr.han >= 5 or (sr.han == 4 and sr.fu >= 40) or sr.fu * 2 ** (sr.han + 2) > 2000:
         return "mangan"
     if sr.kiriage_mangan_enabled and ((sr.han == 4 and sr.fu == 30) or (sr.han == 3 and sr.fu == 60)):
         return "mangan"

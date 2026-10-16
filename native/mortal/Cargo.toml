@@ -1,0 +1,30 @@
+[package]
+name = "riichinight-mortal"
+version = "0.1.0"
+edition = "2024"
+license = "AGPL-3.0-or-later"
+description = "Mortal (libriichi player state + observation encoder) and an S42 inference engine for Riichi Night, built to WebAssembly"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+anyhow = "1"
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }
+serde_with = "3"
+boomphf = "0.6"
+byteorder = "1"
+ndarray = "0.16"
+flate2 = "1"
+derivative = "2"
+ahash = { version = "0.8", default-features = false, features = ["std", "no-rng"] }
+tinyvec = { version = "1", features = ["alloc", "serde", "rustc_1_57"] }
+derive_more = { version = "2", features = ["add", "add_assign", "sum"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"

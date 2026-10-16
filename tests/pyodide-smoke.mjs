@@ -6,7 +6,9 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
+import { existsSync } from "node:fs";
 import { bootPython } from "../src/engine/pyBoot.js";
+import { loadMortal, MORTAL_FILES } from "../public/mortal/mortal.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pyDir = path.join(root, "public", "py");
@@ -20,6 +22,15 @@ const pyodide = await loadPyodide(
   process.env.PYODIDE_DIR ? { indexURL: process.env.PYODIDE_DIR + "/" } : {},
 );
 const tLoad = performance.now();
+// Mortal (WebAssembly) when it is built (scripts/mortal/ci_setup.sh wasm): one
+// rival seat is then played by Mortal through the same JS bridge as the app.
+const mortalDir = path.join(root, "public", "mortal");
+const withMortal = Object.values(MORTAL_FILES).every((f) => existsSync(path.join(mortalDir, f)));
+const mortalJs = { ready: false };
+pyodide.registerJsModule("mortal_js", mortalJs);
+if (withMortal) {
+  Object.assign(mortalJs, await loadMortal(async (n) => new Uint8Array(await readFile(path.join(mortalDir, n)))), { ready: true });
+}
 const bridge = await bootPython(pyodide, async (name) => new Uint8Array(await readFile(path.join(pyDir, name))));
 const tBoot = performance.now();
 
@@ -43,7 +54,8 @@ def autopilot():
 `);
 const autopilot = pyodide.globals.get("autopilot");
 
-let step = JSON.parse(bridge.new_game(JSON.stringify({ seed: 42, levels: ["easy", "normal", "hard"] })));
+const levels = withMortal ? ["easy", "normal", "mortal"] : ["easy", "normal", "hard"];
+let step = JSON.parse(bridge.new_game(JSON.stringify({ seed: 42, levels })));
 let rounds = 0;
 let humanCalls = 0;
 let aiSteps = 0;
@@ -73,6 +85,11 @@ for (let i = 0; i < 20000 && step.view.status !== "game_over"; i++) {
 }
 const tEnd = performance.now();
 if (step.view.status !== "game_over") throw new Error("game did not finish");
+if (withMortal) {
+  const issues = JSON.parse(pyodide.runPython(`json.dumps((_b._game.mortal_mismatches or [])[:3] + (getattr(_b._game, "legal_mismatches", None) or [])[:3])`));
+  if (issues.length) throw new Error("Mortal seat issues: " + JSON.stringify(issues));
+  if (pyodide.runPython("_b._game.brains[3].handle is None")) throw new Error("the Mortal seat never used Mortal");
+}
 const end = step.events.find((e) => e.t === "game_end");
 console.log(
   [
@@ -81,5 +98,6 @@ console.log(
     `hanchan           ${rounds} rounds, ${humanCalls} human + ${aiSteps} AI steps, ${((tEnd - tGame) / 1000).toFixed(1)} s`,
     `slowest step      ${slowest.toFixed(0)} ms`,
     `final scores      ${end ? end.scores.join(" / ") : "?"}`,
+    `Mortal seat       ${withMortal ? "yes (seat 3)" : "not built"}`,
   ].join("\n"),
 );

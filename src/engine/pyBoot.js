@@ -2,7 +2,7 @@
 // test (tests/pyodide-smoke.mjs). Plain JS so Node can import it unbuilt.
 
 /** Python modules shipped in public/py, loaded in dependency order. */
-export const PY_MODULES = ["shanten.py", "ai.py", "fastpatch.py", "rules.py", "yakufix.py", "calcinfo.py", "scenarios.py", "bridge.py"];
+export const PY_MODULES = ["shanten.py", "rulefix.py", "ai.py", "fastpatch.py", "rules.py", "yakufix.py", "calcinfo.py", "scenarios.py", "mjai.py", "mortal.py", "bridge.py"];
 
 const GAME_DIR = "/home/pyodide/game";
 

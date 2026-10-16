@@ -1,0 +1,4248 @@
+{
+ "floats": 10866735,
+ "tensors": [
+  {
+   "name": "mortal.encoder.net.0.weight",
+   "shape": [
+    192,
+    1012,
+    3
+   ],
+   "offset": 0
+  },
+  {
+   "name": "mortal.encoder.net.1.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 582912
+  },
+  {
+   "name": "mortal.encoder.net.1.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 583104
+  },
+  {
+   "name": "mortal.encoder.net.1.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 583296
+  },
+  {
+   "name": "mortal.encoder.net.1.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 583488
+  },
+  {
+   "name": "mortal.encoder.net.1.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 583680
+  },
+  {
+   "name": "mortal.encoder.net.1.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 694272
+  },
+  {
+   "name": "mortal.encoder.net.1.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 694464
+  },
+  {
+   "name": "mortal.encoder.net.1.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 694656
+  },
+  {
+   "name": "mortal.encoder.net.1.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 694848
+  },
+  {
+   "name": "mortal.encoder.net.1.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 695040
+  },
+  {
+   "name": "mortal.encoder.net.1.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 805632
+  },
+  {
+   "name": "mortal.encoder.net.1.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 807936
+  },
+  {
+   "name": "mortal.encoder.net.1.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 807948
+  },
+  {
+   "name": "mortal.encoder.net.1.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 810252
+  },
+  {
+   "name": "mortal.encoder.net.2.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 810444
+  },
+  {
+   "name": "mortal.encoder.net.2.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 810636
+  },
+  {
+   "name": "mortal.encoder.net.2.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 810828
+  },
+  {
+   "name": "mortal.encoder.net.2.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 811020
+  },
+  {
+   "name": "mortal.encoder.net.2.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 811212
+  },
+  {
+   "name": "mortal.encoder.net.2.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 921804
+  },
+  {
+   "name": "mortal.encoder.net.2.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 921996
+  },
+  {
+   "name": "mortal.encoder.net.2.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 922188
+  },
+  {
+   "name": "mortal.encoder.net.2.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 922380
+  },
+  {
+   "name": "mortal.encoder.net.2.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 922572
+  },
+  {
+   "name": "mortal.encoder.net.2.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 1033164
+  },
+  {
+   "name": "mortal.encoder.net.2.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 1035468
+  },
+  {
+   "name": "mortal.encoder.net.2.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 1035480
+  },
+  {
+   "name": "mortal.encoder.net.2.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1037784
+  },
+  {
+   "name": "mortal.encoder.net.3.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 1037976
+  },
+  {
+   "name": "mortal.encoder.net.3.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1038168
+  },
+  {
+   "name": "mortal.encoder.net.3.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 1038360
+  },
+  {
+   "name": "mortal.encoder.net.3.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 1038552
+  },
+  {
+   "name": "mortal.encoder.net.3.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 1038744
+  },
+  {
+   "name": "mortal.encoder.net.3.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 1149336
+  },
+  {
+   "name": "mortal.encoder.net.3.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1149528
+  },
+  {
+   "name": "mortal.encoder.net.3.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 1149720
+  },
+  {
+   "name": "mortal.encoder.net.3.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 1149912
+  },
+  {
+   "name": "mortal.encoder.net.3.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 1150104
+  },
+  {
+   "name": "mortal.encoder.net.3.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 1260696
+  },
+  {
+   "name": "mortal.encoder.net.3.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 1263000
+  },
+  {
+   "name": "mortal.encoder.net.3.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 1263012
+  },
+  {
+   "name": "mortal.encoder.net.3.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1265316
+  },
+  {
+   "name": "mortal.encoder.net.4.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 1265508
+  },
+  {
+   "name": "mortal.encoder.net.4.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1265700
+  },
+  {
+   "name": "mortal.encoder.net.4.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 1265892
+  },
+  {
+   "name": "mortal.encoder.net.4.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 1266084
+  },
+  {
+   "name": "mortal.encoder.net.4.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 1266276
+  },
+  {
+   "name": "mortal.encoder.net.4.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 1376868
+  },
+  {
+   "name": "mortal.encoder.net.4.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1377060
+  },
+  {
+   "name": "mortal.encoder.net.4.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 1377252
+  },
+  {
+   "name": "mortal.encoder.net.4.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 1377444
+  },
+  {
+   "name": "mortal.encoder.net.4.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 1377636
+  },
+  {
+   "name": "mortal.encoder.net.4.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 1488228
+  },
+  {
+   "name": "mortal.encoder.net.4.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 1490532
+  },
+  {
+   "name": "mortal.encoder.net.4.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 1490544
+  },
+  {
+   "name": "mortal.encoder.net.4.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1492848
+  },
+  {
+   "name": "mortal.encoder.net.5.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 1493040
+  },
+  {
+   "name": "mortal.encoder.net.5.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1493232
+  },
+  {
+   "name": "mortal.encoder.net.5.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 1493424
+  },
+  {
+   "name": "mortal.encoder.net.5.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 1493616
+  },
+  {
+   "name": "mortal.encoder.net.5.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 1493808
+  },
+  {
+   "name": "mortal.encoder.net.5.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 1604400
+  },
+  {
+   "name": "mortal.encoder.net.5.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1604592
+  },
+  {
+   "name": "mortal.encoder.net.5.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 1604784
+  },
+  {
+   "name": "mortal.encoder.net.5.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 1604976
+  },
+  {
+   "name": "mortal.encoder.net.5.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 1605168
+  },
+  {
+   "name": "mortal.encoder.net.5.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 1715760
+  },
+  {
+   "name": "mortal.encoder.net.5.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 1718064
+  },
+  {
+   "name": "mortal.encoder.net.5.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 1718076
+  },
+  {
+   "name": "mortal.encoder.net.5.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1720380
+  },
+  {
+   "name": "mortal.encoder.net.6.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 1720572
+  },
+  {
+   "name": "mortal.encoder.net.6.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1720764
+  },
+  {
+   "name": "mortal.encoder.net.6.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 1720956
+  },
+  {
+   "name": "mortal.encoder.net.6.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 1721148
+  },
+  {
+   "name": "mortal.encoder.net.6.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 1721340
+  },
+  {
+   "name": "mortal.encoder.net.6.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 1831932
+  },
+  {
+   "name": "mortal.encoder.net.6.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1832124
+  },
+  {
+   "name": "mortal.encoder.net.6.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 1832316
+  },
+  {
+   "name": "mortal.encoder.net.6.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 1832508
+  },
+  {
+   "name": "mortal.encoder.net.6.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 1832700
+  },
+  {
+   "name": "mortal.encoder.net.6.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 1943292
+  },
+  {
+   "name": "mortal.encoder.net.6.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 1945596
+  },
+  {
+   "name": "mortal.encoder.net.6.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 1945608
+  },
+  {
+   "name": "mortal.encoder.net.6.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1947912
+  },
+  {
+   "name": "mortal.encoder.net.7.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 1948104
+  },
+  {
+   "name": "mortal.encoder.net.7.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 1948296
+  },
+  {
+   "name": "mortal.encoder.net.7.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 1948488
+  },
+  {
+   "name": "mortal.encoder.net.7.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 1948680
+  },
+  {
+   "name": "mortal.encoder.net.7.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 1948872
+  },
+  {
+   "name": "mortal.encoder.net.7.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 2059464
+  },
+  {
+   "name": "mortal.encoder.net.7.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2059656
+  },
+  {
+   "name": "mortal.encoder.net.7.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 2059848
+  },
+  {
+   "name": "mortal.encoder.net.7.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 2060040
+  },
+  {
+   "name": "mortal.encoder.net.7.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 2060232
+  },
+  {
+   "name": "mortal.encoder.net.7.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 2170824
+  },
+  {
+   "name": "mortal.encoder.net.7.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 2173128
+  },
+  {
+   "name": "mortal.encoder.net.7.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 2173140
+  },
+  {
+   "name": "mortal.encoder.net.7.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2175444
+  },
+  {
+   "name": "mortal.encoder.net.8.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 2175636
+  },
+  {
+   "name": "mortal.encoder.net.8.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2175828
+  },
+  {
+   "name": "mortal.encoder.net.8.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 2176020
+  },
+  {
+   "name": "mortal.encoder.net.8.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 2176212
+  },
+  {
+   "name": "mortal.encoder.net.8.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 2176404
+  },
+  {
+   "name": "mortal.encoder.net.8.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 2286996
+  },
+  {
+   "name": "mortal.encoder.net.8.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2287188
+  },
+  {
+   "name": "mortal.encoder.net.8.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 2287380
+  },
+  {
+   "name": "mortal.encoder.net.8.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 2287572
+  },
+  {
+   "name": "mortal.encoder.net.8.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 2287764
+  },
+  {
+   "name": "mortal.encoder.net.8.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 2398356
+  },
+  {
+   "name": "mortal.encoder.net.8.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 2400660
+  },
+  {
+   "name": "mortal.encoder.net.8.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 2400672
+  },
+  {
+   "name": "mortal.encoder.net.8.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2402976
+  },
+  {
+   "name": "mortal.encoder.net.9.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 2403168
+  },
+  {
+   "name": "mortal.encoder.net.9.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2403360
+  },
+  {
+   "name": "mortal.encoder.net.9.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 2403552
+  },
+  {
+   "name": "mortal.encoder.net.9.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 2403744
+  },
+  {
+   "name": "mortal.encoder.net.9.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 2403936
+  },
+  {
+   "name": "mortal.encoder.net.9.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 2514528
+  },
+  {
+   "name": "mortal.encoder.net.9.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2514720
+  },
+  {
+   "name": "mortal.encoder.net.9.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 2514912
+  },
+  {
+   "name": "mortal.encoder.net.9.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 2515104
+  },
+  {
+   "name": "mortal.encoder.net.9.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 2515296
+  },
+  {
+   "name": "mortal.encoder.net.9.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 2625888
+  },
+  {
+   "name": "mortal.encoder.net.9.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 2628192
+  },
+  {
+   "name": "mortal.encoder.net.9.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 2628204
+  },
+  {
+   "name": "mortal.encoder.net.9.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2630508
+  },
+  {
+   "name": "mortal.encoder.net.10.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 2630700
+  },
+  {
+   "name": "mortal.encoder.net.10.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2630892
+  },
+  {
+   "name": "mortal.encoder.net.10.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 2631084
+  },
+  {
+   "name": "mortal.encoder.net.10.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 2631276
+  },
+  {
+   "name": "mortal.encoder.net.10.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 2631468
+  },
+  {
+   "name": "mortal.encoder.net.10.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 2742060
+  },
+  {
+   "name": "mortal.encoder.net.10.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2742252
+  },
+  {
+   "name": "mortal.encoder.net.10.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 2742444
+  },
+  {
+   "name": "mortal.encoder.net.10.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 2742636
+  },
+  {
+   "name": "mortal.encoder.net.10.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 2742828
+  },
+  {
+   "name": "mortal.encoder.net.10.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 2853420
+  },
+  {
+   "name": "mortal.encoder.net.10.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 2855724
+  },
+  {
+   "name": "mortal.encoder.net.10.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 2855736
+  },
+  {
+   "name": "mortal.encoder.net.10.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2858040
+  },
+  {
+   "name": "mortal.encoder.net.11.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 2858232
+  },
+  {
+   "name": "mortal.encoder.net.11.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2858424
+  },
+  {
+   "name": "mortal.encoder.net.11.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 2858616
+  },
+  {
+   "name": "mortal.encoder.net.11.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 2858808
+  },
+  {
+   "name": "mortal.encoder.net.11.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 2859000
+  },
+  {
+   "name": "mortal.encoder.net.11.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 2969592
+  },
+  {
+   "name": "mortal.encoder.net.11.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 2969784
+  },
+  {
+   "name": "mortal.encoder.net.11.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 2969976
+  },
+  {
+   "name": "mortal.encoder.net.11.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 2970168
+  },
+  {
+   "name": "mortal.encoder.net.11.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 2970360
+  },
+  {
+   "name": "mortal.encoder.net.11.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 3080952
+  },
+  {
+   "name": "mortal.encoder.net.11.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 3083256
+  },
+  {
+   "name": "mortal.encoder.net.11.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 3083268
+  },
+  {
+   "name": "mortal.encoder.net.11.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3085572
+  },
+  {
+   "name": "mortal.encoder.net.12.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 3085764
+  },
+  {
+   "name": "mortal.encoder.net.12.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3085956
+  },
+  {
+   "name": "mortal.encoder.net.12.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 3086148
+  },
+  {
+   "name": "mortal.encoder.net.12.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 3086340
+  },
+  {
+   "name": "mortal.encoder.net.12.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 3086532
+  },
+  {
+   "name": "mortal.encoder.net.12.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 3197124
+  },
+  {
+   "name": "mortal.encoder.net.12.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3197316
+  },
+  {
+   "name": "mortal.encoder.net.12.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 3197508
+  },
+  {
+   "name": "mortal.encoder.net.12.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 3197700
+  },
+  {
+   "name": "mortal.encoder.net.12.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 3197892
+  },
+  {
+   "name": "mortal.encoder.net.12.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 3308484
+  },
+  {
+   "name": "mortal.encoder.net.12.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 3310788
+  },
+  {
+   "name": "mortal.encoder.net.12.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 3310800
+  },
+  {
+   "name": "mortal.encoder.net.12.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3313104
+  },
+  {
+   "name": "mortal.encoder.net.13.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 3313296
+  },
+  {
+   "name": "mortal.encoder.net.13.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3313488
+  },
+  {
+   "name": "mortal.encoder.net.13.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 3313680
+  },
+  {
+   "name": "mortal.encoder.net.13.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 3313872
+  },
+  {
+   "name": "mortal.encoder.net.13.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 3314064
+  },
+  {
+   "name": "mortal.encoder.net.13.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 3424656
+  },
+  {
+   "name": "mortal.encoder.net.13.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3424848
+  },
+  {
+   "name": "mortal.encoder.net.13.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 3425040
+  },
+  {
+   "name": "mortal.encoder.net.13.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 3425232
+  },
+  {
+   "name": "mortal.encoder.net.13.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 3425424
+  },
+  {
+   "name": "mortal.encoder.net.13.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 3536016
+  },
+  {
+   "name": "mortal.encoder.net.13.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 3538320
+  },
+  {
+   "name": "mortal.encoder.net.13.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 3538332
+  },
+  {
+   "name": "mortal.encoder.net.13.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3540636
+  },
+  {
+   "name": "mortal.encoder.net.14.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 3540828
+  },
+  {
+   "name": "mortal.encoder.net.14.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3541020
+  },
+  {
+   "name": "mortal.encoder.net.14.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 3541212
+  },
+  {
+   "name": "mortal.encoder.net.14.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 3541404
+  },
+  {
+   "name": "mortal.encoder.net.14.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 3541596
+  },
+  {
+   "name": "mortal.encoder.net.14.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 3652188
+  },
+  {
+   "name": "mortal.encoder.net.14.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3652380
+  },
+  {
+   "name": "mortal.encoder.net.14.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 3652572
+  },
+  {
+   "name": "mortal.encoder.net.14.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 3652764
+  },
+  {
+   "name": "mortal.encoder.net.14.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 3652956
+  },
+  {
+   "name": "mortal.encoder.net.14.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 3763548
+  },
+  {
+   "name": "mortal.encoder.net.14.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 3765852
+  },
+  {
+   "name": "mortal.encoder.net.14.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 3765864
+  },
+  {
+   "name": "mortal.encoder.net.14.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3768168
+  },
+  {
+   "name": "mortal.encoder.net.15.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 3768360
+  },
+  {
+   "name": "mortal.encoder.net.15.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3768552
+  },
+  {
+   "name": "mortal.encoder.net.15.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 3768744
+  },
+  {
+   "name": "mortal.encoder.net.15.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 3768936
+  },
+  {
+   "name": "mortal.encoder.net.15.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 3769128
+  },
+  {
+   "name": "mortal.encoder.net.15.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 3879720
+  },
+  {
+   "name": "mortal.encoder.net.15.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3879912
+  },
+  {
+   "name": "mortal.encoder.net.15.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 3880104
+  },
+  {
+   "name": "mortal.encoder.net.15.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 3880296
+  },
+  {
+   "name": "mortal.encoder.net.15.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 3880488
+  },
+  {
+   "name": "mortal.encoder.net.15.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 3991080
+  },
+  {
+   "name": "mortal.encoder.net.15.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 3993384
+  },
+  {
+   "name": "mortal.encoder.net.15.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 3993396
+  },
+  {
+   "name": "mortal.encoder.net.15.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3995700
+  },
+  {
+   "name": "mortal.encoder.net.16.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 3995892
+  },
+  {
+   "name": "mortal.encoder.net.16.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 3996084
+  },
+  {
+   "name": "mortal.encoder.net.16.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 3996276
+  },
+  {
+   "name": "mortal.encoder.net.16.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 3996468
+  },
+  {
+   "name": "mortal.encoder.net.16.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 3996660
+  },
+  {
+   "name": "mortal.encoder.net.16.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 4107252
+  },
+  {
+   "name": "mortal.encoder.net.16.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 4107444
+  },
+  {
+   "name": "mortal.encoder.net.16.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 4107636
+  },
+  {
+   "name": "mortal.encoder.net.16.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 4107828
+  },
+  {
+   "name": "mortal.encoder.net.16.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 4108020
+  },
+  {
+   "name": "mortal.encoder.net.16.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 4218612
+  },
+  {
+   "name": "mortal.encoder.net.16.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 4220916
+  },
+  {
+   "name": "mortal.encoder.net.16.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 4220928
+  },
+  {
+   "name": "mortal.encoder.net.16.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 4223232
+  },
+  {
+   "name": "mortal.encoder.net.17.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 4223424
+  },
+  {
+   "name": "mortal.encoder.net.17.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 4223616
+  },
+  {
+   "name": "mortal.encoder.net.17.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 4223808
+  },
+  {
+   "name": "mortal.encoder.net.17.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 4224000
+  },
+  {
+   "name": "mortal.encoder.net.17.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 4224192
+  },
+  {
+   "name": "mortal.encoder.net.17.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 4334784
+  },
+  {
+   "name": "mortal.encoder.net.17.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 4334976
+  },
+  {
+   "name": "mortal.encoder.net.17.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 4335168
+  },
+  {
+   "name": "mortal.encoder.net.17.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 4335360
+  },
+  {
+   "name": "mortal.encoder.net.17.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 4335552
+  },
+  {
+   "name": "mortal.encoder.net.17.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 4446144
+  },
+  {
+   "name": "mortal.encoder.net.17.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 4448448
+  },
+  {
+   "name": "mortal.encoder.net.17.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 4448460
+  },
+  {
+   "name": "mortal.encoder.net.17.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 4450764
+  },
+  {
+   "name": "mortal.encoder.net.18.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 4450956
+  },
+  {
+   "name": "mortal.encoder.net.18.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 4451148
+  },
+  {
+   "name": "mortal.encoder.net.18.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 4451340
+  },
+  {
+   "name": "mortal.encoder.net.18.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 4451532
+  },
+  {
+   "name": "mortal.encoder.net.18.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 4451724
+  },
+  {
+   "name": "mortal.encoder.net.18.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 4562316
+  },
+  {
+   "name": "mortal.encoder.net.18.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 4562508
+  },
+  {
+   "name": "mortal.encoder.net.18.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 4562700
+  },
+  {
+   "name": "mortal.encoder.net.18.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 4562892
+  },
+  {
+   "name": "mortal.encoder.net.18.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 4563084
+  },
+  {
+   "name": "mortal.encoder.net.18.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 4673676
+  },
+  {
+   "name": "mortal.encoder.net.18.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 4675980
+  },
+  {
+   "name": "mortal.encoder.net.18.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 4675992
+  },
+  {
+   "name": "mortal.encoder.net.18.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 4678296
+  },
+  {
+   "name": "mortal.encoder.net.19.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 4678488
+  },
+  {
+   "name": "mortal.encoder.net.19.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 4678680
+  },
+  {
+   "name": "mortal.encoder.net.19.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 4678872
+  },
+  {
+   "name": "mortal.encoder.net.19.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 4679064
+  },
+  {
+   "name": "mortal.encoder.net.19.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 4679256
+  },
+  {
+   "name": "mortal.encoder.net.19.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 4789848
+  },
+  {
+   "name": "mortal.encoder.net.19.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 4790040
+  },
+  {
+   "name": "mortal.encoder.net.19.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 4790232
+  },
+  {
+   "name": "mortal.encoder.net.19.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 4790424
+  },
+  {
+   "name": "mortal.encoder.net.19.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 4790616
+  },
+  {
+   "name": "mortal.encoder.net.19.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 4901208
+  },
+  {
+   "name": "mortal.encoder.net.19.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 4903512
+  },
+  {
+   "name": "mortal.encoder.net.19.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 4903524
+  },
+  {
+   "name": "mortal.encoder.net.19.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 4905828
+  },
+  {
+   "name": "mortal.encoder.net.20.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 4906020
+  },
+  {
+   "name": "mortal.encoder.net.20.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 4906212
+  },
+  {
+   "name": "mortal.encoder.net.20.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 4906404
+  },
+  {
+   "name": "mortal.encoder.net.20.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 4906596
+  },
+  {
+   "name": "mortal.encoder.net.20.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 4906788
+  },
+  {
+   "name": "mortal.encoder.net.20.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 5017380
+  },
+  {
+   "name": "mortal.encoder.net.20.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5017572
+  },
+  {
+   "name": "mortal.encoder.net.20.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 5017764
+  },
+  {
+   "name": "mortal.encoder.net.20.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 5017956
+  },
+  {
+   "name": "mortal.encoder.net.20.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 5018148
+  },
+  {
+   "name": "mortal.encoder.net.20.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 5128740
+  },
+  {
+   "name": "mortal.encoder.net.20.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 5131044
+  },
+  {
+   "name": "mortal.encoder.net.20.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 5131056
+  },
+  {
+   "name": "mortal.encoder.net.20.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5133360
+  },
+  {
+   "name": "mortal.encoder.net.21.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 5133552
+  },
+  {
+   "name": "mortal.encoder.net.21.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5133744
+  },
+  {
+   "name": "mortal.encoder.net.21.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 5133936
+  },
+  {
+   "name": "mortal.encoder.net.21.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 5134128
+  },
+  {
+   "name": "mortal.encoder.net.21.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 5134320
+  },
+  {
+   "name": "mortal.encoder.net.21.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 5244912
+  },
+  {
+   "name": "mortal.encoder.net.21.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5245104
+  },
+  {
+   "name": "mortal.encoder.net.21.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 5245296
+  },
+  {
+   "name": "mortal.encoder.net.21.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 5245488
+  },
+  {
+   "name": "mortal.encoder.net.21.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 5245680
+  },
+  {
+   "name": "mortal.encoder.net.21.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 5356272
+  },
+  {
+   "name": "mortal.encoder.net.21.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 5358576
+  },
+  {
+   "name": "mortal.encoder.net.21.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 5358588
+  },
+  {
+   "name": "mortal.encoder.net.21.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5360892
+  },
+  {
+   "name": "mortal.encoder.net.22.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 5361084
+  },
+  {
+   "name": "mortal.encoder.net.22.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5361276
+  },
+  {
+   "name": "mortal.encoder.net.22.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 5361468
+  },
+  {
+   "name": "mortal.encoder.net.22.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 5361660
+  },
+  {
+   "name": "mortal.encoder.net.22.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 5361852
+  },
+  {
+   "name": "mortal.encoder.net.22.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 5472444
+  },
+  {
+   "name": "mortal.encoder.net.22.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5472636
+  },
+  {
+   "name": "mortal.encoder.net.22.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 5472828
+  },
+  {
+   "name": "mortal.encoder.net.22.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 5473020
+  },
+  {
+   "name": "mortal.encoder.net.22.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 5473212
+  },
+  {
+   "name": "mortal.encoder.net.22.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 5583804
+  },
+  {
+   "name": "mortal.encoder.net.22.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 5586108
+  },
+  {
+   "name": "mortal.encoder.net.22.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 5586120
+  },
+  {
+   "name": "mortal.encoder.net.22.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5588424
+  },
+  {
+   "name": "mortal.encoder.net.23.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 5588616
+  },
+  {
+   "name": "mortal.encoder.net.23.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5588808
+  },
+  {
+   "name": "mortal.encoder.net.23.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 5589000
+  },
+  {
+   "name": "mortal.encoder.net.23.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 5589192
+  },
+  {
+   "name": "mortal.encoder.net.23.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 5589384
+  },
+  {
+   "name": "mortal.encoder.net.23.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 5699976
+  },
+  {
+   "name": "mortal.encoder.net.23.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5700168
+  },
+  {
+   "name": "mortal.encoder.net.23.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 5700360
+  },
+  {
+   "name": "mortal.encoder.net.23.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 5700552
+  },
+  {
+   "name": "mortal.encoder.net.23.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 5700744
+  },
+  {
+   "name": "mortal.encoder.net.23.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 5811336
+  },
+  {
+   "name": "mortal.encoder.net.23.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 5813640
+  },
+  {
+   "name": "mortal.encoder.net.23.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 5813652
+  },
+  {
+   "name": "mortal.encoder.net.23.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5815956
+  },
+  {
+   "name": "mortal.encoder.net.24.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 5816148
+  },
+  {
+   "name": "mortal.encoder.net.24.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5816340
+  },
+  {
+   "name": "mortal.encoder.net.24.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 5816532
+  },
+  {
+   "name": "mortal.encoder.net.24.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 5816724
+  },
+  {
+   "name": "mortal.encoder.net.24.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 5816916
+  },
+  {
+   "name": "mortal.encoder.net.24.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 5927508
+  },
+  {
+   "name": "mortal.encoder.net.24.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 5927700
+  },
+  {
+   "name": "mortal.encoder.net.24.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 5927892
+  },
+  {
+   "name": "mortal.encoder.net.24.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 5928084
+  },
+  {
+   "name": "mortal.encoder.net.24.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 5928276
+  },
+  {
+   "name": "mortal.encoder.net.24.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 6038868
+  },
+  {
+   "name": "mortal.encoder.net.24.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 6041172
+  },
+  {
+   "name": "mortal.encoder.net.24.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 6041184
+  },
+  {
+   "name": "mortal.encoder.net.24.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6043488
+  },
+  {
+   "name": "mortal.encoder.net.25.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 6043680
+  },
+  {
+   "name": "mortal.encoder.net.25.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6043872
+  },
+  {
+   "name": "mortal.encoder.net.25.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 6044064
+  },
+  {
+   "name": "mortal.encoder.net.25.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 6044256
+  },
+  {
+   "name": "mortal.encoder.net.25.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 6044448
+  },
+  {
+   "name": "mortal.encoder.net.25.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 6155040
+  },
+  {
+   "name": "mortal.encoder.net.25.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6155232
+  },
+  {
+   "name": "mortal.encoder.net.25.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 6155424
+  },
+  {
+   "name": "mortal.encoder.net.25.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 6155616
+  },
+  {
+   "name": "mortal.encoder.net.25.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 6155808
+  },
+  {
+   "name": "mortal.encoder.net.25.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 6266400
+  },
+  {
+   "name": "mortal.encoder.net.25.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 6268704
+  },
+  {
+   "name": "mortal.encoder.net.25.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 6268716
+  },
+  {
+   "name": "mortal.encoder.net.25.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6271020
+  },
+  {
+   "name": "mortal.encoder.net.26.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 6271212
+  },
+  {
+   "name": "mortal.encoder.net.26.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6271404
+  },
+  {
+   "name": "mortal.encoder.net.26.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 6271596
+  },
+  {
+   "name": "mortal.encoder.net.26.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 6271788
+  },
+  {
+   "name": "mortal.encoder.net.26.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 6271980
+  },
+  {
+   "name": "mortal.encoder.net.26.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 6382572
+  },
+  {
+   "name": "mortal.encoder.net.26.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6382764
+  },
+  {
+   "name": "mortal.encoder.net.26.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 6382956
+  },
+  {
+   "name": "mortal.encoder.net.26.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 6383148
+  },
+  {
+   "name": "mortal.encoder.net.26.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 6383340
+  },
+  {
+   "name": "mortal.encoder.net.26.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 6493932
+  },
+  {
+   "name": "mortal.encoder.net.26.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 6496236
+  },
+  {
+   "name": "mortal.encoder.net.26.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 6496248
+  },
+  {
+   "name": "mortal.encoder.net.26.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6498552
+  },
+  {
+   "name": "mortal.encoder.net.27.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 6498744
+  },
+  {
+   "name": "mortal.encoder.net.27.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6498936
+  },
+  {
+   "name": "mortal.encoder.net.27.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 6499128
+  },
+  {
+   "name": "mortal.encoder.net.27.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 6499320
+  },
+  {
+   "name": "mortal.encoder.net.27.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 6499512
+  },
+  {
+   "name": "mortal.encoder.net.27.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 6610104
+  },
+  {
+   "name": "mortal.encoder.net.27.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6610296
+  },
+  {
+   "name": "mortal.encoder.net.27.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 6610488
+  },
+  {
+   "name": "mortal.encoder.net.27.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 6610680
+  },
+  {
+   "name": "mortal.encoder.net.27.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 6610872
+  },
+  {
+   "name": "mortal.encoder.net.27.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 6721464
+  },
+  {
+   "name": "mortal.encoder.net.27.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 6723768
+  },
+  {
+   "name": "mortal.encoder.net.27.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 6723780
+  },
+  {
+   "name": "mortal.encoder.net.27.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6726084
+  },
+  {
+   "name": "mortal.encoder.net.28.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 6726276
+  },
+  {
+   "name": "mortal.encoder.net.28.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6726468
+  },
+  {
+   "name": "mortal.encoder.net.28.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 6726660
+  },
+  {
+   "name": "mortal.encoder.net.28.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 6726852
+  },
+  {
+   "name": "mortal.encoder.net.28.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 6727044
+  },
+  {
+   "name": "mortal.encoder.net.28.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 6837636
+  },
+  {
+   "name": "mortal.encoder.net.28.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6837828
+  },
+  {
+   "name": "mortal.encoder.net.28.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 6838020
+  },
+  {
+   "name": "mortal.encoder.net.28.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 6838212
+  },
+  {
+   "name": "mortal.encoder.net.28.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 6838404
+  },
+  {
+   "name": "mortal.encoder.net.28.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 6948996
+  },
+  {
+   "name": "mortal.encoder.net.28.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 6951300
+  },
+  {
+   "name": "mortal.encoder.net.28.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 6951312
+  },
+  {
+   "name": "mortal.encoder.net.28.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6953616
+  },
+  {
+   "name": "mortal.encoder.net.29.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 6953808
+  },
+  {
+   "name": "mortal.encoder.net.29.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 6954000
+  },
+  {
+   "name": "mortal.encoder.net.29.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 6954192
+  },
+  {
+   "name": "mortal.encoder.net.29.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 6954384
+  },
+  {
+   "name": "mortal.encoder.net.29.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 6954576
+  },
+  {
+   "name": "mortal.encoder.net.29.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 7065168
+  },
+  {
+   "name": "mortal.encoder.net.29.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7065360
+  },
+  {
+   "name": "mortal.encoder.net.29.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 7065552
+  },
+  {
+   "name": "mortal.encoder.net.29.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 7065744
+  },
+  {
+   "name": "mortal.encoder.net.29.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 7065936
+  },
+  {
+   "name": "mortal.encoder.net.29.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 7176528
+  },
+  {
+   "name": "mortal.encoder.net.29.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 7178832
+  },
+  {
+   "name": "mortal.encoder.net.29.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 7178844
+  },
+  {
+   "name": "mortal.encoder.net.29.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7181148
+  },
+  {
+   "name": "mortal.encoder.net.30.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 7181340
+  },
+  {
+   "name": "mortal.encoder.net.30.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7181532
+  },
+  {
+   "name": "mortal.encoder.net.30.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 7181724
+  },
+  {
+   "name": "mortal.encoder.net.30.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 7181916
+  },
+  {
+   "name": "mortal.encoder.net.30.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 7182108
+  },
+  {
+   "name": "mortal.encoder.net.30.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 7292700
+  },
+  {
+   "name": "mortal.encoder.net.30.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7292892
+  },
+  {
+   "name": "mortal.encoder.net.30.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 7293084
+  },
+  {
+   "name": "mortal.encoder.net.30.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 7293276
+  },
+  {
+   "name": "mortal.encoder.net.30.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 7293468
+  },
+  {
+   "name": "mortal.encoder.net.30.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 7404060
+  },
+  {
+   "name": "mortal.encoder.net.30.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 7406364
+  },
+  {
+   "name": "mortal.encoder.net.30.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 7406376
+  },
+  {
+   "name": "mortal.encoder.net.30.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7408680
+  },
+  {
+   "name": "mortal.encoder.net.31.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 7408872
+  },
+  {
+   "name": "mortal.encoder.net.31.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7409064
+  },
+  {
+   "name": "mortal.encoder.net.31.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 7409256
+  },
+  {
+   "name": "mortal.encoder.net.31.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 7409448
+  },
+  {
+   "name": "mortal.encoder.net.31.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 7409640
+  },
+  {
+   "name": "mortal.encoder.net.31.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 7520232
+  },
+  {
+   "name": "mortal.encoder.net.31.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7520424
+  },
+  {
+   "name": "mortal.encoder.net.31.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 7520616
+  },
+  {
+   "name": "mortal.encoder.net.31.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 7520808
+  },
+  {
+   "name": "mortal.encoder.net.31.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 7521000
+  },
+  {
+   "name": "mortal.encoder.net.31.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 7631592
+  },
+  {
+   "name": "mortal.encoder.net.31.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 7633896
+  },
+  {
+   "name": "mortal.encoder.net.31.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 7633908
+  },
+  {
+   "name": "mortal.encoder.net.31.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7636212
+  },
+  {
+   "name": "mortal.encoder.net.32.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 7636404
+  },
+  {
+   "name": "mortal.encoder.net.32.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7636596
+  },
+  {
+   "name": "mortal.encoder.net.32.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 7636788
+  },
+  {
+   "name": "mortal.encoder.net.32.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 7636980
+  },
+  {
+   "name": "mortal.encoder.net.32.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 7637172
+  },
+  {
+   "name": "mortal.encoder.net.32.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 7747764
+  },
+  {
+   "name": "mortal.encoder.net.32.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7747956
+  },
+  {
+   "name": "mortal.encoder.net.32.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 7748148
+  },
+  {
+   "name": "mortal.encoder.net.32.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 7748340
+  },
+  {
+   "name": "mortal.encoder.net.32.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 7748532
+  },
+  {
+   "name": "mortal.encoder.net.32.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 7859124
+  },
+  {
+   "name": "mortal.encoder.net.32.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 7861428
+  },
+  {
+   "name": "mortal.encoder.net.32.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 7861440
+  },
+  {
+   "name": "mortal.encoder.net.32.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7863744
+  },
+  {
+   "name": "mortal.encoder.net.33.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 7863936
+  },
+  {
+   "name": "mortal.encoder.net.33.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7864128
+  },
+  {
+   "name": "mortal.encoder.net.33.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 7864320
+  },
+  {
+   "name": "mortal.encoder.net.33.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 7864512
+  },
+  {
+   "name": "mortal.encoder.net.33.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 7864704
+  },
+  {
+   "name": "mortal.encoder.net.33.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 7975296
+  },
+  {
+   "name": "mortal.encoder.net.33.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 7975488
+  },
+  {
+   "name": "mortal.encoder.net.33.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 7975680
+  },
+  {
+   "name": "mortal.encoder.net.33.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 7975872
+  },
+  {
+   "name": "mortal.encoder.net.33.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 7976064
+  },
+  {
+   "name": "mortal.encoder.net.33.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 8086656
+  },
+  {
+   "name": "mortal.encoder.net.33.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 8088960
+  },
+  {
+   "name": "mortal.encoder.net.33.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 8088972
+  },
+  {
+   "name": "mortal.encoder.net.33.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 8091276
+  },
+  {
+   "name": "mortal.encoder.net.34.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 8091468
+  },
+  {
+   "name": "mortal.encoder.net.34.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 8091660
+  },
+  {
+   "name": "mortal.encoder.net.34.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 8091852
+  },
+  {
+   "name": "mortal.encoder.net.34.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 8092044
+  },
+  {
+   "name": "mortal.encoder.net.34.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 8092236
+  },
+  {
+   "name": "mortal.encoder.net.34.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 8202828
+  },
+  {
+   "name": "mortal.encoder.net.34.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 8203020
+  },
+  {
+   "name": "mortal.encoder.net.34.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 8203212
+  },
+  {
+   "name": "mortal.encoder.net.34.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 8203404
+  },
+  {
+   "name": "mortal.encoder.net.34.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 8203596
+  },
+  {
+   "name": "mortal.encoder.net.34.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 8314188
+  },
+  {
+   "name": "mortal.encoder.net.34.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 8316492
+  },
+  {
+   "name": "mortal.encoder.net.34.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 8316504
+  },
+  {
+   "name": "mortal.encoder.net.34.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 8318808
+  },
+  {
+   "name": "mortal.encoder.net.35.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 8319000
+  },
+  {
+   "name": "mortal.encoder.net.35.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 8319192
+  },
+  {
+   "name": "mortal.encoder.net.35.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 8319384
+  },
+  {
+   "name": "mortal.encoder.net.35.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 8319576
+  },
+  {
+   "name": "mortal.encoder.net.35.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 8319768
+  },
+  {
+   "name": "mortal.encoder.net.35.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 8430360
+  },
+  {
+   "name": "mortal.encoder.net.35.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 8430552
+  },
+  {
+   "name": "mortal.encoder.net.35.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 8430744
+  },
+  {
+   "name": "mortal.encoder.net.35.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 8430936
+  },
+  {
+   "name": "mortal.encoder.net.35.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 8431128
+  },
+  {
+   "name": "mortal.encoder.net.35.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 8541720
+  },
+  {
+   "name": "mortal.encoder.net.35.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 8544024
+  },
+  {
+   "name": "mortal.encoder.net.35.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 8544036
+  },
+  {
+   "name": "mortal.encoder.net.35.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 8546340
+  },
+  {
+   "name": "mortal.encoder.net.36.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 8546532
+  },
+  {
+   "name": "mortal.encoder.net.36.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 8546724
+  },
+  {
+   "name": "mortal.encoder.net.36.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 8546916
+  },
+  {
+   "name": "mortal.encoder.net.36.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 8547108
+  },
+  {
+   "name": "mortal.encoder.net.36.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 8547300
+  },
+  {
+   "name": "mortal.encoder.net.36.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 8657892
+  },
+  {
+   "name": "mortal.encoder.net.36.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 8658084
+  },
+  {
+   "name": "mortal.encoder.net.36.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 8658276
+  },
+  {
+   "name": "mortal.encoder.net.36.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 8658468
+  },
+  {
+   "name": "mortal.encoder.net.36.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 8658660
+  },
+  {
+   "name": "mortal.encoder.net.36.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 8769252
+  },
+  {
+   "name": "mortal.encoder.net.36.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 8771556
+  },
+  {
+   "name": "mortal.encoder.net.36.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 8771568
+  },
+  {
+   "name": "mortal.encoder.net.36.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 8773872
+  },
+  {
+   "name": "mortal.encoder.net.37.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 8774064
+  },
+  {
+   "name": "mortal.encoder.net.37.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 8774256
+  },
+  {
+   "name": "mortal.encoder.net.37.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 8774448
+  },
+  {
+   "name": "mortal.encoder.net.37.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 8774640
+  },
+  {
+   "name": "mortal.encoder.net.37.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 8774832
+  },
+  {
+   "name": "mortal.encoder.net.37.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 8885424
+  },
+  {
+   "name": "mortal.encoder.net.37.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 8885616
+  },
+  {
+   "name": "mortal.encoder.net.37.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 8885808
+  },
+  {
+   "name": "mortal.encoder.net.37.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 8886000
+  },
+  {
+   "name": "mortal.encoder.net.37.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 8886192
+  },
+  {
+   "name": "mortal.encoder.net.37.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 8996784
+  },
+  {
+   "name": "mortal.encoder.net.37.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 8999088
+  },
+  {
+   "name": "mortal.encoder.net.37.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 8999100
+  },
+  {
+   "name": "mortal.encoder.net.37.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 9001404
+  },
+  {
+   "name": "mortal.encoder.net.38.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 9001596
+  },
+  {
+   "name": "mortal.encoder.net.38.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 9001788
+  },
+  {
+   "name": "mortal.encoder.net.38.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 9001980
+  },
+  {
+   "name": "mortal.encoder.net.38.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 9002172
+  },
+  {
+   "name": "mortal.encoder.net.38.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 9002364
+  },
+  {
+   "name": "mortal.encoder.net.38.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 9112956
+  },
+  {
+   "name": "mortal.encoder.net.38.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 9113148
+  },
+  {
+   "name": "mortal.encoder.net.38.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 9113340
+  },
+  {
+   "name": "mortal.encoder.net.38.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 9113532
+  },
+  {
+   "name": "mortal.encoder.net.38.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 9113724
+  },
+  {
+   "name": "mortal.encoder.net.38.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 9224316
+  },
+  {
+   "name": "mortal.encoder.net.38.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 9226620
+  },
+  {
+   "name": "mortal.encoder.net.38.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 9226632
+  },
+  {
+   "name": "mortal.encoder.net.38.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 9228936
+  },
+  {
+   "name": "mortal.encoder.net.39.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 9229128
+  },
+  {
+   "name": "mortal.encoder.net.39.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 9229320
+  },
+  {
+   "name": "mortal.encoder.net.39.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 9229512
+  },
+  {
+   "name": "mortal.encoder.net.39.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 9229704
+  },
+  {
+   "name": "mortal.encoder.net.39.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 9229896
+  },
+  {
+   "name": "mortal.encoder.net.39.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 9340488
+  },
+  {
+   "name": "mortal.encoder.net.39.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 9340680
+  },
+  {
+   "name": "mortal.encoder.net.39.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 9340872
+  },
+  {
+   "name": "mortal.encoder.net.39.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 9341064
+  },
+  {
+   "name": "mortal.encoder.net.39.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 9341256
+  },
+  {
+   "name": "mortal.encoder.net.39.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 9451848
+  },
+  {
+   "name": "mortal.encoder.net.39.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 9454152
+  },
+  {
+   "name": "mortal.encoder.net.39.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 9454164
+  },
+  {
+   "name": "mortal.encoder.net.39.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 9456468
+  },
+  {
+   "name": "mortal.encoder.net.40.res_unit.0.weight",
+   "shape": [
+    192
+   ],
+   "offset": 9456660
+  },
+  {
+   "name": "mortal.encoder.net.40.res_unit.0.bias",
+   "shape": [
+    192
+   ],
+   "offset": 9456852
+  },
+  {
+   "name": "mortal.encoder.net.40.res_unit.0.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 9457044
+  },
+  {
+   "name": "mortal.encoder.net.40.res_unit.0.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 9457236
+  },
+  {
+   "name": "mortal.encoder.net.40.res_unit.2.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 9457428
+  },
+  {
+   "name": "mortal.encoder.net.40.res_unit.3.weight",
+   "shape": [
+    192
+   ],
+   "offset": 9568020
+  },
+  {
+   "name": "mortal.encoder.net.40.res_unit.3.bias",
+   "shape": [
+    192
+   ],
+   "offset": 9568212
+  },
+  {
+   "name": "mortal.encoder.net.40.res_unit.3.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 9568404
+  },
+  {
+   "name": "mortal.encoder.net.40.res_unit.3.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 9568596
+  },
+  {
+   "name": "mortal.encoder.net.40.res_unit.5.weight",
+   "shape": [
+    192,
+    192,
+    3
+   ],
+   "offset": 9568788
+  },
+  {
+   "name": "mortal.encoder.net.40.ca.shared_mlp.0.weight",
+   "shape": [
+    12,
+    192
+   ],
+   "offset": 9679380
+  },
+  {
+   "name": "mortal.encoder.net.40.ca.shared_mlp.0.bias",
+   "shape": [
+    12
+   ],
+   "offset": 9681684
+  },
+  {
+   "name": "mortal.encoder.net.40.ca.shared_mlp.2.weight",
+   "shape": [
+    192,
+    12
+   ],
+   "offset": 9681696
+  },
+  {
+   "name": "mortal.encoder.net.40.ca.shared_mlp.2.bias",
+   "shape": [
+    192
+   ],
+   "offset": 9684000
+  },
+  {
+   "name": "mortal.encoder.net.41.weight",
+   "shape": [
+    192
+   ],
+   "offset": 9684192
+  },
+  {
+   "name": "mortal.encoder.net.41.bias",
+   "shape": [
+    192
+   ],
+   "offset": 9684384
+  },
+  {
+   "name": "mortal.encoder.net.41.running_mean",
+   "shape": [
+    192
+   ],
+   "offset": 9684576
+  },
+  {
+   "name": "mortal.encoder.net.41.running_var",
+   "shape": [
+    192
+   ],
+   "offset": 9684768
+  },
+  {
+   "name": "mortal.encoder.net.43.weight",
+   "shape": [
+    32,
+    192,
+    3
+   ],
+   "offset": 9684960
+  },
+  {
+   "name": "mortal.encoder.net.43.bias",
+   "shape": [
+    32
+   ],
+   "offset": 9703392
+  },
+  {
+   "name": "mortal.encoder.net.46.weight",
+   "shape": [
+    1024,
+    1088
+   ],
+   "offset": 9703424
+  },
+  {
+   "name": "mortal.encoder.net.46.bias",
+   "shape": [
+    1024
+   ],
+   "offset": 10817536
+  },
+  {
+   "name": "current_dqn.net.weight",
+   "shape": [
+    47,
+    1024
+   ],
+   "offset": 10818560
+  },
+  {
+   "name": "current_dqn.net.bias",
+   "shape": [
+    47
+   ],
+   "offset": 10866688
+  }
+ ]
+}

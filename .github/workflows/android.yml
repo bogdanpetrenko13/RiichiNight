@@ -23,10 +23,15 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install pytest
+      # Mortal (native/mortal) as a native library for the Mortal tests.
+      - name: Mortal (native) and weights
+        run: scripts/mortal/ci_setup.sh native
       # pyriichi is vendored as a zip; Python imports straight from it.
       - name: Run tests
         env:
           PYTHONPATH: public/py/pyriichi.zip
+          MORTAL_LIB: native/mortal/target/release/libriichinight_mortal.so
+          MORTAL_DIR: public/mortal
         run: python -m pytest tests/python -q
 
   build:
@@ -51,6 +56,13 @@ jobs:
           else
             npm install --no-audit --no-fund 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
           fi
+
+      # The Mortal heroines: WebAssembly module + weights into public/mortal.
+      - id: mortal
+        name: Mortal (WebAssembly) and weights
+        run: |
+          set -o pipefail
+          scripts/mortal/ci_setup.sh wasm 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
       - id: smoke
         name: Engine inside Pyodide (full hanchan)

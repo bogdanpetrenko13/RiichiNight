@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Tuple
 
 from pyriichi import GameAction, MeldType, Suit, Tile
 from shanten import shanten, useful_tiles
+import rulefix
 
 SUIT_BASE = {Suit.MANZU: 0, Suit.PINZU: 9, Suit.SOUZU: 18, Suit.HONORS: 27}
 WIND_RANK = {"east": 1, "south": 2, "west": 3, "north": 4}
@@ -200,6 +201,9 @@ class Brain:
         if hand.is_riichi:
             return hand.last_drawn_tile or hand.tiles[-1]
         candidates = candidates or list(hand.tiles)
+        # Kuikae: right after a call some kinds may not be discarded.
+        bad = rulefix.forbidden_discards(engine, me)
+        candidates = [t for t in candidates if (t.suit, t.rank) not in bad] or candidates
         scored = self._discard_options(engine, me, candidates)
 
         if self.level == "easy" and self.rng.random() < 0.3:

@@ -24,13 +24,17 @@ from pyriichi.player import PublicInfo  # noqa: F401  (kept for future AI varian
 import fastpatch
 import yakufix
 import calcinfo
+import rulefix
 import scenarios
+import mjai
+import mortal
 import rules as game_rules
 from ai import Brain, tile_index
 
 fastpatch.apply()
 yakufix.apply()
 calcinfo.apply()
+rulefix.apply()
 game_rules.apply_patches()
 
 SAVE_VERSION = 1
@@ -106,7 +110,17 @@ class Game:
         self.levels = levels[: NUM_PLAYERS - 1]
         styles = list(config.get("styles") or [])
         styles += [None] * (NUM_PLAYERS - 1 - len(styles))
-        self.brains = {i + 1: Brain(self.levels[i], self.rng, styles[i]) for i in range(NUM_PLAYERS - 1)}
+        self.brains = {}
+        for i in range(NUM_PLAYERS - 1):
+            level = self.levels[i]
+            if level in mortal.STRENGTH:
+                # The heuristic brain plays the moves Mortal cannot (see mortal.py).
+                fallback = Brain("hard", self.rng, styles[i])
+                self.brains[i + 1] = mortal.MortalBrain(i + 1, fallback, mortal.STRENGTH[level], self.seed + i)
+            else:
+                self.brains[i + 1] = Brain(level, self.rng, styles[i])
+        self.mjai = mjai.MjaiLog()
+        self.mortal_mismatches: List[dict] = []
         self.rules = game_rules.normalize(config.get("rules"))
         self.engine = RuleEngine(num_players=NUM_PLAYERS)
         self.engine.start_game()
@@ -126,6 +140,7 @@ class Game:
         # getattr: games pickled by older versions have no `scenario`.
         if getattr(self, "scenario", None) and self.round_index == 0:
             scenarios.rig(self.engine, self.scenario)
+        self.log.start_kyoku(self.engine)
         self.round_result = None
         self.round_index += 1
         self.round_start_scores = list(self.engine.game_state.scores)
@@ -139,6 +154,14 @@ class Game:
                 "dealer": gs.dealer,
             }
         )
+
+    @property
+    def log(self) -> "mjai.MjaiLog":
+        # getattr: games pickled by older versions have no mjai log.
+        log = getattr(self, "mjai", None)
+        if log is None:
+            log = self.mjai = mjai.MjaiLog()
+        return log
 
     def next_round(self) -> None:
         phase = self.engine.get_phase()
@@ -161,6 +184,7 @@ class Game:
     def _exec(self, seat: int, action: GameAction, tile: Optional[Tile] = None, **kwargs):
         discarder = self.engine.get_last_discard_player()
         drawn_before = self.engine.get_hand(seat).last_drawn_tile
+        self.log.before(self.engine)
         result = self.engine.execute_action(seat, action, tile, **kwargs)
         if action in CALLOUTS:
             self.events.append({"t": "call", "seat": seat, "kind": CALLOUTS[action]})
@@ -189,6 +213,7 @@ class Game:
         if result.rinshan_win is not None:
             result.winners = [result.rinshan_win.player]
             result.win_results[result.rinshan_win.player] = result.rinshan_win
+        self.log.observe(self.engine, seat, action, tile, result)
         self._after_result(result)
         return result
 
@@ -278,6 +303,9 @@ class Game:
         )
 
     def _finish_draw(self, kind: str, tenpai=None, nagashi=None, chombo_seat=None) -> None:
+        log = self.log
+        if not log.events or log.events[-1]["type"] != "end_kyoku":
+            log.events += [{"type": "ryukyoku"}, {"type": "end_kyoku"}]
         self.round_result = {
             "type": "draw",
             "kind": kind,
@@ -318,7 +346,11 @@ class Game:
                 return  # only the human is left to decide
             seat = ai_seats[0]
             actions = engine.get_available_actions(seat)
-            action, tile, kwargs = self.brains[seat].decide(engine, seat, actions)
+            brain = self.brains[seat]
+            if isinstance(brain, mortal.MortalBrain):
+                action, tile, kwargs = brain.decide(self, actions)
+            else:
+                action, tile, kwargs = brain.decide(engine, seat, actions)
             try:
                 self._exec(seat, action, tile, **kwargs)
             except (RuleError, ValueError):
@@ -394,7 +426,8 @@ class Game:
             if hand.is_riichi and hand.last_drawn_tile is not None:
                 prompt["discardable"] = [tstr(hand.last_drawn_tile)]
             else:
-                prompt["discardable"] = sorted({tstr(t) for t in hand.tiles})
+                # Kuikae: right after a call some kinds may not be discarded.
+                prompt["discardable"] = sorted({tstr(t) for t in rulefix.allowed_discards(engine, HUMAN)})
             hints = {}
             if not hand.is_riichi:
                 for text in prompt["discardable"]:

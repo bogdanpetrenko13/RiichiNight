@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 dist/
 public/pyodide/
 __pycache__/
@@ -12,3 +12,7 @@ android/.gradle/
 !signing/debug.keystore
 test-results/
 .preview/
+native/mortal/target/
+# Built by CI (native/mortal) and downloaded from the mortal-s42 release.
+public/mortal/*.wasm
+public/mortal/*.bin
