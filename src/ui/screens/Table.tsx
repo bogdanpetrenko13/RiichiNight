@@ -14,6 +14,7 @@ import { CallCutaway } from "../components/CallCutaway";
 import { ErrorDialog } from "../components/ErrorDialog";
 import { RivalBand } from "../components/RivalBand";
 import { PlayerBand } from "../components/PlayerBand";
+import { TableCenter } from "../components/TableCenter";
 import { WaitsChip } from "../components/WaitsChip";
 import { IconButton, Sheet } from "../components/Primitives";
 import { Icon } from "../icons";
@@ -223,6 +224,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
             />
           );
         })}
+        {portrait && <TableCenter view={view} />}
         <PlayerBand
           view={view}
           active={view.current === 0 && view.status === "human"}

@@ -17,6 +17,8 @@ export const TILE_RATIO = 1.42;
 export const HAND_UNITS_BASE = 14 + 0.3;
 
 const GAP = 6;
+/** Portrait: height of the table centre strip (TableCenter) incl. its margins. */
+const CENTER_H = 46;
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 const px = (v: number) => `${v.toFixed(1)}px`;
@@ -73,7 +75,7 @@ function handVars(hand: number, avail: number, cap: number): CSSProperties {
 /**
  * River, closed-hand and portrait sizes from the real size of the bands area
  * (measured by the table), so rivers always fit their band.
- *   portrait: 4 stacked bands, field right of a fixed left part
+ *   portrait: 4 stacked bands + the centre strip, field right of a fixed left part
  *   landscape: 4 columns
  * Rivals' rivers hold 9 tiles per row in portrait (6 in landscape columns),
  * the player's 6 per row; plus one sideways riichi tile and the riichi stick
@@ -98,7 +100,8 @@ export function bandVars(orientation: Layout["orientation"], areaW: number, area
     const river = clamp(Math.min((colW - 18) / 6.6, byH, byHMe), 14, 40);
     return { ["--band-river" as string]: px(river), ["--band-back" as string]: px(back) };
   }
-  const bandH = (areaH - 3 * GAP) / 4;
+  // Four bands and the table centre strip (TableCenter, CENTER_H) between them.
+  const bandH = (areaH - 4 * GAP - CENTER_H) / 4;
   // Band: 10 px padding on every side + 8 px between columns + 2 px border.
   const field = areaW - 12 - 2 - left - 28;
   // The player band also holds the waits + buttons column on the right.
@@ -118,7 +121,8 @@ export function bandVars(orientation: Layout["orientation"], areaW: number, area
   // Player: 6 per row next to the waits/buttons column; up to 4 rows.
   const meRiver = clamp(Math.min((meField - 4) / 6.6, (bandH - 16) / (4 * rowH + 0.38)), 14, 40);
   // Portrait under wind / score / name (~68 px of labels): never covers them.
-  const portrait = clamp(Math.min(left - 14, bandH - 16 - 70), 48, 110);
+  // On short screens it shrinks below 48 px rather than overlap the labels.
+  const portrait = clamp(Math.min(left - 14, bandH - 16 - 72), 34, 110);
   return {
     ["--band-side" as string]: `${side}px`,
     ["--band-river" as string]: px(river),

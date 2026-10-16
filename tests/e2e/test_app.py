@@ -97,6 +97,39 @@ def test_table_look_settings_reach_the_table(make_app):
     assert not app.errors, app.errors
 
 
+def test_table_centre_shows_dora_and_counters(make_app):
+    """Portrait: the strip between the rivals and the player carries the dora
+    indicators and the counters; landscape keeps them in the player's column."""
+    app = make_app(PORTRAIT).open("?seed=7").start_game()
+    app.wait_my_turn()
+    centre = app.page.locator("[data-table-center]")
+    assert centre.count() == 1
+    assert centre.locator("[aria-label='Дора'] [aria-label]").count() >= 1
+    wall = int(centre.locator("[title^='Стена']").inner_text().strip())
+    assert 0 < wall <= 70, wall
+    land = make_app(LANDSCAPE).open("?seed=7").start_game()
+    land.wait_my_turn()
+    assert land.page.locator("[data-table-center]").count() == 0
+    assert not app.errors and not land.errors
+
+
+def test_rival_riichi_shows_a_badge(make_app):
+    """A rival in riichi gets a "Риичи" badge in place of her name (seed 2: Hikari
+    declares riichi in the first hand)."""
+    app = make_app(PORTRAIT).open("?seed=2", {"aiDelay": 200}).start_game()
+    page = app.page
+    in_riichi = "() => document.querySelectorAll('section[aria-label] [class*=riichiLine]:not([data-empty])').length"
+    for _ in range(900):
+        state = app.step()
+        if state == "result" or page.evaluate(in_riichi):
+            break
+    assert page.evaluate(in_riichi), "no rival riichi in this deal"
+    band = page.locator("section[aria-label]:has([class*=riichiLine]:not([data-empty]))").first
+    assert band.locator("[class*=riichiBadge]").inner_text().strip().lower() == "риичи"
+    assert page.locator("[class*=riichiBadge]").count() == 1
+    assert not app.errors, app.errors
+
+
 def test_first_hand_plays_to_a_result(make_app):
     app = make_app().open("?seed=11").start_game()
     for _ in range(600):

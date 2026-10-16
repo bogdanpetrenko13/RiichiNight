@@ -430,3 +430,76 @@
   left: 40px;
   top: 40px;
 }
+
+/* ---- portrait: middle of the table (TableCenter.tsx) ---------------------- */
+.center {
+  flex: none;
+  /* 40 px + 3 px margins = CENTER_H in useLayout.ts. */
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 3px 6px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: var(--chip-bg);
+  color: var(--chip-text);
+}
+
+.centerDora {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.centerLabel {
+  margin-right: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.centerCounters {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.centerCounters span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.centerCounters .wall {
+  width: 10px;
+  height: 14px;
+}
+
+/* Rival in riichi: a badge in place of her name. */
+.riichiBadge {
+  align-self: flex-start;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #d2452f;
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  animation: riichiIn var(--dur-slow, 320ms) var(--ease-out) both;
+}
+
+@keyframes riichiIn {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}

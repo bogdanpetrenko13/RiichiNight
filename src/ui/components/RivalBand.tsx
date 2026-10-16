@@ -98,7 +98,11 @@ export function RivalBand({ character, player, emotion, callout, speech, active,
           {t(`wind_${player.wind}` as StringKey)}
         </span>
         <span className={styles.score}>{player.score.toLocaleString()}</span>
-        <span className={styles.name}>{charName(character).split(" ")[0]}</span>
+        {/* In riichi a badge takes the name's place: the first thing to check
+            before a dangerous discard. */}
+        <span className={styles.name}>
+          {player.riichi ? <span className={styles.riichiBadge}>{t("act_riichi")}</span> : charName(character).split(" ")[0]}
+        </span>
         <div className={styles.portrait}>
           <Portrait character={character} emotion={emotion} size={88} className={styles.face} />
           {callout && (
