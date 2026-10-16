@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import json
 import os
+import random
 from typing import List, Optional, Tuple
 
 from pyriichi import GameAction
@@ -142,21 +143,21 @@ def reset_link() -> None:
     _LINK, _LINK_TRIED = None, False
 
 
-# Mortal strength presets (explore, temperature).
-STRENGTH = {
-    "mortal": (0.0, 1.0),  # full strength
-}
 
 
 class MortalBrain:
     """A seat played by Mortal; pickled with the game (the WebAssembly state
     is rebuilt from the hand's events after loading)."""
 
-    def __init__(self, seat: int, fallback, strength: Tuple[float, float] = (0.0, 1.0), seed: int = 1):
+    def __init__(self, seat: int, fallback, strength: Tuple[float, float] = (0.0, 1.0), seed: int = 1, blend: float = 0.0):
         self.seat = seat
-        self.fallback = fallback  # ai.Brain used when Mortal cannot decide
-        self.strength = strength
+        self.fallback = fallback  # ai.Brain: plays the blended share and what Mortal cannot
+        self.strength = strength  # (explore, temperature) of Mortal's own sampling
         self.seed = seed
+        # Share of decisions left to the heuristic AI: 0 = full strength.
+        # Weaker Mortal heroines on the ladder (ai.parse_level "mortal:<p>").
+        self.blend = blend
+        self.blend_rng = random.Random(seed * 7919 + 1)
         self._reset()
 
     def _reset(self) -> None:
@@ -204,6 +205,9 @@ class MortalBrain:
         engine = game.engine
         ln = link()
         if ln is None:
+            return self.fallback.decide(engine, self.seat, actions)
+        blend = getattr(self, "blend", 0.0)
+        if blend > 0 and getattr(self, "blend_rng", None) is not None and self.blend_rng.random() < blend:
             return self.fallback.decide(engine, self.seat, actions)
         try:
             self._sync(ln, game.mjai)

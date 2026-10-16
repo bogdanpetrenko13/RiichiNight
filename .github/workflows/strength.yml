@@ -1,0 +1,76 @@
+name: AI strength
+
+# Run by hand: measures the difficulty ladder. Each pair "challenger|opponent"
+# (sides as in tests/python/mortal_strength.py) plays `games` east-only games,
+# the challenger against three copies of the opponent, spread over the
+# runner's cores. Results are posted as job annotations:
+#   RESULT {"challenger": ..., "opponent": ..., "places": [...], "avg_place": ...}
+on:
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: JSON list of "challenger|opponent"
+        required: true
+      games:
+        description: Games per pair
+        default: "400"
+
+permissions:
+  contents: read
+
+jobs:
+  mortal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mortal (native) and weights
+        run: scripts/mortal/ci_setup.sh native
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mortal-native
+          path: |
+            native/mortal/target/release/libriichinight_mortal.so
+            public/mortal/s42.f16.bin
+
+  pair:
+    needs: mortal
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pair: ${{ fromJSON(inputs.pairs) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: mortal-native
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Play
+        env:
+          PAIR: ${{ matrix.pair }}
+          GAMES: ${{ inputs.games }}
+          PYTHONPATH: public/py/pyriichi.zip
+          MORTAL_LIB: native/mortal/target/release/libriichinight_mortal.so
+          MORTAL_DIR: public/mortal
+        run: |
+          set -e
+          ch="${PAIR%%|*}"; op="${PAIR#*|}"
+          procs=$(nproc); per=$(( (GAMES + procs - 1) / procs ))
+          for i in $(seq 0 $((procs - 1))); do
+            python tests/python/mortal_strength.py "$ch" "$op" "$per" $((1000 + i * 10000)) east > "out$i.txt" &
+          done
+          wait
+          python - <<'EOF'
+          import glob, json
+          rs = [json.loads(l[7:]) for f in sorted(glob.glob("out*.txt")) for l in open(f) if l.startswith("RESULT ")]
+          places = [sum(r["places"][i] for r in rs) for i in range(4)]
+          n = sum(places)
+          avg = sum((i + 1) * c for i, c in enumerate(places)) / n
+          var = sum(c * ((i + 1) - avg) ** 2 for i, c in enumerate(places)) / n
+          out = {"challenger": rs[0]["challenger"], "opponent": rs[0]["opponent"], "games": n,
+                 "places": places, "avg_place": round(avg, 3), "se": round((var / n) ** 0.5, 3),
+                 "avg_score": round(sum(r["avg_score"] * r["games"] for r in rs) / n)}
+          print("::notice::RESULT " + json.dumps(out))
+          EOF

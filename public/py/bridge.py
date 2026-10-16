@@ -29,7 +29,7 @@ import scenarios
 import mjai
 import mortal
 import rules as game_rules
-from ai import Brain, tile_index
+from ai import Brain, parse_level, tile_index
 
 fastpatch.apply()
 yakufix.apply()
@@ -112,13 +112,14 @@ class Game:
         styles += [None] * (NUM_PLAYERS - 1 - len(styles))
         self.brains = {}
         for i in range(NUM_PLAYERS - 1):
-            level = self.levels[i]
-            if level in mortal.STRENGTH:
-                # The heuristic brain plays the moves Mortal cannot (see mortal.py).
+            spec = parse_level(self.levels[i])
+            if spec["kind"] == "mortal":
+                # The heuristic brain plays the moves left to it (blend) and
+                # the ones Mortal cannot make (see mortal.py).
                 fallback = Brain("hard", self.rng, styles[i])
-                self.brains[i + 1] = mortal.MortalBrain(i + 1, fallback, mortal.STRENGTH[level], self.seed + i)
+                self.brains[i + 1] = mortal.MortalBrain(i + 1, fallback, seed=self.seed + i, blend=spec["blend"])
             else:
-                self.brains[i + 1] = Brain(level, self.rng, styles[i])
+                self.brains[i + 1] = Brain(spec["level"], self.rng, styles[i], spec["mistakes"])
         self.mjai = mjai.MjaiLog()
         self.mortal_mismatches: List[dict] = []
         self.rules = game_rules.normalize(config.get("rules"))

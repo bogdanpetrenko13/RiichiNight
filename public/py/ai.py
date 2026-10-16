@@ -56,13 +56,44 @@ STYLES: Dict[str, dict] = {
 LEVEL_STYLE = {"easy": "beginner", "normal": "balanced", "hard": "sharp"}
 
 
+def parse_level(level: str) -> dict:
+    """A seat's strength.
+
+    easy / normal / hard: the heuristic AI (easy: 30 % random discards);
+    "heur:<r>": hard heuristic AI with a share r of random discards;
+    "mortal" / "mortal:<p>": Mortal, with a share p of moves left to the
+    heuristic AI instead (0 = full strength). Unknown -> normal.
+    """
+    level = str(level or "normal")
+    if level.startswith("mortal"):
+        try:
+            p = float(level.split(":", 1)[1]) if ":" in level else 0.0
+        except ValueError:
+            p = 0.0
+        return {"kind": "mortal", "blend": min(max(p, 0.0), 1.0)}
+    if level.startswith("heur:"):
+        try:
+            r = float(level.split(":", 1)[1])
+        except ValueError:
+            r = 0.0
+        return {"kind": "heuristic", "level": "hard", "mistakes": min(max(r, 0.0), 1.0)}
+    return {"kind": "heuristic", "level": level if level in ("easy", "normal", "hard") else "normal", "mistakes": None}
+
+
 class Brain:
-    def __init__(self, level: str, rng: random.Random, style: Optional[str] = None):
+    def __init__(self, level: str, rng: random.Random, style: Optional[str] = None, mistakes: Optional[float] = None):
         if level not in ("easy", "normal", "hard"):
             level = "normal"
         self.level = level
         self.rng = rng
         self.style_name = style if style in STYLES else LEVEL_STYLE[level]
+        # Share of discards made at random (and of riichi chances let go).
+        self.mistakes = (0.3 if level == "easy" else 0.0) if mistakes is None else float(mistakes)
+
+    @property
+    def mistake_rate(self) -> float:
+        # getattr: brains pickled by older builds have no `mistakes`.
+        return getattr(self, "mistakes", 0.3 if self.level == "easy" else 0.0)
 
     @property
     def style(self) -> dict:
@@ -206,7 +237,7 @@ class Brain:
         candidates = [t for t in candidates if (t.suit, t.rank) not in bad] or candidates
         scored = self._discard_options(engine, me, candidates)
 
-        if self.level == "easy" and self.rng.random() < 0.3:
+        if self.mistake_rate > 0 and self.rng.random() < self.mistake_rate:
             return self.rng.choice(candidates)
 
         threats = self._threats(engine, me)
@@ -303,7 +334,7 @@ class Brain:
             if choices and silent and GameAction.DISCARD in actions:
                 # Dama: keep tenpai without announcing it.
                 return GameAction.DISCARD, self.choose_discard(engine, me, choices), {}
-            if choices and not silent and (self.level != "easy" or self.rng.random() < 0.7):
+            if choices and not silent and (self.mistake_rate <= 0 or self.rng.random() >= self.mistake_rate):
                 return GameAction.DECLARE_RIICHI, self.choose_discard(engine, me, choices), {}
 
         if GameAction.DISCARD in actions:
