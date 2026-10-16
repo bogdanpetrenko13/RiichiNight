@@ -67,20 +67,14 @@ Pyodide. Патч отвечает на те же вопросы через та
 (CC0, общественное достояние). Их импортирует `scripts/import-tiles.py` в `public/tiles/`
 (варианты `regular` и `black`), тело тайла рисует CSS.
 
-Все героини собраны из многослойных спрайтов автора Sutemo с itch.io
-([Female Mature Sprite](https://sutemo.itch.io/female-mature-anime-sprite),
-[Female Character Sprite](https://sutemo.itch.io/female-character)): у каждой своя
-причёска, цвет волос, одежда и аксессуары и три выражения лица для стола —
-обычное, радость (победа, риичи) и огорчение (проигрыш, чужой риичи).
-Используются только взрослые наряды. Собирает арт `scripts/import-sutemo-art.py`
-(нужен ImageMagick):
-
-```
-python scripts/import-sutemo-art.py Anime_Mature_Woman_Free.psd Female_Sprite_by_Sutemo.psd
-```
-
-Автор запрещает только перепродажу самого спрайта; игра бесплатная. Исходные PSD в
-репозиторий не входят, подробности в `public/characters/CREDITS.md`.
+Портреты героинь сгенерированы локально в ComfyUI моделью
+[Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0)
+(CreativeML Open RAIL++-M) по текстовым описаниям, в едином стиле: у каждой свой цвет
+волос и глаз, причёска и наряд. Все героини взрослые и нарисованы взрослыми. Три
+выражения лица для стола — обычное, радость (победа, риичи) и огорчение (проигрыш,
+чужой риичи) — получены из выбранного портрета через img2img + IP-Adapter
+(`scripts/comfy/gen_emotions.py`), в игру их переносит `scripts/import-heroine-art.py`
+(подгонка цвета к портрету, кадр лица 512 px). Подробности — `public/characters/CREDITS.md`.
 
 Файлы подхватываются по соглашению об именах; пока файла нет, показывается
 аккуратная заглушка с ожидаемым путём.

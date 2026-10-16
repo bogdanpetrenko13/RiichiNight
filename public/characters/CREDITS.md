@@ -1,25 +1,25 @@
 # Character art credits
 
-All heroine portraits and expressions are built by
-`scripts/import-sutemo-art.py` from two layered sprite sets by **Sutemo**
-(itch.io):
+All heroine portraits and expressions are AI-generated on the author's own PC
+with [ComfyUI](https://github.com/comfyanonymous/ComfyUI) and the
+**Animagine XL 4.0** model by Cagliostro Research Lab
+(https://huggingface.co/cagliostrolab/animagine-xl-4.0,
+CreativeML Open RAIL++-M, which allows use of the generated images). No
+third-party artwork was used as input; Tsukiko's base portrait was supplied
+by the game's author.
 
-| Source | Link | Heroines |
-|---|---|---|
-| Female Mature Character Sprite for VN (`Anime_Mature_Woman_Free.psd`) | https://sutemo.itch.io/female-mature-anime-sprite | Hikari, Rin, Mai, Reiko |
-| Female Character Sprite for Visual Novel (`Female_Sprite_by_Sutemo.psd`) | https://sutemo.itch.io/female-character | Yuzu, Nanami |
+Every heroine is an adult (23–36) and is drawn as one.
 
-Each heroine is a different combination of the sprite's layers (hairstyle,
-hair colour, outfit, accessories, expressions), cropped to the face. Only
-adult outfits are used.
+How the files are made:
 
-The author's terms allow use in personal and commercial projects; the sprite
-itself may not be resold on its own (including as a character creator). This
-game is free and non-commercial. The source PSDs are not stored in the
-repository: to rebuild the art, download them from the links above and run
-
-```
-python scripts/import-sutemo-art.py Anime_Mature_Woman_Free.psd Female_Sprite_by_Sutemo.psd
-```
+1. A base portrait per heroine (832×1216) from a text prompt: her age, job,
+   hair and eye colour, outfit.
+2. `scripts/comfy/gen_emotions.py` (run with ComfyUI's Python) re-draws the
+   chosen portrait for each table expression — neutral, happy, troubled —
+   with img2img plus IP-Adapter Plus SDXL (h94/IP-Adapter, Apache-2.0), so
+   the face, pose and outfit stay the same.
+3. `scripts/import-heroine-art.py <base-dir> <emotions-dir> --pick id:emotion:N ...`
+   matches each render's colours to the base portrait, cuts the face crop and
+   writes `<id>/portrait.webp` and `<id>/emotions/<emotion>.webp` (512 px).
 
 Replace any file with your own art of the same name to swap a heroine's look.

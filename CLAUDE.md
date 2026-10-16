@@ -10,7 +10,8 @@ The owner writes in Russian; reply in Russian.
 
 - No explicit or sexual content.
 - Every character is an adult and must look like one (art, text, ages).
-- Never commit the Sutemo source PSDs; only the finished images.
+- Never commit art sources (PSDs, model weights, raw ComfyUI renders); only the
+  finished images in `public/characters/`.
 - `signing/debug.keystore` is a debug key with the public `android` passwords,
   committed on purpose so every CI build updates in place. Never use it for
   release builds.
@@ -39,6 +40,7 @@ The owner writes in Russian; reply in Russian.
 | `src/ui/useLayout.ts` | Tile / band sizes from the viewport and the measured bands area |
 | `src/ui/motion.ts` | FLIP and discard flight animations |
 | `src/i18n/strings.ts` | en + ru strings (both must have the same keys) |
+| `scripts/comfy/gen_emotions.py`, `scripts/import-heroine-art.py` | Heroine art: AI portraits (Animagine XL 4.0 in ComfyUI on the owner's PC), emotion renders via img2img + IP-Adapter, colour match + face crop into `public/characters/<id>/` (see its `CREDITS.md`) |
 
 pyriichi gotchas: `Tile.__eq__` ignores the red-five flag (use identity or
 `str(tile)` when the red matters); on tsumo the drawn tile is already in
