@@ -35,7 +35,7 @@ let dealtKey = "";
 export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const { t, settings } = useApp();
   const layout = useLayout();
-  const { view, cast, emotions, callouts, speech, cutaway, busy, error } = game;
+  const { view, cast, emotions, callouts, freshMeld, speech, cutaway, busy, error } = game;
 
   // Stable handle for timers: the controller object changes identity every render.
   const gameRef = useRef(game);
@@ -137,6 +137,14 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
     for (const c of callouts) map[c.seat] = c.kind;
     return map;
   }, [callouts]);
+  // "from Yuzu" / "from you" under a rival's announcement.
+  const calloutFrom = (seat: number): string | null => {
+    const c = [...callouts].reverse().find((x) => x.seat === seat);
+    if (!c || c.from === undefined || c.from === null) return null;
+    if (c.from === 0) return t("callFromYou");
+    const who = cast[c.from - 1];
+    return who ? t("callFrom", { name: who.name[settings.lang].split(" ")[0] }) : null;
+  };
 
   if (!view) return null;
   const prompt = view.status === "human" ? view.prompt : null;
@@ -215,6 +223,8 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
               player={view.players[seat]}
               emotion={emotions[seat]}
               callout={calloutBySeat[seat] ?? null}
+              calloutFrom={calloutBySeat[seat] ? calloutFrom(seat) : null}
+              freshMeld={freshMeld === seat}
               speech={speech[seat]?.text ?? null}
               active={view.current === seat && view.status === "ai"}
               dealer={view.round.dealer === seat}

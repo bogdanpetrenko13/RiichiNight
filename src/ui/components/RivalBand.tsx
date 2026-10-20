@@ -14,6 +14,10 @@ interface RivalBandProps {
   player: PlayerView;
   emotion?: Emotion;
   callout?: CallKind | null;
+  /** Under the announcement: whom the tile was taken from ("from Yuzu"). */
+  calloutFrom?: string | null;
+  /** Outline her newest meld (just called, until the next player's discard). */
+  freshMeld?: boolean;
   speech?: string | null;
   active: boolean;
   dealer: boolean;
@@ -29,7 +33,20 @@ interface RivalBandProps {
  * One rival: wind, score and name with her portrait on the left; her river
  * (6 per row) on the right, closed hand and calls underneath.
  */
-export function RivalBand({ character, player, emotion, callout, speech, active, dealer, claimed, riverCols = 6, tsumogiri = false }: RivalBandProps) {
+export function RivalBand({
+  character,
+  player,
+  emotion,
+  callout,
+  calloutFrom = null,
+  freshMeld = false,
+  speech,
+  active,
+  dealer,
+  claimed,
+  riverCols = 6,
+  tsumogiri = false,
+}: RivalBandProps) {
   const { t, charName } = useApp();
   const lastIndex = player.discards.length - 1;
   const backStyle = { ["--tw" as string]: "var(--band-back, 14px)" };
@@ -106,11 +123,6 @@ export function RivalBand({ character, player, emotion, callout, speech, active,
         <span className={styles.name}>{charName(character).split(" ")[0]}</span>
         <div className={styles.portrait}>
           <Portrait character={character} emotion={emotion} size={88} className={styles.face} />
-          {callout && (
-            <span key={callout} className={styles.callout}>
-              {t(`act_${callout}` as StringKey)}!
-            </span>
-          )}
           {speech && (
             <div key={speech} className={styles.bubble} role="status">
               {speech}
@@ -146,12 +158,21 @@ export function RivalBand({ character, player, emotion, callout, speech, active,
         ))}
       </div>
 
+      {/* Chi / Pon / Kan: a big plaque in her colour across the band, with
+          whom the tile came from; the band glows in her colour meanwhile. */}
+      {callout && (
+        <div key={callout} className={styles.announce} role="status">
+          <b>{t(`act_${callout}` as StringKey)}!</b>
+          {calloutFrom && <small>{calloutFrom}</small>}
+        </div>
+      )}
+
       {/* Calls on the left, then the closed hand, then her drawn tile. */}
       <div className={styles.lower}>
         {player.melds.length > 0 && (
           <div className={styles.melds}>
             {player.melds.map((m, i) => (
-              <span key={i} className={styles.meld}>
+              <span key={i} className={styles.meld} data-fresh={(freshMeld && i === player.melds.length - 1) || undefined}>
                 {m.tiles.map((code, j) => (
                   <Tile
                     key={j}

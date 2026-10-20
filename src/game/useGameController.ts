@@ -11,6 +11,8 @@ export interface Callout {
   id: number;
   seat: number;
   kind: CallKind;
+  /** Seat the tile was taken from (meld event); null for a closed or added kan. */
+  from?: number | null;
 }
 
 export interface Speech {
@@ -26,6 +28,8 @@ export interface Cutaway {
 }
 
 const CALL_PAUSE = 650;
+/** How long a rival's Chi / Pon / Kan announcement stays in her band. */
+const CALLOUT_MS = 1600;
 /** Ron / Tsumo / Riichi banner: 0.3 s in, 1.5 s readable, 0.4 s out. */
 export const CUTAWAY_MS = 2200;
 const SPEECH_MS = 3200;
@@ -38,6 +42,7 @@ export interface GameController {
   emotions: Record<number, Emotion>;
   tsumogiri: Record<number, boolean>;
   callouts: Callout[];
+  freshMeld: number | null;
   speech: Record<number, Speech>;
   cutaway: Cutaway | null;
   busy: boolean;
@@ -82,6 +87,9 @@ export function useGameController(): GameController {
   const [cast, setCast] = useState<CharacterDef[]>([]);
   const [emotions, setEmotions] = useState<Record<number, Emotion>>({});
   const [callouts, setCallouts] = useState<Callout[]>([]);
+  /** Seat whose newest meld is outlined: from her call until the next
+   *  player's discard (so a missed call can still be seen). */
+  const [freshMeld, setFreshMeld] = useState<number | null>(null);
   const [speech, setSpeech] = useState<Record<number, Speech>>({});
   /** Per seat: was the last discard the tile just drawn (tsumogiri)? */
   const [tsumogiri, setTsumogiri] = useState<Record<number, boolean>>({});
@@ -136,9 +144,15 @@ export function useGameController(): GameController {
         switch (ev.t) {
           case "discard":
             setTsumogiri((prev) => ({ ...prev, [ev.seat]: Boolean(ev.tsumogiri) }));
+            setFreshMeld((s) => (s !== null && s !== ev.seat ? null : s));
             break;
           case "round_start":
             setEmotions({});
+            setFreshMeld(null);
+            break;
+          case "meld":
+            setFreshMeld(ev.seat);
+            setCallouts((prev) => prev.map((c) => (c.seat === ev.seat && c.from === undefined ? { ...c, from: ev.from } : c)));
             break;
           case "call": {
             pause = Math.max(pause, CALL_PAUSE);
@@ -146,7 +160,7 @@ export function useGameController(): GameController {
             // Ron / Tsumo / Riichi get the big banner instead of the small callout.
             if (ev.kind !== "ron" && ev.kind !== "tsumo" && ev.kind !== "riichi") {
               setCallouts((prev) => [...prev, { id, seat: ev.seat, kind: ev.kind }]);
-              window.setTimeout(() => setCallouts((prev) => prev.filter((c) => c.id !== id)), 1400);
+              window.setTimeout(() => setCallouts((prev) => prev.filter((c) => c.id !== id)), CALLOUT_MS);
             }
             if (ev.kind === "ron" || ev.kind === "tsumo" || ev.kind === "riichi") {
               pause = CUTAWAY_MS;
@@ -343,6 +357,7 @@ export function useGameController(): GameController {
     emotions,
     tsumogiri,
     callouts,
+    freshMeld,
     speech,
     cutaway,
     busy,
