@@ -116,6 +116,7 @@
     box-shadow: 0 0 0 0 transparent;
   }
   to {
+    box-shadow: 0 0 6px 2px var(--btn-win-bg);
     box-shadow: 0 0 0 5px color-mix(in srgb, var(--btn-win-bg) 35%, transparent);
   }
 }

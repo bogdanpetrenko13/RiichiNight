@@ -35,6 +35,11 @@
 
 /* Settings → Turn highlight → Glow. */
 :global([data-glow]) .band[data-active]::after {
+  /* Old WebViews (e.g. the emulator's) lack color-mix(): the full colour
+     with a negative spread gives a similar soft glow. */
+  box-shadow:
+    inset 0 0 0 2px var(--active-ring),
+    inset 0 0 26px -10px var(--active-ring);
   box-shadow:
     inset 0 0 0 2px var(--active-ring),
     inset 0 0 22px color-mix(in srgb, var(--active-ring) 45%, transparent);
@@ -110,6 +115,7 @@
   pointer-events: none;
   /* The band glows in her colour behind the plaque. */
   border-radius: var(--band-radius);
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.1), transparent);
   background: radial-gradient(closest-side, color-mix(in srgb, var(--c) 45%, transparent), transparent);
   box-shadow: inset 0 0 0 3px var(--c);
   animation: announceFade 1.6s ease-out forwards;

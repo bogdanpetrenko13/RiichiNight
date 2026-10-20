@@ -141,12 +141,20 @@
   box-shadow:
     0 0 0 2px var(--accent),
     0 calc(var(--tw) * 0.08) 0 var(--bone-300),
+    0 0 calc(var(--tw) * 0.4) calc(var(--tw) * -0.1) var(--accent);
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 calc(var(--tw) * 0.08) 0 var(--bone-300),
     0 0 calc(var(--tw) * 0.4) color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 /* Tiles you can use for the pending choice: raised + primary ring (A + C). */
 .eligible {
   transform: translateY(calc(var(--tw) * -0.16));
+  box-shadow:
+    0 0 0 2.5px var(--primary),
+    0 calc(var(--tw) * 0.08) 0 var(--bone-300),
+    0 0 calc(var(--tw) * 0.45) calc(var(--tw) * -0.1) var(--primary);
   box-shadow:
     0 0 0 2.5px var(--primary),
     0 calc(var(--tw) * 0.08) 0 var(--bone-300),
