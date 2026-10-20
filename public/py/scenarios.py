@@ -13,7 +13,7 @@ a few moves instead of waiting for it to happen by chance:
            all other copies of, so one of them declares riichi within the
            first go-around and nobody wins first (rival riichi display)
   rivalpon the right-hand rival holds a pair of red dragons and the
-           player draws the third first: cutting it lets her Pon
+           player is dealt the third: cutting it lets her Pon
            (call announcement, outlined new meld)
   myriichi the player alone starts tenpai (same hand as "riichi"): the
            player's riichi flow, the sideways tile in the player's river
@@ -55,7 +55,8 @@ SCENARIOS: Dict[str, dict] = {
         "dora": "9p",
     },
     "rivalpon": {
-        "draws": ["7z"],
+        "hand": "7z 123m 456m 13p 79s 24s",
+        "junk": "9p",
         "rivals": ["77z 123m 456p 78s 23p 5s"],
         "dora": "1m",
     },

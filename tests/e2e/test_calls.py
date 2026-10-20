@@ -1,8 +1,8 @@
 """A rival's Chi / Pon / Kan: a plaque in her colour across her band with whom
 the tile came from, and her new meld outlined until the next player's discard.
 
-Scenario "rivalpon": the rival on the right (seat 1) holds 77z, the player's
-first draw is the third 7z.
+Scenario "rivalpon": the rival on the right (seat 1) holds 77z, the player
+is dealt the third 7z.
 """
 
 from conftest import LANDSCAPE, PORTRAIT
