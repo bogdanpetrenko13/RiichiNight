@@ -23,7 +23,7 @@ export function PlayerBand({
 }: {
   view: GameView;
   active: boolean;
-  /** Waits / furiten chip under the score (portrait; in landscape it sits right of the hand). */
+  /** Waits / furiten chip: under the score (portrait), top right of the column (landscape). */
   waits?: ReactNode;
   /** Discards per row: 9 in portrait (like the rivals), 6 in landscape. */
   riverCols?: number;

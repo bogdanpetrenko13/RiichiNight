@@ -220,6 +220,21 @@
   animation: drop var(--dur-slow) var(--ease-in) both;
 }
 
+/* The riichi tile keeps its rotation while it drops in. */
+.river > [class*="sideways"] {
+  animation-name: dropSideways;
+}
+
+@keyframes dropSideways {
+  from {
+    opacity: 0;
+    transform: rotate(90deg) translateX(calc(var(--tw) * 0.21)) translateX(-45%) scale(1.15);
+  }
+  60% {
+    opacity: 1;
+  }
+}
+
 @keyframes drop {
   from {
     opacity: 0;
@@ -321,6 +336,18 @@
 }
 
 /* Waits / furiten under the score. */
+/* Landscape: waits in the top right corner of the player's column, over
+   the free part of the header, so they never change the layout. */
+.waitsHead {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  max-width: calc(100% - 96px);
+  display: flex;
+  justify-content: flex-end;
+}
+
 .waitsSlot {
   width: 100%;
   margin-top: 4px;

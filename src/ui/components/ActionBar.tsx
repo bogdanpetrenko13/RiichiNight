@@ -8,7 +8,7 @@ interface ActionBarProps {
   riichiMode: boolean;
   chiPicker: boolean;
   busy: boolean;
-  /** Tile lifted in the hand: offers an explicit Discard button. */
+  /** Tile lifted in the hand: offers an explicit Discard (or, in riichi mode, Riichi) button. */
   selectedTile: TileCode | null;
   onDiscardSelected: () => void;
   onAction: (action: ActionName, option?: number) => void;
@@ -36,11 +36,18 @@ export function ActionBar({
   const { t } = useApp();
   if (!prompt) return null;
 
+  // Riichi: pick the tile (it lifts and its waits show), then confirm.
   if (riichiMode) {
     return (
-      <div className={styles.bar} data-row={row || undefined}>
-        <span className={styles.label}>{t("chooseRiichiTile")}</span>
-        <button className={`btn ${styles.action}`} onClick={() => onRiichiMode(false)}>
+      <div className={styles.bar} data-count={2} data-row={row || undefined}>
+        {selectedTile ? (
+          <button className={styles.action} data-kind="primary" onClick={onDiscardSelected} disabled={busy}>
+            {t("act_riichi")}
+          </button>
+        ) : (
+          <span className={styles.label}>{t("chooseRiichiTile")}</span>
+        )}
+        <button className={styles.action} data-kind="pass" onClick={() => onRiichiMode(false)}>
           {t("cancel")}
         </button>
       </div>
@@ -62,12 +69,14 @@ export function ActionBar({
   const buttons = ORDER.filter((a) => prompt.actions.includes(a));
   const canDiscard = prompt.actions.includes("discard");
   const count = buttons.length + (canDiscard && selectedTile ? 1 : 0);
+  // One filled button: a win, else riichi, else Discard; the rest are plain.
+  const lead = buttons.find((a) => a === "tsumo" || a === "ron") ?? (buttons.includes("riichi") ? "riichi" : null);
   if (!count) return null;
   return (
     <div className={styles.bar} data-count={count} data-row={row || undefined}>
       {buttons.map((action) => {
         const kind =
-          action === "tsumo" || action === "ron" ? "win" : action === "riichi" ? "riichi" : action === "pass" ? "pass" : "call";
+          action === "tsumo" || action === "ron" ? "win" : action === "riichi" ? (lead === "riichi" ? "primary" : "pass") : action === "pass" ? "pass" : "call";
         const onClick = () => {
           if (action === "riichi") onRiichiMode(true);
           else if (action === "chi" && (prompt.chiOptions?.length ?? 0) > 1) onChiPicker(true);
@@ -80,7 +89,7 @@ export function ActionBar({
         );
       })}
       {canDiscard && selectedTile && (
-        <button className={styles.action} data-kind="discard" onClick={onDiscardSelected} disabled={busy}>
+        <button className={styles.action} data-kind={lead ? "pass" : "primary"} onClick={onDiscardSelected} disabled={busy}>
           {t("act_discard")}
         </button>
       )}

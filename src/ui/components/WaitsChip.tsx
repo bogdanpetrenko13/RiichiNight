@@ -26,8 +26,10 @@ function findHint(prompt: Prompt | null | undefined, code: TileCode) {
  */
 export function WaitsChip({ player, prompt, selectedCode, riichiMode, inline = false }: WaitsChipProps) {
   const { t, settings } = useApp();
-  if (riichiMode) return <div className={styles.chip} data-inline={inline || undefined}>{t("chooseRiichiTile")}</div>;
-  const selectedHint = selectedCode && settings.showWaitHints ? findHint(prompt, selectedCode) : null;
+  // Riichi: the waits of the lifted tile are always shown (the point of
+  // checking before declaring), whatever the hints setting says.
+  const selectedHint = selectedCode && (settings.showWaitHints || riichiMode) ? findHint(prompt, selectedCode) : null;
+  if (riichiMode && !selectedHint) return <div className={styles.chip} data-inline={inline || undefined}>{t("chooseRiichiTile")}</div>;
   const standing =
     !selectedHint && player.waits?.length
       ? { waits: player.waits.map((tile) => ({ tile, remaining: -1 })), furiten: Boolean(player.furiten) }

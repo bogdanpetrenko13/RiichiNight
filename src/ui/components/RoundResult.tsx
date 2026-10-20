@@ -1,4 +1,4 @@
-import type { GameView, WinResult } from "../../engine/protocol";
+import type { GameView, TileCode, WinResult } from "../../engine/protocol";
 import type { CharacterDef } from "../../game/characters";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
@@ -38,7 +38,7 @@ export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
           </div>
         )}
         {result.type === "win" ? (
-          <WinBody result={result} nameOf={nameOf} yakuName={yakuName} />
+          <WinBody result={result} doraIndicators={view.dora} nameOf={nameOf} yakuName={yakuName} />
         ) : (
           <>
             <h2 className={styles.title}>{t(`drawKind_${result.kind}` as StringKey) || t("draw")}</h2>
@@ -100,10 +100,13 @@ export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
 
 function WinBody({
   result,
+  doraIndicators,
   nameOf,
   yakuName,
 }: {
   result: WinResult;
+  /** Dora indicators of the hand (shown next to the ura indicators). */
+  doraIndicators: TileCode[];
   nameOf: (seat: number) => string;
   yakuName: (key: string, en: string) => string;
 }) {
@@ -173,6 +176,16 @@ function WinBody({
                       <span>{t("han", { n: v })}</span>
                     </li>
                   ))}
+              {!w.yakuman && doraIndicators.length > 0 && (
+                <li>
+                  <span>{t("doraIndicator")}</span>
+                  <span className={styles.calcTiles}>
+                    {doraIndicators.map((c, i) => (
+                      <Tile key={i} code={c} size="meld" />
+                    ))}
+                  </span>
+                </li>
+              )}
               {!w.yakuman && w.calc?.uraIndicators && w.calc.uraIndicators.length > 0 && (
                 <li>
                   <span>{t("uraIndicator")}</span>

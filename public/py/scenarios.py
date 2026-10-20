@@ -12,6 +12,8 @@ a few moves instead of waiting for it to happen by chance:
   riichi   all three rivals start tenpai on a tanki wait the player holds
            all other copies of, so one of them declares riichi within the
            first go-around and nobody wins first (rival riichi display)
+  myriichi the player alone starts tenpai (same hand as "riichi"): the
+           player's riichi flow, the sideways tile in the player's river
 
 Only the tiles named here are placed; everything else stays shuffled by the
 seed. The human is seat 0. Draw order follows the turn order from the dealer.
@@ -47,6 +49,11 @@ SCENARIOS: Dict[str, dict] = {
         "hand": "555z 666z 777z 1122z",
         "junk": "9s",
         "rivals": ["123m 456m 789p 234s 5z", "234p 567p 678s 345m 6z", "789m 123s 456s 345p 7z"],
+        "dora": "9p",
+    },
+    "myriichi": {
+        "hand": "555z 666z 777z 1122z",
+        "junk": "9s",
         "dora": "9p",
     },
 }
@@ -149,4 +156,11 @@ def rig(engine, name: str) -> None:
 
     ts._tiles = wall
     engine._hands = [Hand(sorted(h)) for h in hands]
+    # A dealt hand gets its riichi discards when its 14th tile is added; the
+    # rigged dealer hand is built whole, so compute them here (else no Riichi
+    # on the dealer's first turn)...
+    deal_hand = engine._hands[dealer]
+    deal_hand._tenpai_discards = deal_hand.calculate_tenpai_discards()
+    # ...and its 14th tile counts as drawn (shown apart, cut by tsumogiri).
+    deal_hand._last_drawn_tile = hands[dealer][-1]
     engine._waiting_for_actions = {dealer: engine._calculate_turn_actions(dealer)}

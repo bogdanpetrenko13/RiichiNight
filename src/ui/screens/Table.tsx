@@ -171,7 +171,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
       chiPicker={chiPicker}
       busy={busy}
       selectedTile={selectedTile}
-      onDiscardSelected={() => selectedTile && act("discard", { tile: selectedTile })}
+      onDiscardSelected={() => selectedTile && act(riichiMode ? "riichi" : "discard", { tile: selectedTile })}
       onAction={(action, option) => act(action, option !== undefined ? { option } : undefined)}
       onRiichiMode={(on) => {
         setSelected(null);
@@ -182,7 +182,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
     />
   );
   const waitsChip = (
-    <WaitsChip player={me} prompt={prompt} selectedCode={selectedTile} riichiMode={riichiMode} inline={!portrait} />
+    <WaitsChip player={me} prompt={prompt} selectedCode={selectedTile} riichiMode={riichiMode} />
   );
 
   const showRound =
@@ -228,7 +228,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
         <PlayerBand
           view={view}
           active={view.current === 0 && view.status === "human"}
-          waits={portrait ? waitsChip : undefined}
+          waits={waitsChip}
           riverCols={portrait ? 9 : 6}
         />
       </div>
@@ -263,12 +263,11 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
             else if (matches.length > 1) setChiFirst(i);
           }}
         />
-        {/* Portrait: a reserved row under the hand (the hand never moves when
-            buttons appear); landscape: a column to its right. */}
+        {/* Portrait: a reserved row under the hand; landscape: a column of
+            fixed height to its right. Either way the hand and the bands keep
+            their size when buttons appear (the waits live in the player band). */}
         <div className={portrait ? styles.actionsRow : styles.actions} data-actions>
           {actionBar}
-          {/* Landscape: waits / furiten above the buttons (column-reverse). */}
-          {!portrait && waitsChip}
         </div>
       </div>
 

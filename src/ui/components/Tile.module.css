@@ -174,11 +174,20 @@
   filter: grayscale(0.6) brightness(0.5);
 }
 
-/* Riichi tile lies sideways: rotated, its width becomes the tile height, so it
-   needs (1.42 - 1) / 2 of a tile on each side plus room for the 3D edge. */
+/* Riichi tile lies sideways. Rotated, it is 1.42 tiles wide and 1 tall:
+   margins of (1.42 - 1) / 2 on each side make room for it exactly, and it is
+   moved down by the same amount so its face sits on the row's baseline like
+   its neighbours. The 3D edge is drawn along the x axis, which the rotation
+   turns into "down", so the edge stays under the tile instead of jutting out
+   to the left over the previous discard. */
 .sideways {
-  transform: rotate(90deg) translateX(calc(var(--tw) * -0.05));
-  margin: 0 calc(var(--tw) * 0.25);
+  transform: rotate(90deg) translateX(calc(var(--tw) * 0.21));
+  margin: 0 calc(var(--tw) * 0.21);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06) inset,
+    calc(var(--tw) * 0.07) 0 0 var(--bone-300),
+    calc(var(--tw) * 0.08) 0 0 var(--bone-shadow),
+    calc(var(--tw) * 0.14) 0 calc(var(--tw) * 0.24) rgba(0, 0, 0, 0.35);
 }
 
 /* Flat tile set: no 3D edge, crisp outline. */

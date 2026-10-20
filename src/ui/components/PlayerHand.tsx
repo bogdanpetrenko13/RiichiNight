@@ -28,7 +28,9 @@ const contains = (list: TileCode[] | undefined, code: TileCode) => Boolean(list?
 
 /**
  * The human's hand. Tap a tile to lift it (and see its waits), tap again to
- * discard. In riichi mode only tiles that keep tenpai can be picked.
+ * discard. In riichi mode only tiles that keep tenpai can be picked, and the
+ * declaration works the same way: lift, check the waits, tap again (or the
+ * Riichi button) to declare.
  */
 export function PlayerHand({
   player,
@@ -81,11 +83,7 @@ export function PlayerHand({
       return;
     }
     if (!allowed(code)) return;
-    if (riichiMode) {
-      onRiichi(code);
-      return;
-    }
-    if (selected === index) onDiscard(code);
+    if (selected === index) (riichiMode ? onRiichi : onDiscard)(code);
     else onSelect(index);
   };
 
@@ -172,7 +170,7 @@ export function PlayerHand({
           {all.map((code, i) => {
             const isDrawn = drawn !== null && i === all.length - 1;
             const pick = eligible(code, i);
-            const showsWait = !riichiMode && !chiMode && settings.showWaitHints && Boolean(prompt?.hints && findHint(prompt, code));
+            const showsWait = !chiMode && settings.showWaitHints && Boolean(prompt?.hints && findHint(prompt, code));
             return (
               <Tile
                 key={keys[i]}
