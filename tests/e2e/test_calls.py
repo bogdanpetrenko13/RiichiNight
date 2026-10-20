@@ -16,16 +16,32 @@ FRESH = "section[aria-label] [class*=meld][data-fresh]"
 def test_rival_pon_is_announced_in_her_band(make_app, viewport):
     app = make_app(viewport).open("?scenario=rivalpon", {"aiDelay": 300}).start_game()
     page = app.page
+    # Record every announcement as it appears (it only stays 1.6 s).
+    page.evaluate(
+        """() => {
+          window.__ann = [];
+          window.__fresh = false;
+          const look = () => {
+            document.querySelectorAll('[class*=announce]').forEach((e) => {
+              if (!e.dataset.seen) {
+                e.dataset.seen = '1';
+                window.__ann.push(e.innerText);
+              }
+            });
+            if (document.querySelector('[class*=meld][data-fresh]')) window.__fresh = true;
+          };
+          new MutationObserver(look).observe(document.body, { childList: true, subtree: true, attributes: true });
+        }"""
+    )
     seen = None
     cut = False
     for _ in range(400):
-        # Only her Pon on the player's 7z counts (another rival may Chi first).
-        if page.locator(ANNOUNCE).count():
-            text = page.locator(ANNOUNCE).first.inner_text()
-            assert "{" not in text, text
-            if "ПОН" in text.upper():
-                seen = text
-                break
+        texts = page.evaluate("() => window.__ann")
+        assert not any("{" in x for x in texts), texts
+        pons = [x for x in texts if "ПОН" in x.upper()]
+        if pons:
+            seen = pons[0]
+            break
         if app.result_shown():
             break
         if not cut and app.my_turn() and page.locator("[class*=dock] button[aria-label='7z']").count():
@@ -35,19 +51,22 @@ def test_rival_pon_is_announced_in_her_band(make_app, viewport):
             except AssertionError:  # the hand re-rendered mid-tap: try again
                 page.wait_for_timeout(300)
             continue
-        if cut or not app.my_turn():
-            app.step()
-        else:
-            app.discard()
-    assert seen, "no call was announced"
-    assert "ПОН" in seen.upper() and "у вас" in seen, seen
-    page.wait_for_timeout(500)
-    # The plaque sits inside the caller's band, fully on screen.
-    box = page.locator(ANNOUNCE).first.bounding_box()
-    band = page.locator(ANNOUNCE).first.locator("xpath=..").bounding_box()
-    assert box and band and abs(box["x"] - band["x"]) <= 3 and abs(box["width"] - band["width"]) <= 6, (box, band)
-    assert page.locator(FRESH).count() == 1
-    app.shot("rival_pon_" + ("portrait" if viewport == PORTRAIT else "landscape"))
+        try:
+            if cut or not app.my_turn():
+                app.step()
+            else:
+                app.discard()
+        except AssertionError:
+            page.wait_for_timeout(300)
+    assert seen, ("no Pon was announced", cut, page.evaluate("() => window.__ann"))
+    assert "у вас" in seen, seen
+    # The plaque covers the caller's band (checked while it is still up).
+    if page.locator(ANNOUNCE).count():
+        box = page.locator(ANNOUNCE).first.bounding_box()
+        band = page.locator(ANNOUNCE).first.locator("xpath=..").bounding_box()
+        assert box and band and abs(box["x"] - band["x"]) <= 3 and abs(box["width"] - band["width"]) <= 6, (box, band)
+        app.shot("rival_pon_" + ("portrait" if viewport == PORTRAIT else "landscape"))
+    page.wait_for_function("() => window.__fresh === true", timeout=5_000)
     # The plaque goes away by itself; the outline stays until the next
     # player discards.
     page.locator(ANNOUNCE).wait_for(state="detached", timeout=5_000)

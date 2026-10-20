@@ -122,8 +122,11 @@ class App:
         raise AssertionError(f"could not discard {code or 'the drawn tile'}")
 
     def my_turn(self) -> bool:
+        """14 tiles (incl. melds' share) and the hand accepts taps: during a
+        call announcement the count can already match while it is disabled."""
         return self.page.evaluate(
-            "() => document.querySelectorAll('[class*=dock] button[aria-label]').length % 3 === 2"
+            """() => { const b = [...document.querySelectorAll('[class*=dock] button[aria-label]')];
+                       return b.length % 3 === 2 && !b[b.length - 1].disabled; }"""
         )
 
     def result_shown(self) -> bool:
