@@ -80,7 +80,7 @@
 
 .savedAt {
   font-size: 11px;
-  font-weight: 500;
+  font-weight: var(--fw-medium);
   opacity: 0.75;
 }
 
@@ -123,7 +123,7 @@
 }
 
 .cardName {
-  font-weight: 800;
+  font-weight: var(--fw-bold);
   font-size: 16px;
   display: flex;
   align-items: center;

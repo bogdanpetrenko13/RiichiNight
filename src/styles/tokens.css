@@ -5,6 +5,22 @@
    shadows. The theme is set as data-theme="light|dark" on <html>.
    The older token names further down are aliases used by the components. */
 
+/* ---- typography: one set of weights and one style per kind of text ------
+   Body 400, secondary emphasis 600, titles / numbers / labels / buttons 700,
+   table announcements (Riichi! Ron! Pon! ...) 900 in capitals. */
+:root {
+  --fw-body: 400;
+  --fw-medium: 600;
+  --fw-bold: 700;
+  --fw-heavy: 900;
+  /* Small capital labels: wind chips, "Dora", section titles. */
+  --caps-ls: 0.08em;
+  /* Every call announcement: the cutaway, rival plaques, the player's own. */
+  --call-weight: var(--fw-heavy);
+  --call-ls: 0.06em;
+  --call-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+
 /* ---- stacking order: every z-index in the app comes from this scale ----- */
 :root {
   /* Inside a component (a tile's index over its art, sticky sheet buttons). */

@@ -7,7 +7,7 @@
 .tierTitle {
   margin: 4px 2px 10px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -133,7 +133,7 @@
 
 .name {
   font-size: 17px;
-  font-weight: 800;
+  font-weight: var(--fw-bold);
 }
 
 .meta {

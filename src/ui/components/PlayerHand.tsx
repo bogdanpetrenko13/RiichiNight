@@ -8,6 +8,8 @@ import { Tile } from "./Tile";
 import styles from "./PlayerHand.module.css";
 
 interface PlayerHandProps {
+  /** Outline the newest meld (just called, until the next player's discard). */
+  freshMeld?: boolean;
   player: PlayerView;
   prompt: Prompt | null;
   riichiMode: boolean;
@@ -44,6 +46,7 @@ export function PlayerHand({
   dealId,
   chiMode,
   onChiTile,
+  freshMeld = false,
 }: PlayerHandProps) {
   const { settings } = useApp();
   const tiles = player.hand ?? [];
@@ -196,7 +199,7 @@ export function PlayerHand({
         {player.melds.length > 0 && (
           <div className={styles.melds}>
             {player.melds.map((m, i) => (
-              <span key={i} className={styles.meld}>
+              <span key={i} className={styles.meld} data-fresh={(freshMeld && i === player.melds.length - 1) || undefined}>
                 {m.tiles.map((code, j) => (
                   <Tile
                     key={j}

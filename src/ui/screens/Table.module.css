@@ -74,40 +74,6 @@
   padding-bottom: 4px;
 }
 
-/* ---- player's callout ------------------------------------------------------ */
-.myCallout {
-  position: absolute;
-  left: 50%;
-  bottom: 30%;
-  z-index: var(--z-callout);
-  transform: translateX(-50%);
-  padding: 6px 20px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-weight: 700;
-  font-size: 22px;
-  animation: pop 1.3s var(--ease-out) forwards;
-  pointer-events: none;
-}
-
-@keyframes pop {
-  0% {
-    transform: translate(-50%, 8px) scale(0.6);
-    opacity: 0;
-  }
-  15% {
-    transform: translate(-50%, 0) scale(1.15);
-    opacity: 1;
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
 /* ---- dock: the hand (portrait); hand + buttons (landscape) ------------------ */
 .dock {
   padding-bottom: 10px;

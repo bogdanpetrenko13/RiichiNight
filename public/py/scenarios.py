@@ -15,6 +15,8 @@ a few moves instead of waiting for it to happen by chance:
   rivalpon the right-hand rival holds a pair of red dragons and the
            player is dealt the third: cutting it lets her Pon
            (call announcement, outlined new meld)
+  mypon    the player holds a pair of red dragons, the right-hand rival a
+           lone one she cuts early: the player's own Pon announcement
   myriichi the player alone starts tenpai (same hand as "riichi"): the
            player's riichi flow, the sideways tile in the player's river
 
@@ -58,6 +60,12 @@ SCENARIOS: Dict[str, dict] = {
         "hand": "7z 123m 456m 13p 79s 24s",
         "junk": "9p",
         "rivals": ["77z 123m 456p 78s 23p 5s"],
+        "dora": "1m",
+    },
+    "mypon": {
+        "hand": "77z 123m 58m 46p 79s 33s",
+        "junk": "9p",
+        "rivals": ["7z 123m 456m 789p 234s"],
         "dora": "1m",
     },
     "myriichi": {

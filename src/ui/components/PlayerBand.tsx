@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 import { useLayoutEffect, useRef } from "react";
-import type { GameView } from "../../engine/protocol";
+import type { CallKind, GameView } from "../../engine/protocol";
 import { landDiscard } from "../motion";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
 import { Tenbo } from "./Tenbo";
 import styles from "./Band.module.css";
+import overlay from "./BandOverlay.module.css";
 import riverStyles from "./River.module.css";
 import info from "./TableInfo.module.css";
 
@@ -22,6 +23,8 @@ export function PlayerBand({
   active,
   waits,
   riverCols = 6,
+  callout = null,
+  calloutFrom = null,
 }: {
   view: GameView;
   active: boolean;
@@ -29,6 +32,9 @@ export function PlayerBand({
   waits?: ReactNode;
   /** Discards per row: 9 in portrait (like the rivals), 6 in landscape. */
   riverCols?: number;
+  /** The player's own Chi / Pon / Kan: the same plaque as a rival's. */
+  callout?: CallKind | null;
+  calloutFrom?: string | null;
 }) {
   const { t } = useApp();
   const me = view.players[0];
@@ -100,6 +106,12 @@ export function PlayerBand({
       </div>
       {/* Landscape: dora + counters where the rivals have their closed hand. */}
       {riverCols !== 9 && <div className={styles.meLower}>{deadWall}</div>}
+      {callout && (
+        <div key={callout} className={overlay.announce} data-me role="status">
+          <b>{t(`act_${callout}` as StringKey)}!</b>
+          {calloutFrom && <small>{calloutFrom}</small>}
+        </div>
+      )}
     </section>
   );
 }

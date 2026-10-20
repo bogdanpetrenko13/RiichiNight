@@ -243,11 +243,12 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
           view={view}
           active={view.current === 0 && view.status === "human"}
           waits={waitsChip}
+          callout={calloutBySeat[0] ?? null}
+          calloutFrom={calloutBySeat[0] ? calloutFrom(0) : null}
           riverCols={portrait ? 9 : 6}
         />
       </div>
 
-      {calloutBySeat[0] && <span className={styles.myCallout}>{t(`act_${calloutBySeat[0]}` as StringKey)}!</span>}
 
       {/* The hand across the bottom; in landscape the buttons sit to its right. */}
       <div className={styles.dock} data-zone>
@@ -262,6 +263,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
           dealing={dealing}
           dealId={dealKey}
           chiMode={chiPicker ? { first: chiFirst } : null}
+          freshMeld={freshMeld === 0}
           onChiTile={(i) => {
             const options = prompt?.chiOptions ?? [];
             const code = allTiles[i];

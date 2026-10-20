@@ -76,3 +76,51 @@ def test_rival_pon_is_announced_in_her_band(make_app, viewport):
         app.step()
     assert page.locator(FRESH).count() == 0
     assert not app.errors, app.errors
+
+
+def test_player_pon_uses_the_same_plaque(make_app):
+    """The player's own Pon: the same plaque as a rival's (over the player
+    band, "from <name>"), the new meld outlined in the hand, and the same
+    lettering as the riichi / ron cutaway (tokens.css --call-*)."""
+    app = make_app(PORTRAIT).open("?scenario=mypon", {"aiDelay": 300}).start_game()
+    page = app.page
+    page.evaluate(
+        """() => {
+          window.__ann = [];
+          new MutationObserver(() => document.querySelectorAll('[class*=announce]').forEach((e) => {
+            if (!e.dataset.seen) {
+              e.dataset.seen = '1';
+              window.__ann.push({ text: e.innerText, me: e.hasAttribute('data-me'),
+                font: getComputedStyle(e.querySelector('b')).fontWeight + ' ' + getComputedStyle(e.querySelector('b')).textTransform });
+            }
+          })).observe(document.body, { childList: true, subtree: true });
+        }"""
+    )
+    called = False
+    for _ in range(400):
+        if app.result_shown():
+            break
+        if not called and app.button("Пон").count():
+            app.button("Пон").first.click()
+            called = True
+            continue
+        mine = [a for a in page.evaluate("() => window.__ann") if a["me"]]
+        if mine:
+            break
+        try:
+            if app.button("Пропуск").count():
+                app.step()  # other calls
+            elif app.my_turn():
+                app.discard()
+            else:
+                page.wait_for_timeout(200)
+        except AssertionError:
+            page.wait_for_timeout(300)
+    assert called, "no Pon was offered"
+    page.wait_for_function("() => window.__ann.some((a) => a.me)", timeout=10_000)
+    mine = [a for a in page.evaluate("() => window.__ann") if a["me"]][0]
+    assert "ПОН" in mine["text"].upper() and "у " in mine["text"], mine
+    assert mine["font"] == "900 uppercase", mine
+    assert page.locator("[class*=dock] [class*=meld][data-fresh]").count() == 1
+    app.shot("player_pon")
+    assert not app.errors, app.errors

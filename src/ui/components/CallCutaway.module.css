@@ -46,20 +46,22 @@
 
 .romaji {
   font-size: 13px;
-  font-weight: 800;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.5em;
   color: rgba(255, 255, 255, 0.75);
 }
 
+/* Same lettering as every call on the table (tokens.css --call-*). */
 .word {
+  font-family: var(--font-display);
   font-size: clamp(40px, 11vw, 78px);
-  font-weight: 700;
-  font-style: italic;
+  font-weight: var(--call-weight);
+  letter-spacing: var(--call-ls);
+  text-transform: uppercase;
   color: white;
   text-shadow:
-    0 3px 0 rgba(0, 0, 0, 0.35),
+    var(--call-shadow),
     0 0 24px rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.02em;
 }
 
 /* 0.3 s in, 1.5 s readable (slow drift), 0.4 s out. */

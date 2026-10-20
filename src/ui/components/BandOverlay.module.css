@@ -28,11 +28,11 @@
   color: #fff;
   font-family: var(--font-display);
   font-size: clamp(28px, 7vmin, 46px);
-  font-weight: 900;
+  font-weight: var(--call-weight);
   line-height: 1;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--call-ls);
   text-transform: uppercase;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+  text-shadow: var(--call-shadow);
   box-shadow:
     0 0 0 3px rgba(255, 255, 255, 0.85),
     0 8px 24px rgba(0, 0, 0, 0.45);
@@ -46,7 +46,13 @@
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
+}
+
+/* The player's own call: the same plaque over the player band, in the
+   accent colour. */
+.announce[data-me] {
+  --c: var(--accent);
 }
 
 @keyframes announceFade {

@@ -78,9 +78,10 @@
   border-radius: 999px;
   background: var(--danger);
   color: white;
-  font-weight: 800;
+  font-weight: var(--fw-bold);
   font-size: 12px;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--caps-ls);
+  text-transform: uppercase;
 }
 
 .tiles[data-dealing] > * {
@@ -121,4 +122,13 @@
   width: var(--hand-tile);
   margin-left: calc(var(--hand-tile) * 0.3);
   visibility: hidden;
+}
+
+/* The player's newest meld, from the call until the next player's discard
+   (same outline as a rival's, in the accent colour). */
+.meld[data-fresh] {
+  border-radius: 4px;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 12px var(--accent);
 }
