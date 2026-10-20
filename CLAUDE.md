@@ -37,7 +37,8 @@ The owner writes in Russian; reply in Russian.
 | `src/engine/protocol.ts` | Types of everything the bridge returns |
 | `src/game/useGameController.ts` | Game flow, cutaway banner timing, `?seed=` / `?scenario=` |
 | `src/game/storage.ts` | Settings (localStorage key `settings.v1`; Capacitor prefixes it with `CapacitorStorage.`) |
-| `src/ui/useLayout.ts` | Tile / band sizes from the viewport and the measured bands area |
+| `src/ui/useLayout.ts` | Tile / band sizes from the viewport and the measured bands area (fixed sizes from `src/ui/metrics.ts`) |
+| `src/ui/components/Band.module.css` | Band layout; rivers in `River.module.css`, plaques and bubbles in `BandOverlay.module.css`, dead wall / counters / table centre in `TableInfo.module.css` |
 | `src/ui/motion.ts` | FLIP and discard flight animations |
 | `src/i18n/strings.ts` | en + ru strings (both must have the same keys) |
 | `scripts/comfy/gen_emotions.py`, `scripts/import-heroine-art.py` | Heroine art: AI portraits (Animagine XL 4.0 in ComfyUI on the owner's PC), emotion renders via img2img + IP-Adapter, colour match + face crop into `public/characters/<id>/` (see its `CREDITS.md`) |
@@ -84,6 +85,9 @@ node node_modules/typescript/bin/tsc -p tsconfig.app.json --noEmit
 
 # Engine tests (CPython; pyriichi imported from the vendored zip)
 PYTHONPATH=public/py/pyriichi.zip python -m pytest tests/python -q
+
+# CSS on the oldest supported WebView (105): newer features need a fallback
+node scripts/check-css-compat.mjs
 
 # Browser tests on a build (rigged deals, seeded games, layout screenshots)
 npm run build && E2E_DIST=dist python -m pytest tests/e2e -q
@@ -145,6 +149,16 @@ emulator screen is 900×1600 (phone-like portrait).
 
 - Visual changes: check portrait (412×915) and landscape, both table styles
   (`quiet`, `felt`), dark theme.
+- Minimum Android System WebView is 105 (`MIN_WEBVIEW` in
+  `scripts/check-css-compat.mjs`; CI runs it). Tests run in a current
+  Chromium, so a CSS feature newer than that (e.g. `color-mix()`, 111) needs a
+  plain declaration of the same property before it, or it silently vanishes
+  on emulators and older phones.
+- Layout sizes shared by `useLayout.ts` and the CSS live in `src/ui/metrics.ts`
+  (set as custom properties on the table root); stacking order only via the
+  `--z-*` scale in `tokens.css`, never a raw `z-index` number.
+- Render errors are caught by `ScreenErrorBoundary` (same recovery dialog as
+  engine errors); e2e triggers one with `window.__rnCrash = "table"`.
 - Saves pickle the whole `Game` (engine, brains). A new attribute on `Game`,
   `Brain` or anything pickled must be read with `getattr(obj, "name", default)`
   so games saved by older builds keep working (see

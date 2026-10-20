@@ -8,6 +8,8 @@ import { Portrait } from "./Portrait";
 import { Tile } from "./Tile";
 import { Tenbo } from "./Tenbo";
 import styles from "./Band.module.css";
+import riverStyles from "./River.module.css";
+import overlay from "./BandOverlay.module.css";
 
 interface RivalBandProps {
   character: CharacterDef;
@@ -124,7 +126,7 @@ export function RivalBand({
         <div className={styles.portrait}>
           <Portrait character={character} emotion={emotion} size={88} className={styles.face} />
           {speech && (
-            <div key={speech} className={styles.bubble} role="status">
+            <div key={speech} className={overlay.bubble} role="status">
               {speech}
             </div>
           )}
@@ -132,7 +134,7 @@ export function RivalBand({
       </div>
 
       <div
-        className={styles.river}
+        className={riverStyles.river}
         data-rows={Math.ceil(player.discards.length / riverCols)}
         // Rows beyond the planned ones (2 rows of 9, or 3 of 6) shrink the river.
         data-over={Math.max(0, Math.ceil(player.discards.length / riverCols) - (riverCols === 9 ? 2 : 3)) || undefined}
@@ -143,7 +145,7 @@ export function RivalBand({
         {/* Riichi: a 1 000 stick laid in front of the river, as on a real table. */}
         {/* The stick's line is always there (hidden until riichi), so the river
             does not jump down when she declares. */}
-        <div className={styles.riichiLine} data-empty={!player.riichi || undefined} aria-hidden={!player.riichi || undefined}>
+        <div className={riverStyles.riichiLine} data-empty={!player.riichi || undefined} aria-hidden={!player.riichi || undefined}>
           <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
         </div>
         {player.discards.map((code, i) => (
@@ -161,7 +163,7 @@ export function RivalBand({
       {/* Chi / Pon / Kan: a big plaque in her colour across the band, with
           whom the tile came from; the band glows in her colour meanwhile. */}
       {callout && (
-        <div key={callout} className={styles.announce} role="status">
+        <div key={callout} className={overlay.announce} role="status">
           <b>{t(`act_${callout}` as StringKey)}!</b>
           {calloutFrom && <small>{calloutFrom}</small>}
         </div>

@@ -29,11 +29,11 @@
 }
 .p1 {
   transform: rotate(-3deg);
-  z-index: 1;
+  z-index: var(--z-local);
 }
 .p2 {
   transform: rotate(3deg);
-  z-index: 1;
+  z-index: var(--z-local);
 }
 .p3 {
   transform: rotate(8deg) translateY(6px);

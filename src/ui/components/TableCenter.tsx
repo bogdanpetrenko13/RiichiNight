@@ -2,7 +2,7 @@ import type { GameView } from "../../engine/protocol";
 import { useApp } from "../../app/AppContext";
 import { Tile } from "./Tile";
 import { Tenbo } from "./Tenbo";
-import styles from "./Band.module.css";
+import styles from "./TableInfo.module.css";
 
 /**
  * Portrait: the middle of the table between the rivals and the player — the

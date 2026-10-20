@@ -1,0 +1,74 @@
+/* A discard river (rivals' and the player's). Tile size: --river-tile from
+   the band (useLayout.ts); --river-cols per row. */
+
+.river {
+  grid-area: river;
+  align-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 1px;
+  row-gap: calc(var(--river-tile) * 0.06 + 2px);
+  /* N tiles per row (--river-cols: 9 rivals in portrait, else 6) + gaps +
+     room for one sideways riichi tile. */
+  width: calc(var(--river-tile) * (var(--river-cols, 6) + 0.5) + var(--river-cols, 6) * 1px);
+  max-width: 100%;
+  min-height: 0;
+}
+
+/* Riichi stick: its own line in front of the discards. Reserved from the
+   start of the hand (invisible), so declaring riichi does not move the river. */
+.riichiLine[data-empty] {
+  visibility: hidden;
+}
+
+.riichiLine {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: flex-start;
+  padding: 0 0 calc(var(--river-tile) * 0.1) 1px;
+  opacity: 0.92;
+  animation: none !important;
+}
+
+/* Rivals: more rows than planned shrink the river so the band never grows
+   and nothing overlaps the closed hand (one extra row ≈ 0.69, two ≈ 0.53). */
+.river[data-over="1"] {
+  --river-tile: calc(var(--band-river, 24px) * 0.69);
+}
+
+.river[data-over="2"],
+.river[data-over="3"] {
+  --river-tile: calc(var(--band-river, 24px) * 0.53);
+}
+
+/* Rivals' discards fly in from their hand (RivalBand); others drop in. */
+.river[data-rival] > * {
+  animation: none;
+}
+
+.river > * {
+  animation: drop var(--dur-slow) var(--ease-in) both;
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-45%) scale(1.15);
+  }
+  60% {
+    opacity: 1;
+  }
+}
+
+/* The riichi tile appears in place: an animated transform would undo its
+   rotation for the length of the animation. */
+.river > [class*="sideways"] {
+  animation: none;
+}
+
+
+/* The player's discards fly in from the hand (motion.ts) instead of dropping. */
+.river[data-flight] > * {
+  animation: none;
+}

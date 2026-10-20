@@ -7,6 +7,8 @@ import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
 import { Tenbo } from "./Tenbo";
 import styles from "./Band.module.css";
+import riverStyles from "./River.module.css";
+import info from "./TableInfo.module.css";
 
 /**
  * The player's band: wind and score, the waits / furiten chip; the player's
@@ -43,8 +45,8 @@ export function PlayerBand({
     lastCount.current = count;
   }, [count]);
   const deadWall = (
-    <div className={styles.table}>
-      <div className={styles.dora} aria-label={t("dora")}>
+    <div className={info.table}>
+      <div className={info.dora} aria-label={t("dora")}>
         {view.dora.map((d, i) => (
           <Tile key={i} code={d} size="river" style={doraBig} />
         ))}
@@ -52,7 +54,7 @@ export function PlayerBand({
           <Tile key={`b${i}`} back size="river" style={doraBig} />
         ))}
       </div>
-      <div className={styles.counters}>
+      <div className={info.counters}>
         <span title={t("riichiSticks")}>
           <Tenbo kind="1000" width={18} />×{view.round.riichiSticks}
         </span>
@@ -60,7 +62,7 @@ export function PlayerBand({
           <Tenbo kind="100" width={18} />×{view.round.honba}
         </span>
         <span title={t("wall", { n: view.wall ?? 0 })}>
-          <i className={styles.wall} />×{view.wall ?? 0}
+          <i className={info.wall} />×{view.wall ?? 0}
         </span>
       </div>
     </div>
@@ -79,7 +81,7 @@ export function PlayerBand({
         {riverCols !== 9 && waits && <div className={styles.waitsHead}>{waits}</div>}
       </div>
       <div
-        className={styles.river}
+        className={riverStyles.river}
         data-rows={Math.ceil(me.discards.length / riverCols)}
         // Same shrink rule as the rivals (portrait: a third row of 9; landscape: a fourth of 6).
         data-over={Math.max(0, Math.ceil(me.discards.length / riverCols) - (riverCols === 9 ? 2 : 3)) || undefined}
@@ -89,7 +91,7 @@ export function PlayerBand({
       >
         {/* The stick's line is always there (hidden until riichi), so the river
             does not jump down when she declares. */}
-        <div className={styles.riichiLine} data-empty={!me.riichi || undefined} aria-hidden={!me.riichi || undefined}>
+        <div className={riverStyles.riichiLine} data-empty={!me.riichi || undefined} aria-hidden={!me.riichi || undefined}>
           <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
         </div>
         {me.discards.map((code, i) => (

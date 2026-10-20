@@ -107,7 +107,7 @@
   position: absolute;
   right: 10px;
   bottom: calc(100% - var(--hand-tile) * 0.25);
-  z-index: 3;
+  z-index: var(--z-table-chrome);
   box-shadow: var(--shadow-md);
 }
 

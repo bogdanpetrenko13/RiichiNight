@@ -271,7 +271,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 5;
+  z-index: var(--z-screen-bar);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;

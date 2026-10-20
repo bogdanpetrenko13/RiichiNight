@@ -74,6 +74,9 @@ jobs:
         name: Type-check and build web app
         run: |
           set -o pipefail
+          # Stylesheets must work on Android WebView 105+ (emulators, older
+          # phones): newer CSS needs a fallback (scripts/check-css-compat.mjs).
+          node scripts/check-css-compat.mjs 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
           npm run build 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
 
       # Browser tests on the built app: rigged deals (?scenario=), seeded games,

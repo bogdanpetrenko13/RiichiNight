@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { CENTER_STRIP_TOTAL, METRICS, metricVars } from "./metrics";
 
 export interface Layout {
   orientation: "portrait" | "landscape";
@@ -16,9 +17,8 @@ export const TILE_RATIO = 1.42;
  */
 export const HAND_UNITS_BASE = 14 + 0.3;
 
-const GAP = 6;
-/** Portrait: height of the table centre strip (TableCenter) incl. its margins. */
-const CENTER_H = 46;
+/** Gap between bands when the table does not report one (tokens.css --band-gap). */
+const DEFAULT_GAP = 6;
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 const px = (v: number) => `${v.toFixed(1)}px`;
@@ -41,13 +41,13 @@ function compute(): Layout {
   const h = window.innerHeight;
 
   if (w > h * 1.05) {
-    const actionsW = 150;
+    const actionsW = METRICS.actionsW;
     const avail = w - 24 - actionsW;
     const cap = clamp(h * 0.13, 30, 60);
     const hand = Math.min(cap, avail / HAND_UNITS_BASE);
     return {
       orientation: "landscape",
-      vars: { ...handVars(hand, avail, cap), ["--band-portrait" as string]: "46px" },
+      vars: { ...metricVars(), ...handVars(hand, avail, cap), ["--band-portrait" as string]: "46px" },
       left: 0,
     };
   }
@@ -58,7 +58,7 @@ function compute(): Layout {
   const left = clamp(Math.round(w * 0.25), 92, 128);
   return {
     orientation: "portrait",
-    vars: { ...handVars(hand, avail, cap), ["--band-left" as string]: `${left}px` },
+    vars: { ...metricVars(), ...handVars(hand, avail, cap), ["--band-left" as string]: `${left}px` },
     left,
   };
 }
@@ -81,15 +81,22 @@ function handVars(hand: number, avail: number, cap: number): CSSProperties {
  * the player's 6 per row; plus one sideways riichi tile and the riichi stick
  * line. More rows than planned shrink via CSS.
  */
-export function bandVars(orientation: Layout["orientation"], areaW: number, areaH: number, left: number): CSSProperties {
+export function bandVars(
+  orientation: Layout["orientation"],
+  areaW: number,
+  areaH: number,
+  left: number,
+  /** The real gap between bands (--band-gap: 6 px, 0 for the felt style). */
+  gap: number = DEFAULT_GAP,
+): CSSProperties {
   if (areaW <= 0 || areaH <= 0) return {};
   // One river row: tile + 3D edge + row gap; the riichi stick line ≈ half a tile.
   const rowH = TILE_RATIO + 0.16;
   const rows = 3 * rowH + 0.38;
   if (orientation === "landscape") {
-    const colW = (areaW - 12 - 3 * GAP) / 4;
+    const colW = (areaW - 12 - 3 * gap) / 4;
     const colH = areaH - 4;
-    const header = 54;
+    const header = METRICS.landscapeHeader;
     // 13 backs (1 px gaps) + 6 px row gap + 0.35 gap + drawn tile must fit the
     // column's content box (8 px padding each side + 1 px borders).
     const back = clamp((colW - 18 - 18) / 14.35, 8, 16);
@@ -100,8 +107,8 @@ export function bandVars(orientation: Layout["orientation"], areaW: number, area
     const river = clamp(Math.min((colW - 18) / 6.6, byH, byHMe), 14, 40);
     return { ["--band-river" as string]: px(river), ["--band-back" as string]: px(back) };
   }
-  // Four bands and the table centre strip (TableCenter, CENTER_H) between them.
-  const bandH = (areaH - 4 * GAP - CENTER_H) / 4;
+  // Four bands and the table centre strip (TableCenter) between them.
+  const bandH = (areaH - 4 * gap - CENTER_STRIP_TOTAL) / 4;
   // Band: 10 px padding on every side + 8 px between columns + 2 px border.
   const field = areaW - 12 - 2 - left - 28;
   // The player band also holds the waits + buttons column on the right.

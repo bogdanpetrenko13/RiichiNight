@@ -2,7 +2,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: var(--z-result);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -175,7 +175,7 @@
 .buttons {
   position: sticky;
   bottom: calc(-16px - var(--safe-bottom));
-  z-index: 1;
+  z-index: var(--z-local);
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -237,7 +237,7 @@
 .calcLayer {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: var(--z-dialog);
   display: grid;
   place-items: center;
   padding: calc(16px + var(--safe-top)) 16px calc(16px + var(--safe-bottom));

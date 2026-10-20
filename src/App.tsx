@@ -13,6 +13,7 @@ import { SettingsScreen } from "./ui/screens/Settings";
 import { Learn } from "./ui/screens/Learn";
 import { StatsScreen } from "./ui/screens/StatsScreen";
 import { AchievementToast } from "./ui/components/AchievementToast";
+import { ScreenErrorBoundary } from "./ui/components/ScreenErrorBoundary";
 
 type Screen = "boot" | "title" | "setup" | "table" | "settings" | "learn" | "stats";
 
@@ -118,9 +119,21 @@ export default function App() {
       break;
   }
 
+  // Continue from the last save after a crash while drawing a screen.
+  const recover = async () => {
+    const g = await loadGame();
+    if (!g) return false;
+    setLastCast(g.cast);
+    setScreen("table");
+    await game.resume(g);
+    return true;
+  };
+
   return (
     <>
-      {content}
+      <ScreenErrorBoundary resetKey={screen} onRecover={recover} onTitle={toTitle}>
+        {content}
+      </ScreenErrorBoundary>
       <AchievementToast />
     </>
   );

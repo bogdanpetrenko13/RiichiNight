@@ -1,0 +1,115 @@
+/* Over a rival's band: the Chi / Pon / Kan plaque and her speech bubble. */
+
+/* Rival's Chi / Pon / Kan: a plaque in her colour across the middle of her
+   band (RivalBand), with whom the tile was taken from; the band glows in her
+   colour while it shows, and the new meld stays outlined a little longer. */
+.announce {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-callout);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  pointer-events: none;
+  /* The band glows in her colour behind the plaque. */
+  border-radius: var(--band-radius);
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.1), transparent);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--c) 45%, transparent), transparent);
+  box-shadow: inset 0 0 0 3px var(--c);
+  animation: announceFade 1.6s ease-out forwards;
+}
+
+.announce b {
+  padding: 4px 22px 6px;
+  border-radius: 14px;
+  background: var(--c);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 7vmin, 46px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.85),
+    0 8px 24px rgba(0, 0, 0, 0.45);
+  transform: rotate(-4deg);
+  animation: plaquePop 0.45s var(--ease-out) both;
+}
+
+.announce small {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@keyframes announceFade {
+  0% {
+    opacity: 0;
+  }
+  10%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes plaquePop {
+  0% {
+    transform: rotate(-4deg) scale(0.5);
+  }
+  60% {
+    transform: rotate(-4deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(-4deg) scale(1);
+  }
+}
+
+.bubble {
+  position: absolute;
+  left: 85%;
+  top: 0;
+  z-index: var(--z-bubble);
+  width: max-content;
+  max-width: 210px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  box-shadow: var(--shadow-lg);
+  animation: bubble 3.2s var(--ease-out) forwards;
+  pointer-events: none;
+}
+
+@keyframes bubble {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  8%,
+  88% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+:global([data-orientation="landscape"]) .bubble {
+  left: 40px;
+  top: 40px;
+}

@@ -282,3 +282,43 @@ def test_engine_error_shows_a_dialog_and_recovers(make_app):
         timeout=15_000,
     )
     assert app.page.get_by_role("alertdialog").count() == 0
+
+
+def test_crash_while_drawing_shows_the_recovery_dialog(make_app):
+    """A render error (window.__rnCrash, see ScreenErrorBoundary.tsx) shows the
+    recovery dialog instead of a blank page; each of its buttons gets the
+    player back into the app."""
+    app = make_app().open("?seed=7", {"aiDelay": 300}).start_game()
+    page = app.page
+    dialog = page.get_by_role("alertdialog")
+    crash = "() => { window.__rnCrash = 'table'; }"
+
+    def crash_now():
+        page.evaluate(crash)
+        page.get_by_role("button", name="Меню").first.click()  # re-renders the table
+        dialog.wait_for(timeout=20_000)
+        assert "Что-то пошло не так" in dialog.inner_text()
+        page.evaluate("() => { window.__rnCrash = undefined; }")  # the fault is gone
+
+    crash_now()
+    dialog.get_by_role("button", name="Подробности").click()
+    assert "test crash in table" in dialog.inner_text()
+    app.shot("render_error")
+    # Try again: the table is drawn again.
+    dialog.get_by_role("button", name="Повторить").click()
+    dialog.wait_for(state="detached", timeout=10_000)
+    app.hand().first.wait_for(timeout=30_000)
+
+    # Continue from the last save: the match goes on.
+    crash_now()
+    dialog.get_by_role("button", name="Продолжить с сохранения").click()
+    dialog.wait_for(state="detached", timeout=30_000)
+    app.hand().first.wait_for(timeout=60_000)
+
+    # Main screen.
+    crash_now()
+    dialog.get_by_role("button", name="На главный экран").click()
+    page.get_by_text("Продолжить").first.wait_for(timeout=20_000)
+    assert page.locator("[class*=dock]").count() == 0
+    # Page errors are expected here (the crash itself); nothing else.
+    assert all("test crash" in e or "#520" in e for e in app.errors), app.errors

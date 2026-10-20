@@ -12,6 +12,7 @@ import { RoundResult } from "../components/RoundResult";
 import { GameOver } from "../components/GameOver";
 import { CallCutaway } from "../components/CallCutaway";
 import { ErrorDialog } from "../components/ErrorDialog";
+import { testCrash } from "../components/ScreenErrorBoundary";
 import { RivalBand } from "../components/RivalBand";
 import { PlayerBand } from "../components/PlayerBand";
 import { TableCenter } from "../components/TableCenter";
@@ -33,6 +34,7 @@ interface TableProps {
 let dealtKey = "";
 
 export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
+  testCrash("table");
   const { t, settings } = useApp();
   const layout = useLayout();
   const { view, cast, emotions, callouts, freshMeld, speech, cutaway, busy, error } = game;
@@ -51,19 +53,21 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
 
   // Rivers are sized from the real size of the bands area.
   const bandsRef = useRef<HTMLDivElement>(null);
-  const [bandsBox, setBandsBox] = useState({ w: 0, h: 0 });
+  const [bandsBox, setBandsBox] = useState({ w: 0, h: 0, gap: 6 });
   useEffect(() => {
     const el = bandsRef.current;
     if (!el) return;
-    const update = () => setBandsBox({ w: el.clientWidth, h: el.clientHeight });
+    // The gap between bands depends on the table style (--band-gap).
+    const update = () =>
+      setBandsBox({ w: el.clientWidth, h: el.clientHeight, gap: parseFloat(getComputedStyle(el).rowGap) || 0 });
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
   }, [view !== null]);
   const bandStyle = useMemo(
-    () => bandVars(layout.orientation, bandsBox.w, bandsBox.h, layout.left),
-    [layout.orientation, layout.left, bandsBox.w, bandsBox.h],
+    () => bandVars(layout.orientation, bandsBox.w, bandsBox.h, layout.left, bandsBox.gap),
+    [layout.orientation, layout.left, bandsBox.w, bandsBox.h, bandsBox.gap],
   );
 
   // Any new engine state clears local selection modes.

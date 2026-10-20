@@ -2,7 +2,7 @@
 .appBar {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: var(--z-app-bar);
   display: grid;
   grid-template-columns: 44px 1fr 44px;
   align-items: center;
@@ -175,7 +175,7 @@
 .scrim {
   position: fixed;
   inset: 0;
-  z-index: 45;
+  z-index: var(--z-sheet);
   display: flex;
   align-items: flex-end;
   justify-content: center;
