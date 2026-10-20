@@ -19,9 +19,13 @@ def test_rival_pon_is_announced_in_her_band(make_app, viewport):
     seen = None
     cut = False
     for _ in range(400):
+        # Only her Pon on the player's 7z counts (another rival may Chi first).
         if page.locator(ANNOUNCE).count():
-            seen = page.locator(ANNOUNCE).first.inner_text()
-            break
+            text = page.locator(ANNOUNCE).first.inner_text()
+            assert "{" not in text, text
+            if "ПОН" in text.upper():
+                seen = text
+                break
         if app.result_shown():
             break
         if not cut and app.my_turn() and page.locator("[class*=dock] button[aria-label='7z']").count():
