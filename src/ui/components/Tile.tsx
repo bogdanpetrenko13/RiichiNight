@@ -70,7 +70,7 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
   const Tag = onClick || button ? "button" : "span";
   return (
     <Tag
-      className={index ? `${classes} ${styles.withIdx}` : classes}
+      className={classes}
       data-suit={t.suit}
       data-k={dataKey}
       data-red={t.red || undefined}

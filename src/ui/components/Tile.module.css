@@ -49,16 +49,6 @@
   user-select: none;
 }
 
-/* With a corner index the artwork moves right/down to give it its own
-   corner (as in Kemono Mahjong), instead of the digit covering the art. */
-.withIdx .art {
-  position: absolute;
-  left: 13%;
-  top: 17%;
-  width: 82%;
-  height: 79%;
-}
-
 .idx {
   position: absolute;
   top: calc(var(--tw) * 0.03);
@@ -69,6 +59,15 @@
   line-height: 1;
   letter-spacing: -0.02em;
   pointer-events: none;
+  /* Laid over the full-size artwork (the art keeps its size): a halo in
+     the tile's colour keeps the index readable on top of the picture. */
+  z-index: 1;
+  text-shadow:
+    0 0 1px var(--bone-50),
+    0 0 2px var(--bone-50),
+    0 0 3px var(--bone-50),
+    1px 1px 0 var(--bone-50),
+    -1px -1px 0 var(--bone-50);
 }
 
 .idx[data-suit="m"] {
@@ -216,8 +215,3 @@
   display: none;
 }
 
-.mini.withIdx .art {
-  position: static;
-  width: 96%;
-  height: 94%;
-}
