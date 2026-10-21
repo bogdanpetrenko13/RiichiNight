@@ -98,6 +98,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const onDown = (e: PointerEvent) => {
       voice.unlock();
+      music.resume(); // menus' music waits for the first tap (autoplay rules)
       const el = e.target instanceof Element ? e.target.closest("button") : null;
       if (el && !el.closest("[data-k]") && !el.disabled) void sfx.play("tap");
     };

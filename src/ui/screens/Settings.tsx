@@ -209,6 +209,9 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
               {t("sourceCodeOpen")}
             </a>
           </Row>
+          <Row label={t("credits")} hint={t("creditsMusic")} stacked>
+            <span />
+          </Row>
         </Group>
       </div>
     </div>

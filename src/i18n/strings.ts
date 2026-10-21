@@ -279,6 +279,9 @@ const en = {
   about: "About",
   version: "Version",
   sourceCode: "Source code and licenses",
+  credits: "Credits",
+  creditsMusic:
+    "Music: \"Joey's Formal Waltz – Unscented\" (menus) and \"Vibing Over Venus\" (table) by Kevin MacLeod (incompetech.com), licensed under Creative Commons: By Attribution 4.0 (creativecommons.org/licenses/by/4.0). Sound effects are synthesised in the app.",
   sourceCodeHint: "Free software under the AGPL-3.0 licence. Mortal AI: AGPL-3.0, S42 weights: Apache-2.0, pyriichi: MIT.",
   sourceCodeOpen: "Open on GitHub",
 };
@@ -563,6 +566,9 @@ const ru: Record<StringKey, string> = {
   about: "О программе",
   version: "Версия",
   sourceCode: "Исходный код и лицензии",
+  credits: "Авторы",
+  creditsMusic:
+    "Музыка: «Joey's Formal Waltz – Unscented» (меню) и «Vibing Over Venus» (стол), Kevin MacLeod (incompetech.com), лицензия Creative Commons «Атрибуция» 4.0 (creativecommons.org/licenses/by/4.0). Звуковые эффекты синтезируются в самой игре.",
   sourceCodeHint: "Свободная программа под лицензией AGPL-3.0. ИИ Mortal: AGPL-3.0, веса S42: Apache-2.0, pyriichi: MIT.",
   sourceCodeOpen: "Открыть на GitHub",
 };

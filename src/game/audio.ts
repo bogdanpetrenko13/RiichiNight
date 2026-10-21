@@ -79,24 +79,48 @@ class MusicPlayer {
     else if (this.el?.paused && this.track) void this.el.play().catch(() => undefined);
   }
 
+  /** Fades an element's volume to `to` over `ms`, then calls `done`. */
+  private fade(el: HTMLAudioElement, to: number, ms: number, done?: () => void) {
+    const from = el.volume;
+    const start = performance.now();
+    const tick = () => {
+      const k = Math.min(1, (performance.now() - start) / ms);
+      el.volume = Math.max(0, Math.min(1, from + (to - from) * k));
+      if (k < 1) window.setTimeout(tick, 40);
+      else done?.();
+    };
+    tick();
+  }
+
   play(track: string) {
     if (track === this.track || this.missing.has(track)) return;
     this.track = track;
-    this.el?.pause();
+    // The old track fades out instead of stopping dead.
+    const old = this.el;
+    if (old) this.fade(old, 0, 700, () => old.pause());
     const el = new Audio(`${new URL("./", window.location.href).href}audio/music/${track}.mp3`);
     el.loop = true;
-    el.volume = this.volume;
+    el.volume = 0;
     el.onerror = () => {
       this.missing.add(track);
       if (this.el === el) this.el = null;
     };
     this.el = el;
-    if (this.volume > 0) void el.play().catch(() => undefined); // autoplay may wait for a tap
+    if (this.volume > 0)
+      void el
+        .play()
+        .then(() => this.fade(el, this.volume, 900))
+        .catch(() => undefined); // autoplay may wait for a tap (resume)
   }
 
   /** Retry playback after a user gesture (autoplay policies). */
   resume() {
-    if (this.el && this.el.paused && this.volume > 0) void this.el.play().catch(() => undefined);
+    const el = this.el;
+    if (el && el.paused && this.volume > 0)
+      void el
+        .play()
+        .then(() => this.fade(el, this.volume, 900))
+        .catch(() => undefined);
   }
 }
 
