@@ -212,6 +212,9 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
           <Row label={t("credits")} hint={t("creditsMusic")} stacked>
             <span />
           </Row>
+          <Row label={t("creditsVoiceTitle")} hint={t("creditsVoice")} stacked>
+            <span />
+          </Row>
         </Group>
       </div>
     </div>

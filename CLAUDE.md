@@ -42,6 +42,7 @@ The owner writes in Russian; reply in Russian.
 | `src/ui/motion.ts` | FLIP and discard flight animations |
 | `src/i18n/strings.ts` | en + ru strings (both must have the same keys) |
 | `src/game/speech/<id>.ts` | Each heroine's lines per situation (`SpeechKind`, ru + en), chattiness, profile story / play style and bonds with other heroines; `tests/python/test_speech.py` checks they are complete and bonds go both ways |
+| `public/voice/<id>/<kind>.mp3` | Heroines' calls (riichi/pon/chi/kan/ron/tsumo) from VOICEVOX via `scripts/voicevox/` + `voices.json`; credits in `public/voice/CREDITS.md` and Settings → About (each voice requires its `VOICEVOX:<name>` line) |
 | `src/game/sfx.ts` | Table sound effects synthesised with Web Audio (no files): tile clack (wood for the quiet table, felt for the felt one), draw, riichi stick, meld, win, round end, button tap |
 | `scripts/comfy/gen_emotions.py`, `scripts/import-heroine-art.py` | Heroine art: AI portraits (Animagine XL 4.0 in ComfyUI on the owner's PC), emotion renders via img2img + IP-Adapter, colour match + face crop into `public/characters/<id>/` (see its `CREDITS.md`) |
 
