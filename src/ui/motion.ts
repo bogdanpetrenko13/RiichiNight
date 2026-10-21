@@ -16,6 +16,11 @@ export function setMotionSpeed(aiDelayMs: number) {
   speed = Math.max(0.6, Math.min(1.3, aiDelayMs / 700));
 }
 
+/** When a discard lands in the river (ms after it starts), for its clack. */
+export function landingMs(): number {
+  return reduced() ? 0 : Math.round((DUR.slow - 60) * speed);
+}
+
 const reduced = () => typeof window !== "undefined" && Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 
 export function animate(el: Element, frames: Keyframe[], ms: number, easing = EASE): Animation | null {

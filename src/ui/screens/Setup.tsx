@@ -110,7 +110,8 @@ export function Setup({ initial, onBack, onStart }: SetupProps) {
                 <span>· {focused.age}</span>
               </div>
             )}
-            <p className={styles.bio}>{focusedOpen ? focused.bio[lang] : unlockHint(focused)}</p>
+            <p className={styles.bio}>{focusedOpen ? focused.story[lang] : unlockHint(focused)}</p>
+            {focusedOpen && <Profile c={focused} />}
           </div>
         </div>
       </div>
@@ -129,6 +130,64 @@ export function Setup({ initial, onBack, onStart }: SetupProps) {
           {t("start")}
         </button>
       </footer>
+    </div>
+  );
+}
+
+/** Her play style, your record against her and the heroines she knows. */
+function Profile({ c }: { c: CharacterDef }) {
+  const { t, lang, rivals, records } = useApp();
+  const rec = records[c.id];
+  const friends = Object.keys(c.bonds)
+    .map((id) => getCharacter(id))
+    .filter((x): x is CharacterDef => Boolean(x));
+  return (
+    <div className={styles.profile} data-profile>
+      <section>
+        <h3>{t("profileStyle")}</h3>
+        <p>{c.playstyle[lang]}</p>
+      </section>
+      <section>
+        <h3>{t("profileRecord")}</h3>
+        {rec && rec.matches > 0 ? (
+          <dl className={styles.record}>
+            <div>
+              <dt>{t("profileMatches")}</dt>
+              <dd>{rec.matches}</dd>
+            </div>
+            <div>
+              <dt>{t("profileYouFirst")}</dt>
+              <dd>{rec.youFirst}</dd>
+            </div>
+            <div>
+              <dt>{t("profileHerFirst")}</dt>
+              <dd>{rec.herFirst}</dd>
+            </div>
+            <div>
+              <dt>{t("profileHerAvg")}</dt>
+              <dd>{(rec.herPlaceSum / rec.matches).toFixed(2)}</dd>
+            </div>
+          </dl>
+        ) : (
+          <p>{t("profileNever")}</p>
+        )}
+      </section>
+      {friends.length > 0 && (
+        <section>
+          <h3>{t("profileKnows")}</h3>
+          <div className={styles.friends}>
+            {friends.map((f) => {
+              const open = isUnlocked(f, rivals);
+              return (
+                <span key={f.id} className={styles.friend} data-locked={!open || undefined} style={{ ["--c" as string]: f.color }}>
+                  <Portrait character={f} size={26} round />
+                  {open ? f.name[lang].split(" ")[0] : "???"}
+                </span>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -56,6 +56,22 @@ export const TURN_RING_STYLES: TurnRingStyle[] = ["line", "glow"];
 /** Bumped when the look changes so old theme choices are replaced once. */
 const STYLE_VERSION = 3;
 
+export type SpeechFreq = "often" | "normal" | "rare" | "off";
+export const SPEECH_FREQS: SpeechFreq[] = ["often", "normal", "rare", "off"];
+/** Multiplier on every line's chance (with the heroine's chattiness). */
+export const SPEECH_FREQ_FACTOR: Record<SpeechFreq, number> = { often: 1.6, normal: 1, rare: 0.45, off: 0 };
+
+/** Your record against one heroine (her profile on the rival screen). */
+export interface HeadToHead {
+  matches: number;
+  /** Matches you finished 1st / she finished 1st. */
+  youFirst: number;
+  herFirst: number;
+  /** Sum of her places (1-4), for her average place against you. */
+  herPlaceSum: number;
+}
+export type Records = Record<string, HeadToHead>;
+
 export interface Settings {
   lang: Lang;
   voiceVolume: number;
@@ -66,7 +82,8 @@ export interface Settings {
   showWaitHints: boolean;
   autoDiscardRiichi: boolean;
   dealAnimation: boolean;
-  speechBubbles: boolean;
+  /** How often rivals talk at the table (each heroine also has her own chattiness). */
+  speechFreq: SpeechFreq;
   tileset: Tileset;
   /** Table look: flat cards ("quiet") or one green felt ("felt"). */
   tableStyle: TableStyle;
@@ -107,6 +124,7 @@ const KEYS = {
   stats: "stats.v1",
   achievements: "achievements.v1",
   rivals: "rivals.v1",
+  records: "records.v1",
 };
 
 export function defaultSettings(): Settings {
@@ -120,7 +138,7 @@ export function defaultSettings(): Settings {
     showWaitHints: true,
     autoDiscardRiichi: true,
     dealAnimation: true,
-    speechBubbles: true,
+    speechFreq: "normal",
     tileset: "modern",
     tableStyle: "quiet",
     feltColor: "emerald",
@@ -170,6 +188,11 @@ export async function loadSettings(): Promise<Settings> {
   if (rest.dealerChip !== undefined && !TURN_RINGS.includes(rest.dealerChip)) delete rest.dealerChip;
   if (rest.turnRingStyle !== undefined && !TURN_RING_STYLES.includes(rest.turnRingStyle)) delete rest.turnRingStyle;
   if (rest.aiDelay === undefined && oldSpeed) rest.aiDelay = OLD_SPEED[oldSpeed] ?? AI_DELAY_DEFAULT;
+  // The old on/off switch for rivals' lines becomes "off" / the default.
+  const oldBubbles = (rest as { speechBubbles?: boolean }).speechBubbles;
+  delete (rest as { speechBubbles?: boolean }).speechBubbles;
+  if (rest.speechFreq !== undefined && !SPEECH_FREQS.includes(rest.speechFreq)) delete rest.speechFreq;
+  if (rest.speechFreq === undefined && oldBubbles === false) rest.speechFreq = "off";
   return {
     ...base,
     ...rest,
@@ -208,6 +231,28 @@ export async function loadRivals(): Promise<string[]> {
 }
 
 export const saveRivals = (r: string[]) => setJson(KEYS.rivals, r);
+
+export async function loadRecords(): Promise<Records> {
+  const v = await getJson<Records>(KEYS.records);
+  return v && typeof v === "object" ? v : {};
+}
+
+export const saveRecords = (r: Records) => setJson(KEYS.records, r);
+
+/** Adds one finished match: `places[i]` is the 1-4 place of cast[i]; `you` yours. */
+export function addMatch(records: Records, cast: readonly string[], places: readonly number[], you: number): Records {
+  const next: Records = { ...records };
+  cast.forEach((id, i) => {
+    const r = next[id] ?? { matches: 0, youFirst: 0, herFirst: 0, herPlaceSum: 0 };
+    next[id] = {
+      matches: r.matches + 1,
+      youFirst: r.youFirst + (you === 1 ? 1 : 0),
+      herFirst: r.herFirst + (places[i] === 1 ? 1 : 0),
+      herPlaceSum: r.herPlaceSum + places[i],
+    };
+  });
+  return next;
+}
 
 export async function loadGame(): Promise<SavedGame | null> {
   const g = await getJson<SavedGame>(KEYS.game);

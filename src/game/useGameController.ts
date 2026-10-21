@@ -3,9 +3,11 @@ import { getEngine } from "../engine/EngineClient";
 import type { CallKind, GameView, HumanCommand, StepResult } from "../engine/protocol";
 import { useApp } from "../app/AppContext";
 import { music, voice } from "./audio";
+import { sfx } from "./sfx";
+import { landingMs } from "../ui/motion";
 import { getCharacter, pickLine, rivalsUnlockedBy, type CharacterDef, type Emotion, type SpeechKind } from "./characters";
 import { applyEvents } from "./stats";
-import { clearGame, loadGame, saveGame, type SavedGame } from "./storage";
+import { SPEECH_FREQ_FACTOR, clearGame, loadGame, saveGame, type SavedGame } from "./storage";
 
 export interface Callout {
   id: number;
@@ -17,6 +19,12 @@ export interface Callout {
 
 export interface Speech {
   id: number;
+  text: string;
+}
+
+/** A heroine's last word on the match results card. */
+export interface Finale {
+  seat: number;
   text: string;
 }
 
@@ -44,6 +52,8 @@ export interface GameController {
   callouts: Callout[];
   freshMeld: number | null;
   speech: Record<number, Speech>;
+  /** Shown on the game-over card: the winner's (or the top heroine's) word. */
+  finale: Finale | null;
   cutaway: Cutaway | null;
   busy: boolean;
   /** Engine failure: the table shows a dialog instead of a traceback. */
@@ -78,7 +88,12 @@ function toGameError(err: unknown): GameError {
 }
 
 export function useGameController(): GameController {
-  const { settings, stats, commitStats, lang, rivals, unlockRivals } = useApp();
+  const { settings, stats, commitStats, lang, rivals, unlockRivals, records, recordMatch } = useApp();
+  const recordsRef = useRef(records);
+  recordsRef.current = records;
+  const [finale, setFinale] = useState<Finale | null>(null);
+  /** The "last place before the final hand" line is said once per match. */
+  const lastPlaceSaid = useRef(false);
   const rivalsRef = useRef(rivals);
   rivalsRef.current = rivals;
   const engine = getEngine();
@@ -117,11 +132,12 @@ export function useGameController(): GameController {
   const voiceIdFor = (seat: number) => (seat === 0 ? PLAYER_VOICE : castRef.current[seat - 1]?.id);
   const setEmotion = (seat: number, e: Emotion) => setEmotions((prev) => ({ ...prev, [seat]: e }));
 
-  const say = useCallback((seat: number, kind: SpeechKind) => {
+  /** Shows a line in a heroine's bubble (a random one of `kind`, or `text`). */
+  const say = useCallback((seat: number, kind: SpeechKind, text?: string) => {
     const c = castRef.current[seat - 1];
-    if (!c || !settingsRef.current.speechBubbles) return;
+    if (!c || SPEECH_FREQ_FACTOR[settingsRef.current.speechFreq] <= 0) return;
     const id = nextId.current++;
-    setSpeech((prev) => ({ ...prev, [seat]: { id, text: pickLine(c, langRef.current, kind) } }));
+    setSpeech((prev) => ({ ...prev, [seat]: { id, text: text ?? pickLine(c, langRef.current, kind) } }));
     window.setTimeout(
       () =>
         setSpeech((prev) => {
@@ -134,6 +150,49 @@ export function useGameController(): GameController {
     );
   }, []);
 
+  /** Says it with probability base × her chattiness × the speech setting. */
+  const maybeSay = useCallback(
+    (seat: number, kind: SpeechKind, base: number, text?: string, delayMs = 0) => {
+      const c = castRef.current[seat - 1];
+      if (!c) return;
+      const p = base * c.chatty * SPEECH_FREQ_FACTOR[settingsRef.current.speechFreq];
+      if (Math.random() >= p) return;
+      if (delayMs) window.setTimeout(() => say(seat, kind, text), delayMs);
+      else say(seat, kind, text);
+    },
+    [say],
+  );
+
+  /** A line from `seat` about the heroine at `otherSeat`, if they know each other. */
+  const bondLine = (seat: number, otherSeat: number, which: "greet" | "lostTo"): string | null => {
+    const c = castRef.current[seat - 1];
+    const other = castRef.current[otherSeat - 1];
+    const pool = c && other ? c.bonds[other.id]?.[langRef.current]?.[which] : undefined;
+    return pool?.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+  };
+
+  /** Match start: one heroine greets (or greets a friend at the table); maybe a second one too. */
+  const greet = () => {
+    const n = castRef.current.length;
+    if (!n) return;
+    const seats = Array.from({ length: n }, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+    const first = seats[0];
+    const friend = seats.slice(1).find((s) => bondLine(first, s, "greet"));
+    const factor = SPEECH_FREQ_FACTOR[settingsRef.current.speechFreq];
+    const kindFor = (seat: number): SpeechKind =>
+      (recordsRef.current[castRef.current[seat - 1].id]?.matches ?? 0) > 0 ? "greetAgain" : "greet";
+    if (Math.random() >= Math.min(1, factor)) return;
+    if (friend && Math.random() < 0.6) {
+      window.setTimeout(() => say(first, "greet", bondLine(first, friend, "greet") ?? undefined), 900);
+      const reply = bondLine(friend, first, "greet");
+      if (reply) window.setTimeout(() => say(friend, "greet", reply), 2600);
+      return;
+    }
+    window.setTimeout(() => say(first, kindFor(first)), 900);
+    const second = seats[1];
+    if (second) maybeSay(second, kindFor(second), 0.35, undefined, 2400);
+  };
+
   const randomRival = () => 1 + Math.floor(Math.random() * Math.max(1, castRef.current.length));
 
   const handleStep = useCallback(
@@ -143,13 +202,26 @@ export function useGameController(): GameController {
       for (const ev of step.events) {
         switch (ev.t) {
           case "discard":
+            void sfx.play("discard", landingMs()); // the clack when the tile lands
             setTsumogiri((prev) => ({ ...prev, [ev.seat]: Boolean(ev.tsumogiri) }));
             setFreshMeld((s) => (s !== null && s !== ev.seat ? null : s));
             break;
-          case "round_start":
+          case "round_start": {
             setEmotions({});
             setFreshMeld(null);
+            // Going into the final hand last: she says something about it once.
+            const v = step.view;
+            const final = v.rules.gameLength === "east" ? ev.wind === "east" && ev.number === 4 : ev.wind === "south" && ev.number === 4;
+            if (final && !lastPlaceSaid.current) {
+              const scores = v.players.map((p) => p.score);
+              const last = scores.indexOf(Math.min(...scores));
+              if (last > 0) {
+                lastPlaceSaid.current = true;
+                maybeSay(last, "lastPlace", 0.9, undefined, 1200);
+              }
+            }
             break;
+          }
           case "meld":
             setFreshMeld(ev.seat);
             setCallouts((prev) => prev.map((c) => (c.seat === ev.seat && c.from === undefined ? { ...c, from: ev.from } : c)));
@@ -169,44 +241,76 @@ export function useGameController(): GameController {
             }
             const vid = voiceIdFor(ev.seat);
             if (vid) void voice.play(vid, ev.kind);
+            // The riichi stick goes down just after the discard; a meld is slapped down.
+            if (ev.kind === "riichi") void sfx.play("riichi", 250);
+            else if (ev.kind === "pon" || ev.kind === "chi" || ev.kind === "kan") void sfx.play("call");
             if (ev.seat === 0) {
-              // Your riichi worries everyone else.
-              if (ev.kind === "riichi") for (let s = 1; s <= 3; s++) setEmotion(s, "troubled");
+              // Your riichi worries everyone else; one of them says so.
+              if (ev.kind === "riichi") {
+                for (let s = 1; s <= 3; s++) setEmotion(s, "troubled");
+                maybeSay(randomRival(), "playerRiichi", 0.55, undefined, 900);
+              }
             } else if (ev.kind === "riichi") {
               setEmotion(ev.seat, "happy");
-              if (Math.random() < 0.6) say(ev.seat, "riichi");
+              maybeSay(ev.seat, "riichi", 0.7);
+            } else if (ev.kind === "pon" || ev.kind === "chi" || ev.kind === "kan") {
+              maybeSay(ev.seat, "call", 0.35, undefined, 700);
             }
             break;
           }
           case "win": {
             const humanWin = ev.winners.includes(0);
+            void sfx.play(humanWin ? "win" : "roundEnd", 600);
+            const pointsOf = (seat: number) =>
+              result?.type === "win" ? result.winners.find((w) => w.seat === seat)?.points ?? 0 : 0;
             if (humanWin) {
-              const points = result?.type === "win" ? result.winners.find((w) => w.seat === 0)?.points ?? 0 : 0;
               if (ev.tsumo) {
                 for (let s = 1; s <= 3; s++) setEmotion(s, "troubled");
-                say(randomRival(), "lossTsumo");
+                maybeSay(randomRival(), "lossTsumo", 0.8);
               } else if (ev.from !== null && ev.from > 0) {
                 setEmotion(ev.from, "troubled");
-                say(ev.from, points >= MANGAN ? "lossBig" : "lossRon");
+                maybeSay(ev.from, pointsOf(0) >= MANGAN ? "lossBig" : "lossRon", 1);
               }
             } else if (!ev.tsumo && ev.from !== null && ev.from > 0) {
               setEmotion(ev.from, "troubled");
-              say(ev.from, "lossRon");
+              // Dealt into a heroine she knows: a line about her.
+              const friendLine = ev.winners.map((w) => bondLine(ev.from as number, w, "lostTo")).find(Boolean);
+              if (friendLine) maybeSay(ev.from, "lossRon", 0.9, friendLine);
+              else maybeSay(ev.from, "lossRon", 0.6);
             }
             for (const w of ev.winners)
               if (w > 0) {
                 setEmotion(w, "happy");
-                say(w, "pleased");
+                // The loser speaks first when there is one; the winner a moment later.
+                const later = !ev.tsumo && ev.from !== null && ev.from > 0 ? 1500 : 0;
+                maybeSay(w, pointsOf(w) >= MANGAN ? "bigWin" : "pleased", 0.9, undefined, later);
               }
             break;
           }
           case "draw_game":
-            if (ev.kind === "exhaustive_draw") say(randomRival(), "wallGame");
+            void sfx.play("roundEnd", 300);
+            if (ev.kind === "exhaustive_draw") maybeSay(randomRival(), "wallGame", 0.6);
             break;
           case "game_end": {
+            const castIds = castRef.current.map((c) => c.id);
             // Progression: a 1st place opens the next, harder rivals.
-            if (ev.placement[0] === 0)
-              unlockRivals(rivalsUnlockedBy(castRef.current.map((c) => c.id), rivalsRef.current));
+            if (ev.placement[0] === 0) unlockRivals(rivalsUnlockedBy(castIds, rivalsRef.current));
+            // Your record against each of them (rival profiles).
+            const placeOf = (seat: number) => ev.placement.indexOf(seat) + 1;
+            recordMatch(castIds, castIds.map((_, i) => placeOf(i + 1)), placeOf(0));
+            // Last word on the results card: the winner, or (if you won) the
+            // strongest heroine at the table conceding.
+            if (SPEECH_FREQ_FACTOR[settingsRef.current.speechFreq] > 0) {
+              const winner = ev.placement[0];
+              const strongest = castRef.current.reduce((best, c, i) => (c.step > castRef.current[best].step ? i : best), 0) + 1;
+              const seat = winner === 0 ? strongest : winner;
+              const kind: SpeechKind = winner === 0 ? "defeated" : "matchWin";
+              const c = castRef.current[seat - 1];
+              if (c) setFinale({ seat, text: pickLine(c, langRef.current, kind) });
+              // The heroine who finished last grumbles in her bubble.
+              const last = ev.placement[3];
+              if (last > 0 && last !== seat) maybeSay(last, "matchLose", 0.7);
+            }
             break;
           }
           default:
@@ -245,7 +349,7 @@ export function useGameController(): GameController {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [commitStats, say, unlockRivals],
+    [commitStats, say, maybeSay, unlockRivals, recordMatch],
   );
 
   const run = useCallback(
@@ -286,9 +390,12 @@ export function useGameController(): GameController {
     setCast(chars);
     setEmotions({});
     setSpeech({});
+    setFinale(null);
+    lastPlaceSaid.current = false;
     setCutaway(null);
     voice.unlock();
     voice.preload(PLAYER_VOICE);
+    sfx.preload();
     chars.forEach((c) => voice.preload(c.id));
     music.play("table");
   };
@@ -300,6 +407,7 @@ export function useGameController(): GameController {
       await run(() =>
         engine.newGame({ levels: chars.map((c) => c.level), styles: chars.map((c) => c.style), rules: settingsRef.current.gameRules, ...testParams() }),
       );
+      greet();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [run, engine],
@@ -343,7 +451,7 @@ export function useGameController(): GameController {
     return true;
   }, [resume]);
 
-  const sayIdle = useCallback(() => say(randomRival(), "idle"), [say]);
+  const sayIdle = useCallback(() => maybeSay(randomRival(), "idle", 0.8), [maybeSay]);
 
   const skipCutaway = useCallback(() => {
     setCutaway(null);
@@ -359,6 +467,7 @@ export function useGameController(): GameController {
     callouts,
     freshMeld,
     speech,
+    finale,
     cutaway,
     busy,
     error,

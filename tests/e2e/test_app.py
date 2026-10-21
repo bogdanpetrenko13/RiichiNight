@@ -333,3 +333,85 @@ def test_crash_while_drawing_shows_the_recovery_dialog(make_app):
     assert page.locator("[class*=dock]").count() == 0
     # Page errors are expected here (the crash itself); nothing else.
     assert all("test crash" in e or "#520" in e for e in app.errors), app.errors
+
+
+def test_sound_effects_are_synthesised_and_played(make_app):
+    """Table sounds (src/game/sfx.ts) are rendered in the app, not loaded:
+    each one has real signal, the felt and wood clacks differ, and playing a
+    hand triggers discard / draw sounds."""
+    app = make_app().open("?seed=7", {"aiDelay": 200}).start_game()
+    page = app.page
+    stats = page.evaluate(
+        """async () => {
+          const out = {};
+          for (const name of ['discard', 'draw', 'riichi', 'call', 'win', 'roundEnd', 'tap'])
+            for (const surface of ['wood', 'felt']) {
+              const x = await window.__rnRenderSfx(name, surface);
+              const peak = Math.max(...x.map(Math.abs));
+              const rms = Math.sqrt(x.reduce((a, v) => a + v * v, 0) / x.length);
+              // spectral centroid proxy: mean absolute first difference
+              const diff = x.slice(1).reduce((a, v, i) => a + Math.abs(v - x[i]), 0) / x.length;
+              out[name + ':' + surface] = { n: x.length, peak, rms, diff };
+            }
+          return out;
+        }"""
+    )
+    for key, s in stats.items():
+        assert s["n"] > 1000 and 0.3 <= s["peak"] <= 0.81 and s["rms"] > 0.005, (key, s)
+    # The wooden clack is brighter than the felt one.
+    assert stats["discard:wood"]["diff"] > stats["discard:felt"]["diff"] * 1.3, stats
+    for _ in range(40):
+        app.step()
+    played = page.evaluate("() => window.__rnSfx")
+    assert "discard" in played and "draw" in played, played
+    assert not app.errors, app.errors
+
+
+def test_a_heroine_greets_at_match_start(make_app):
+    """Match start: one of the heroines says hello in her speech bubble
+    (src/game/speech; the "normal" setting always greets)."""
+    app = make_app().open("?seed=7", {"aiDelay": 600, "speechFreq": "normal"}).start_game()
+    bubble = app.page.locator("section[aria-label] [role=status]").first
+    bubble.wait_for(timeout=8_000)
+    text = bubble.inner_text().strip()
+    assert text and "{" not in text, text
+    app.shot("greeting")
+    assert not app.errors, app.errors
+
+
+def test_match_end_shows_a_last_word_and_counts_in_profiles(make_app):
+    """A whole east match: the results card carries the winner's (or the
+    strongest heroine's) last word, and the rival screen then shows the
+    match in her record."""
+    app = make_app().open("?seed=3", {"aiDelay": 120, "gameRules": {"gameLength": "east"}}).start_game()
+    page = app.page
+    over = page.get_by_text("Партия окончена")
+    for _ in range(3000):
+        if over.count():
+            break
+        nxt = page.locator("button:has-text('Следующая раздача'), button:has-text('Дальше')")
+        if nxt.count():
+            try:
+                nxt.first.click(timeout=2_000)
+            except Exception:
+                pass
+            continue
+        try:
+            app.step()
+        except AssertionError:
+            page.wait_for_timeout(200)
+    over.first.wait_for(timeout=10_000)
+    finale = page.locator("figure[class*=finale]")
+    finale.wait_for(timeout=5_000)
+    quote = finale.locator("p").inner_text().strip()
+    assert quote and "{" not in quote, quote
+    name = finale.locator("figcaption").inner_text().strip()
+    app.shot("game_over_finale")
+    page.get_by_role("button", name="На главный экран").click()
+    page.get_by_text("Новая игра").first.click()
+    page.get_by_role("button", name=name).first.click()
+    profile = page.locator("[data-profile]")
+    profile.wait_for(timeout=5_000)
+    assert "Партий" in profile.inner_text(), profile.inner_text()
+    app.shot("rival_profile")
+    assert not app.errors, app.errors

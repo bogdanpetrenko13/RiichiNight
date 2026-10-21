@@ -37,7 +37,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
   );
   const setRules = (patch: Partial<GameRules>) => updateSettings({ gameRules: { ...settings.gameRules, ...patch } });
 
-  const slider = (key: "voiceVolume" | "musicVolume", label: StringKey) => (
+  const slider = (key: "voiceVolume" | "sfxVolume" | "musicVolume", label: StringKey) => (
     <Row label={t(label)}>
       <input
         className={styles.slider}
@@ -166,8 +166,15 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
           {toggle("showWaitHints", "waitHints")}
           {toggle("autoDiscardRiichi", "autoDiscardRiichi")}
           {toggle("dealAnimation", "dealAnimation")}
-          {toggle("speechBubbles", "speechBubbles")}
+          <Row label={t("speechFreq")}>
+            <Segmented
+              value={settings.speechFreq}
+              options={(["often", "normal", "rare", "off"] as const).map((v) => ({ value: v, label: t(`speech_${v}` as StringKey) }))}
+              onChange={(speechFreq) => updateSettings({ speechFreq })}
+            />
+          </Row>
           {slider("voiceVolume", "voiceVolume")}
+          {slider("sfxVolume", "sfxVolume")}
           {slider("musicVolume", "musicVolume")}
         </Group>
 

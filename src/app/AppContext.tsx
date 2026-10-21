@@ -4,18 +4,23 @@ import {
   defaultSettings,
   dropRetiredData,
   loadAchievements,
+  addMatch,
+  loadRecords,
   loadRivals,
   loadSettings,
   loadStats,
   saveAchievements,
+  saveRecords,
   saveRivals,
   saveSettings,
   saveStats,
   type AchievementLog,
+  type Records,
   type Settings,
 } from "../game/storage";
 import { emptyStats, newlyEarned, type Stats } from "../game/stats";
 import { music, voice } from "../game/audio";
+import { sfx } from "../game/sfx";
 import { setMotionSpeed } from "../ui/motion";
 import type { CharacterDef } from "../game/characters";
 
@@ -34,6 +39,10 @@ interface AppState {
   rivals: string[];
   /** Adds rivals and queues a "new rival" toast for each. */
   unlockRivals: (ids: string[]) => void;
+  /** Your record against each heroine (profile on the rival screen). */
+  records: Records;
+  /** Adds a finished match: places (1-4) of the cast in seat order, and yours. */
+  recordMatch: (cast: string[], places: number[], you: number) => void;
   /** Achievement ids (or "rival:<id>") waiting to be shown as toasts. */
   toasts: string[];
   dismissToast: () => void;
@@ -53,11 +62,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<string[]>([]);
   const [rivals, setRivals] = useState<string[]>([]);
   const rivalsRef = useRef<string[]>([]);
+  const [records, setRecords] = useState<Records>({});
+  const recordsRef = useRef<Records>({});
   const achievementsRef = useRef<AchievementLog>({});
 
   useEffect(() => {
     void dropRetiredData();
-    void Promise.all([loadSettings(), loadStats(), loadAchievements(), loadRivals()]).then(([s, st, a, r]) => {
+    void Promise.all([loadSettings(), loadStats(), loadAchievements(), loadRivals(), loadRecords()]).then(([s, st, a, r, rec]) => {
+      recordsRef.current = rec;
+      setRecords(rec);
       rivalsRef.current = r;
       setRivals(r);
       setSettings(s);
@@ -70,12 +83,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     voice.volume = settings.voiceVolume;
+    sfx.volume = settings.sfxVolume;
+    sfx.surface = settings.tableStyle === "felt" ? "felt" : "wood";
     setMotionSpeed(settings.aiDelay);
     music.setVolume(settings.musicVolume);
     const root = document.documentElement;
     root.lang = settings.lang;
     root.dataset.tileset = settings.tileset;
-  }, [settings.voiceVolume, settings.musicVolume, settings.lang, settings.tileset, settings.aiDelay]);
+  }, [settings.voiceVolume, settings.sfxVolume, settings.tableStyle, settings.musicVolume, settings.lang, settings.tileset, settings.aiDelay]);
+
+  // Audio may only start after a user gesture (Android / Chrome). The first
+  // tap anywhere unlocks it; every button press then gives a soft click
+  // (tiles have their own sounds).
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      voice.unlock();
+      const el = e.target instanceof Element ? e.target.closest("button") : null;
+      if (el && !el.closest("[data-k]") && !el.disabled) void sfx.play("tap");
+    };
+    document.addEventListener("pointerdown", onDown, true);
+    return () => document.removeEventListener("pointerdown", onDown, true);
+  }, []);
 
   // Light/dark theme; "system" follows the OS setting and its changes.
   useEffect(() => {
@@ -137,6 +165,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setToasts((q) => [...q, ...fresh.map((id) => `rival:${id}`)]);
   }, []);
 
+  const recordMatch = useCallback((cast: string[], places: number[], you: number) => {
+    const next = addMatch(recordsRef.current, cast, places, you);
+    recordsRef.current = next;
+    setRecords(next);
+    void saveRecords(next);
+  }, []);
+
   const value = useMemo<AppState>(() => {
     const lang = settings.lang;
     const table = STRINGS[lang];
@@ -155,6 +190,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       achievements,
       rivals,
       unlockRivals,
+      records,
+      recordMatch,
       toasts,
       dismissToast,
       t,
@@ -162,7 +199,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       yakuName: (key, en) => (lang === "ru" ? YAKU_RU[key] ?? en : en),
       charName: (c) => c.name[lang],
     };
-  }, [ready, settings, updateSettings, stats, commitStats, resetStats, achievements, rivals, unlockRivals, toasts, dismissToast]);
+  }, [ready, settings, updateSettings, stats, commitStats, resetStats, achievements, rivals, unlockRivals, records, recordMatch, toasts, dismissToast]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -41,6 +41,8 @@ The owner writes in Russian; reply in Russian.
 | `src/ui/components/Band.module.css` | Band layout; rivers in `River.module.css`, plaques and bubbles in `BandOverlay.module.css`, dead wall / counters / table centre in `TableInfo.module.css` |
 | `src/ui/motion.ts` | FLIP and discard flight animations |
 | `src/i18n/strings.ts` | en + ru strings (both must have the same keys) |
+| `src/game/speech/<id>.ts` | Each heroine's lines per situation (`SpeechKind`, ru + en), chattiness, profile story / play style and bonds with other heroines; `tests/python/test_speech.py` checks they are complete and bonds go both ways |
+| `src/game/sfx.ts` | Table sound effects synthesised with Web Audio (no files): tile clack (wood for the quiet table, felt for the felt one), draw, riichi stick, meld, win, round end, button tap |
 | `scripts/comfy/gen_emotions.py`, `scripts/import-heroine-art.py` | Heroine art: AI portraits (Animagine XL 4.0 in ComfyUI on the owner's PC), emotion renders via img2img + IP-Adapter, colour match + face crop into `public/characters/<id>/` (see its `CREDITS.md`) |
 
 pyriichi gotchas: `Tile.__eq__` ignores the red-five flag (use identity or
@@ -160,6 +162,9 @@ emulator screen is 900×1600 (phone-like portrait).
 - Text style: weights from `--fw-*` (400 / 600 / 700, 900 only for calls);
   every call announcement (cutaway, rival and player plaques) uses the
   `--call-*` tokens (heavy capitals); small capital labels use `--caps-ls`.
+- Rivals' lines: say them through `maybeSay` (chance × her `chatty` × the
+  "Rivals talk" setting); new situations need lines for all 12 heroines.
+  Your record against each heroine is `records.v1` (`addMatch` in storage).
 - Render errors are caught by `ScreenErrorBoundary` (same recovery dialog as
   engine errors); e2e triggers one with `window.__rnCrash = "table"`.
 - Saves pickle the whole `Game` (engine, brains). A new attribute on `Game`,

@@ -6,6 +6,7 @@ import { DUR, EASE_IN, animate, setHandLocator } from "../motion";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { Tile } from "./Tile";
 import styles from "./PlayerHand.module.css";
+import { sfx } from "../../game/sfx";
 
 interface PlayerHandProps {
   /** Outline the newest meld (just called, until the next player's discard). */
@@ -52,6 +53,14 @@ export function PlayerHand({
   const tiles = player.hand ?? [];
   const drawn = player.drawn ?? null;
   const all = drawn ? [...tiles, drawn] : tiles;
+
+  // A soft slide-and-touch when a tile is drawn (not while the hand is dealt).
+  const hadDrawn = useRef(drawn !== null);
+  useEffect(() => {
+    const has = drawn !== null;
+    if (has && !hadDrawn.current && !dealing) void sfx.play("draw");
+    hadDrawn.current = has;
+  }, [drawn, dealing]);
   const canDiscard = Boolean(prompt?.actions.includes("discard"));
 
   const allowed = (code: TileCode) =>

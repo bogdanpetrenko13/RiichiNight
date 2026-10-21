@@ -332,6 +332,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
           cast={cast}
           onAgain={onAgain}
           onTitle={onTitle}
+          finale={game.finale}
         />
       )}
 

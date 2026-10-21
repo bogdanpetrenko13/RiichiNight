@@ -3,6 +3,7 @@
 // the on-screen callout still shows and the game stays silent.
 import { assetPaths } from "./characters";
 import type { CallKind } from "../engine/protocol";
+import { sfx } from "./sfx";
 
 class VoicePlayer {
   private ctx: AudioContext | null = null;
@@ -15,6 +16,7 @@ class VoicePlayer {
       const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!Ctor) return;
       this.ctx = new Ctor();
+      sfx.attach(this.ctx); // one AudioContext for voices and effects
     }
     if (this.ctx.state === "suspended") void this.ctx.resume();
   }
