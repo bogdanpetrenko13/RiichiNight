@@ -121,6 +121,11 @@ CI (`.github/workflows/android.yml`):
 4. Browser tests; the screenshots are uploaded as artifact `e2e-screenshots`.
 5. The debug APK, signed with the fixed key.
 
+Versions for players: a tag `vX.Y.Z` (pushed, or a release published on
+GitHub) makes CI publish `RiichiNight-vX.Y.Z.apk` in that release, with notes
+from `docs/releases/vX.Y.Z.md`; the tag must match `package.json`'s version
+(`docs/releases/README.md`). This session cannot create releases itself.
+
 On main, the APK is also published as the pre-release **dev-latest**:
 
 ```bash

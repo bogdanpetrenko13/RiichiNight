@@ -3,7 +3,10 @@ name: Build APK
 on:
   push:
     branches: [main, develop]
+    tags: ["v*"]
   pull_request:
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -180,6 +183,34 @@ jobs:
           name: riichi-night-apk
           path: dist-apk/*.apk
           if-no-files-found: error
+
+      # A version tag (v0.2.0) gets a fixed release with the APK: either a
+      # pushed tag (the release is created) or a release published on GitHub
+      # (the APK is attached to it). Notes come from docs/releases/<tag>.md when
+      # it exists. The tag must match package.json's version (Settings -> About).
+      - name: Publish tagged release
+        if: >-
+          (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+          (github.event_name == 'release' && startsWith(github.ref_name, 'v'))
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "v$version" ]; then
+            echo "::error::Tag $tag does not match package.json version $version"; exit 1
+          fi
+          apk="dist-apk/RiichiNight-$tag.apk"
+          cp dist-apk/RiichiNight-debug.apk "$apk"
+          notes="docs/releases/$tag.md"
+          if gh release view "$tag" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" "$apk" --clobber -R "$GITHUB_REPOSITORY"
+            [ -f "$notes" ] && gh release edit "$tag" --notes-file "$notes" -R "$GITHUB_REPOSITORY"
+          else
+            [ -f "$notes" ] || { echo "Riichi Night $version." > /tmp/notes.md; notes=/tmp/notes.md; }
+            gh release create "$tag" "$apk" -R "$GITHUB_REPOSITORY" \
+              --verify-tag --latest --title "Riichi Night $version" --notes-file "$notes"
+          fi
 
       # Rolling pre-release with the latest debug APK from main, so it can be
       # fetched with `gh release download dev-latest` (artifacts need a login
