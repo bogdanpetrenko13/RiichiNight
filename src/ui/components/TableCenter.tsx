@@ -27,20 +27,32 @@ export function TableCenter({ view }: { view: GameView }) {
           <Tile key={`b${i}`} back size="river" style={DORA_TILE} />
         ))}
       </div>
-      <div className={styles.centerCounters}>
-        <span title={t("wall", { n: view.wall ?? 0 })}>
-          <i className={styles.wall} />
-          {view.wall ?? 0}
-        </span>
-        <span title={t("honba", { n: view.round.honba })}>
-          <Tenbo kind="100" width={24} />
-          {view.round.honba}
-        </span>
-        <span title={t("riichiSticks")}>
-          <Tenbo kind="1000" width={24} />
-          {view.round.riichiSticks}
-        </span>
-      </div>
+      <TableCounters view={view} />
+    </div>
+  );
+}
+
+/**
+ * Tiles left in the wall, honba sticks, riichi sticks — the same look and
+ * order in the portrait table centre and the landscape player column
+ * (`compact`: a little smaller to fit the column).
+ */
+export function TableCounters({ view, compact = false }: { view: GameView; compact?: boolean }) {
+  const { t } = useApp();
+  return (
+    <div className={styles.counters} data-compact={compact || undefined}>
+      <span title={t("wall", { n: view.wall ?? 0 })}>
+        <i className={styles.wall} />
+        {view.wall ?? 0}
+      </span>
+      <span title={t("honba", { n: view.round.honba })}>
+        <Tenbo kind="100" width="var(--cnt-stick)" />
+        {view.round.honba}
+      </span>
+      <span title={t("riichiSticks")}>
+        <Tenbo kind="1000" width="var(--cnt-stick)" />
+        {view.round.riichiSticks}
+      </span>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
 import { Tenbo } from "./Tenbo";
+import { TableCounters } from "./TableCenter";
 import styles from "./Band.module.css";
 import overlay from "./BandOverlay.module.css";
 import riverStyles from "./River.module.css";
@@ -60,17 +61,7 @@ export function PlayerBand({
           <Tile key={`b${i}`} back size="river" style={doraBig} />
         ))}
       </div>
-      <div className={info.counters}>
-        <span title={t("riichiSticks")}>
-          <Tenbo kind="1000" width={18} />×{view.round.riichiSticks}
-        </span>
-        <span title={t("honba", { n: view.round.honba })}>
-          <Tenbo kind="100" width={18} />×{view.round.honba}
-        </span>
-        <span title={t("wall", { n: view.wall ?? 0 })}>
-          <i className={info.wall} />×{view.wall ?? 0}
-        </span>
-      </div>
+      <TableCounters view={view} compact />
     </div>
   );
   return (

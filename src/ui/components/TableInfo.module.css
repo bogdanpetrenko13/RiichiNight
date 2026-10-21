@@ -12,28 +12,47 @@
   gap: 1px;
 }
 
-/* One line in both orientations: sticks ×n, honba ×n, wall ×n. */
+/* Wall / honba / riichi counters (TableCounters): one look in both
+   orientations; the landscape column uses the compact size. */
 .counters {
+  --cnt-stick: 24px;
   display: flex;
   flex-wrap: nowrap;
+  align-items: center;
   white-space: nowrap;
-  gap: 6px;
-  font-size: 10.5px;
-  color: var(--ink-soft);
+  gap: 14px;
+  color: var(--chip-text);
+  font-size: 15px;
+  font-weight: var(--fw-bold);
   font-variant-numeric: tabular-nums;
 }
 
 .counters span {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 5px;
 }
 
 .wall {
-  width: 7px;
-  height: 10px;
+  width: 10px;
+  height: 14px;
   border-radius: 2px;
   background: linear-gradient(180deg, var(--tile-back-hi), var(--tile-back));
+}
+
+.counters[data-compact] {
+  --cnt-stick: 18px;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.counters[data-compact] span {
+  gap: 4px;
+}
+
+.counters[data-compact] .wall {
+  width: 8px;
+  height: 11px;
 }
 
 /* ---- portrait: middle of the table (TableCenter.tsx) ---------------------- */
@@ -56,25 +75,4 @@
   display: flex;
   align-items: center;
   gap: 2px;
-}
-
-
-.centerCounters {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-size: 15px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.centerCounters span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.centerCounters .wall {
-  width: 10px;
-  height: 14px;
 }
