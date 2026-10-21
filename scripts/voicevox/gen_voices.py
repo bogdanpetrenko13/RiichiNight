@@ -1,5 +1,7 @@
 """Heroine call voices with VOICEVOX (free Japanese TTS, https://voicevox.hiroshiba.jp).
 
+On Windows without Python use gen_voices.ps1 (1_samples.bat, 2_calls.bat).
+
 Runs on the PC where the VOICEVOX app is open (its engine listens on
 http://127.0.0.1:50021). Python 3 standard library only, so any Python works,
 e.g. the one that comes with ComfyUI.
