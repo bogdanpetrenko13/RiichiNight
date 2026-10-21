@@ -92,6 +92,29 @@ def test_discard_flights_are_smooth_and_start_at_the_tile(make_app):
     assert not app.errors, app.errors
 
 
+def test_your_draw_waits_for_the_rivals_discard_to_land(make_app):
+    """The left rival's discard and your draw come in one engine step; your
+    tile appears only once her tile has landed in the river (landingMs())."""
+    app = make_app(PORTRAIT)
+    app.page.add_init_script(path=PROBE)
+    app.open("?seed=41", {"aiDelay": 700}).start_game()
+    app.page.evaluate("window.__track.recording = true")
+    play(app, 8)
+    paths = app.page.evaluate("window.__track.paths")
+    rivals = sorted(p["t0"] for p in paths if p["kind"] == "rivalDiscard")
+    gaps = []
+    for p in paths:
+        if p["kind"] != "handNew":
+            continue
+        before = [t for t in rivals if t <= p["t0"]]
+        if before and p["t0"] - before[-1] < 1500:
+            gaps.append(p["t0"] - before[-1])
+    assert len(gaps) >= 4, gaps
+    # landingMs() at this speed is 260 ms; allow a frame of slack.
+    assert min(gaps) >= 240, gaps
+    assert not app.errors, app.errors
+
+
 def test_hand_does_not_shift_when_a_tile_is_drawn(make_app):
     app = make_app(PORTRAIT).open("?seed=43", {"aiDelay": 300}).start_game()
     xs_js = "() => Object.fromEntries([...document.querySelectorAll('[class*=dock] [data-k]')].map(e => [e.dataset.k, Math.round(e.getBoundingClientRect().left)]))"

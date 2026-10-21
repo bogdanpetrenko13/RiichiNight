@@ -338,13 +338,13 @@ def test_crash_while_drawing_shows_the_recovery_dialog(make_app):
 def test_sound_effects_are_synthesised_and_played(make_app):
     """Table sounds (src/game/sfx.ts): the synthesised fallbacks have real
     signal, the felt and wood clacks differ, playing a hand triggers discard /
-    draw / dice sounds, and the recordings decode."""
+    dice sounds, and the recordings decode."""
     app = make_app().open("?seed=7", {"aiDelay": 200}).start_game()
     page = app.page
     stats = page.evaluate(
         """async () => {
           const out = {};
-          for (const name of ['discard', 'draw', 'riichi', 'call', 'win', 'roundEnd', 'tap'])
+          for (const name of ['discard', 'riichi', 'call', 'win', 'roundEnd', 'tap'])
             for (const surface of ['wood', 'felt']) {
               const x = await window.__rnRenderSfx(name, surface);
               const peak = Math.max(...x.map(Math.abs));
@@ -363,7 +363,7 @@ def test_sound_effects_are_synthesised_and_played(make_app):
     for _ in range(40):
         app.step()
     played = page.evaluate("() => window.__rnSfx")
-    assert "discard" in played and "draw" in played and "dice" in played, played
+    assert "discard" in played and "dice" in played, played
     # The recorded tile / stick / dice sounds and the player's voice decode.
     decoded = page.evaluate(
         """async () => {

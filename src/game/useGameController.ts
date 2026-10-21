@@ -133,6 +133,8 @@ export function useGameController(): GameController {
   const busyRef = useRef(false);
   const nextId = useRef(1);
   const pauseRef = useRef(0);
+  /** Holds your drawn tile back until a rival's discard has landed. */
+  const drawTimer = useRef<number | undefined>(undefined);
   statsRef.current = stats;
   settingsRef.current = settings;
   langRef.current = lang;
@@ -357,7 +359,29 @@ export function useGameController(): GameController {
       }
 
       pauseRef.current = pause;
-      setView(step.view);
+      // A rival's discard and your draw arrive in one step: the river tile
+      // lands first, then your tile comes in (and only then can you act).
+      const lastEv = step.events[step.events.length - 1];
+      const me = step.view.players[0];
+      const landing = landingMs();
+      if (lastEv?.t === "discard" && lastEv.seat > 0 && me?.drawn && step.view.status === "human" && landing > 0) {
+        setView({
+          ...step.view,
+          wall: step.view.wall === null ? null : step.view.wall + 1,
+          players: [{ ...me, drawn: null }, ...step.view.players.slice(1)],
+          prompt: null,
+        });
+        await new Promise<void>((resolve) => {
+          const id = window.setTimeout(() => {
+            // Skipped if a new match / load replaced the table meanwhile.
+            if (drawTimer.current === id) setView(step.view);
+            resolve();
+          }, landing + 80);
+          drawTimer.current = id;
+        });
+      } else {
+        setView(step.view);
+      }
 
       const status = step.view.status;
       if (status === "game_over") {
@@ -418,6 +442,7 @@ export function useGameController(): GameController {
     setSpeech({});
     setFinale(null);
     lastPlaceSaid.current = false;
+    drawTimer.current = undefined;
     setCutaway(null);
     voice.unlock();
     voice.preload(PLAYER_VOICE);

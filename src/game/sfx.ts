@@ -6,7 +6,7 @@
 // AudioBuffer and played with a tiny random pitch change so repeats do not
 // sound mechanical.
 
-export type SfxName = "discard" | "draw" | "riichi" | "call" | "win" | "roundEnd" | "tap" | "dice" | "shuffle" | "sticks";
+export type SfxName = "discard" | "riichi" | "call" | "win" | "roundEnd" | "tap" | "dice" | "shuffle" | "sticks";
 /** Tile sounds follow the table style: a hard wooden clack or a soft felt mat. */
 export type SfxSurface = "wood" | "felt";
 
@@ -129,30 +129,6 @@ function recipe(name: SfxName, surface: SfxSurface): Recipe {
   switch (name) {
     case "discard":
       return { length: 0.1, peak: 0.8, draw: (c, o) => tick(c, o, 0, surface) };
-    case "draw":
-      return {
-        length: 0.3,
-        peak: 0.35,
-        draw: (c, o) => {
-          // A short slide, then a soft touch.
-          const len = Math.ceil(SR * 0.16);
-          const buf = c.createBuffer(1, len, SR);
-          const n = noise(len, 7);
-          for (let i = 0; i < len; i++) n[i] *= Math.sin((Math.PI * i) / len) ** 2;
-          buf.getChannelData(0).set(n);
-          const src = c.createBufferSource();
-          src.buffer = buf;
-          const f = c.createBiquadFilter();
-          f.type = "bandpass";
-          f.frequency.value = 3000;
-          f.Q.value = 0.7;
-          const g = c.createGain();
-          g.gain.value = 0.6;
-          src.connect(f).connect(g).connect(o);
-          src.start(0);
-          clack(c, o, 0.16, "felt", 1.15, 0.5, 11);
-        },
-      };
     case "riichi": {
       const stick = (c: Ctx, o: AudioNode, at: number, gain: number, seed: number) => {
         modes(c, o, at, [
@@ -308,7 +284,7 @@ class SfxPlayer {
 
   /** Render every sound ahead of the first use (called at the start of a match). */
   preload() {
-    const names: SfxName[] = ["discard", "draw", "riichi", "call", "win", "roundEnd", "tap", "dice", "shuffle", "sticks"];
+    const names: SfxName[] = ["discard", "riichi", "call", "win", "roundEnd", "tap", "dice", "shuffle", "sticks"];
     for (const n of names) {
       void this.buffer(n, this.surface);
       for (const f of recordings(n, this.surface)) void this.file(f);
