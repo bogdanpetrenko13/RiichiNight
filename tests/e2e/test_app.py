@@ -104,6 +104,9 @@ def test_table_centre_shows_dora_and_counters(make_app):
     app.wait_my_turn()
     centre = app.page.locator("[data-table-center]")
     assert centre.count() == 1
+    # The dead wall as five tiles: the indicator(s) face up, the rest backs.
+    dead = centre.locator("[aria-label='Дора'] > *")
+    assert dead.count() == 5, dead.count()
     assert centre.locator("[aria-label='Дора'] [aria-label]").count() >= 1
     wall = int(centre.locator("[title^='Стена']").inner_text().strip())
     assert 0 < wall <= 70, wall

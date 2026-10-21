@@ -6,19 +6,25 @@ import styles from "./TableInfo.module.css";
 
 /**
  * Portrait: the middle of the table between the rivals and the player — the
- * dora indicators on the left, tiles left in the wall, honba and riichi
- * sticks on the right. (Landscape keeps them in the player's column.)
+ * dead wall on the left as five tiles, as on a real table (dora indicators
+ * face up, the rest face down; a kan turns the next one over), tiles left in
+ * the wall, honba and riichi sticks on the right. Landscape shows the same
+ * five tiles in the player's column.
  */
 const DORA_TILE = { ["--tw" as string]: "24px" };
+/** Tiles shown of the dead wall: up to four kans add indicators to the first. */
+const DEAD_WALL = 5;
 
 export function TableCenter({ view }: { view: GameView }) {
   const { t } = useApp();
   return (
     <div className={styles.center} data-table-center>
       <div className={styles.centerDora} aria-label={t("dora")}>
-        <span className={styles.centerLabel}>{t("dora")}</span>
         {view.dora.map((d, i) => (
           <Tile key={i} code={d} size="river" style={DORA_TILE} />
+        ))}
+        {Array.from({ length: Math.max(0, DEAD_WALL - view.dora.length) }, (_, i) => (
+          <Tile key={`b${i}`} back size="river" style={DORA_TILE} />
         ))}
       </div>
       <div className={styles.centerCounters}>
