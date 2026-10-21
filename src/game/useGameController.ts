@@ -42,6 +42,14 @@ const CALLOUT_MS = 1600;
 export const CUTAWAY_MS = 2200;
 const SPEECH_MS = 3200;
 const PLAYER_VOICE = "player";
+/** Yaku the player's voice can name (public/voice/player/yaku_<clip>.mp3); value tiles map to "yakuhai". */
+const YAKU_VOICE: Record<string, string> = {
+  tanyao: "tanyao",
+  pinfu: "pinfu",
+  chiitoitsu: "chiitoitsu",
+  ittsu: "ittsu",
+  double_riichi: "double_riichi",
+};
 const MANGAN = 8000;
 
 export interface GameController {
@@ -207,6 +215,10 @@ export function useGameController(): GameController {
             setFreshMeld((s) => (s !== null && s !== ev.seat ? null : s));
             break;
           case "round_start": {
+            // The wall is built (a shuffle at the first hand of the match), then the dice roll.
+            const first = ev.wind === "east" && ev.number === 1 && ev.honba === 0;
+            if (first) void sfx.play("shuffle");
+            void sfx.play("dice", first ? 1600 : 200);
             setEmotions({});
             setFreshMeld(null);
             // Going into the final hand last: she says something about it once.
@@ -261,6 +273,20 @@ export function useGameController(): GameController {
           case "win": {
             const humanWin = ev.winners.includes(0);
             void sfx.play(humanWin ? "win" : "roundEnd", 600);
+            // The winner sweeps up the riichi sticks on the table.
+            if (result?.type === "win" && result.winners.some((w) => (w.calc?.sticks ?? 0) > 0)) void sfx.play("sticks", 1300);
+            // Your own win: you name its yaku (the ones the voice pack has).
+            if (humanWin && result?.type === "win") {
+              const mine = result.winners.find((w) => w.seat === 0);
+              const said = new Set<string>();
+              for (const y of mine?.yaku ?? []) {
+                const clip = YAKU_VOICE[y.key] ?? (/^(haku|hatsu|chun|round_wind_|seat_wind_)/.test(y.key) ? "yakuhai" : null);
+                if (clip && !said.has(clip) && said.size < 3) {
+                  void voice.play(PLAYER_VOICE, `yaku_${clip}`, CUTAWAY_MS + 200 + said.size * 1000);
+                  said.add(clip);
+                }
+              }
+            }
             const pointsOf = (seat: number) =>
               result?.type === "win" ? result.winners.find((w) => w.seat === seat)?.points ?? 0 : 0;
             if (humanWin) {

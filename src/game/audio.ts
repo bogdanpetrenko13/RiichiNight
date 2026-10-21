@@ -47,7 +47,8 @@ class VoicePlayer {
     }
   }
 
-  async play(voiceId: string, kind: CallKind) {
+  /** A call (riichi, pon, ...) or another clip in the voice's folder (e.g. "yaku_pinfu"). */
+  async play(voiceId: string, kind: CallKind | string, delayMs = 0) {
     if (!this.ctx || this.volume <= 0) return;
     const buffer = await this.load(assetPaths.voice(voiceId, kind));
     if (!buffer) return;
@@ -56,7 +57,7 @@ class VoicePlayer {
     gain.gain.value = this.volume;
     source.buffer = buffer;
     source.connect(gain).connect(this.ctx.destination);
-    source.start();
+    source.start(this.ctx.currentTime + delayMs / 1000);
   }
 }
 

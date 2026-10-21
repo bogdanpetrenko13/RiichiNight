@@ -1,10 +1,12 @@
-// Table sound effects, synthesised in the app (no audio files, no licences):
-// each sound is rendered once in an OfflineAudioContext from noise and
+// Table sound effects. Tile, riichi-stick, dice and shuffle sounds are real
+// recordings (public/audio/sfx, T-Studio "Free Sound Mahjong Sound Pack");
+// the rest, and the fallback when a file cannot be loaded, is synthesised:
+// each synthesised sound is rendered once in an OfflineAudioContext from noise and
 // decaying sine "modes" (like a struck tile or a bell), cached as an
 // AudioBuffer and played with a tiny random pitch change so repeats do not
 // sound mechanical.
 
-export type SfxName = "discard" | "draw" | "riichi" | "call" | "win" | "roundEnd" | "tap";
+export type SfxName = "discard" | "draw" | "riichi" | "call" | "win" | "roundEnd" | "tap" | "dice" | "shuffle" | "sticks";
 /** Tile sounds follow the table style: a hard wooden clack or a soft felt mat. */
 export type SfxSurface = "wood" | "felt";
 
@@ -84,6 +86,25 @@ function clack(ctx: Ctx, out: AudioNode, at: number, surface: SfxSurface, scale 
   }
 }
 
+/** A tile set down on the table: a dry, very short tick with almost no ring. */
+function tick(ctx: Ctx, out: AudioNode, at: number, surface: SfxSurface) {
+  if (surface === "wood") {
+    burst(ctx, out, at, 2500, 6000, 0.0015, 0.7, 6);
+    modes(ctx, out, at, [
+      [1900, 0.012, 0.3],
+      [3000, 0.007, 0.15],
+      [260, 0.01, 0.4],
+    ]);
+  } else {
+    burst(ctx, out, at, 900, 2800, 0.002, 0.6, 6);
+    modes(ctx, out, at, [
+      [900, 0.01, 0.25],
+      [1500, 0.006, 0.1],
+      [150, 0.014, 0.6],
+    ]);
+  }
+}
+
 function bell(ctx: Ctx, out: AudioNode, at: number, freq: number, length: number, gain: number) {
   modes(
     ctx,
@@ -107,7 +128,7 @@ interface Recipe {
 function recipe(name: SfxName, surface: SfxSurface): Recipe {
   switch (name) {
     case "discard":
-      return { length: 0.18, peak: 0.8, draw: (c, o) => clack(c, o, 0, surface) };
+      return { length: 0.1, peak: 0.8, draw: (c, o) => tick(c, o, 0, surface) };
     case "draw":
       return {
         length: 0.3,
@@ -175,6 +196,10 @@ function recipe(name: SfxName, surface: SfxSurface): Recipe {
           bell(c, o, 0.18, 293.66, 1.6, 0.7);
         },
       };
+    case "dice":
+    case "shuffle":
+    case "sticks":
+      return { length: 0.2, peak: 0.5, draw: (c, o) => clack(c, o, 0, surface, 1, 0.6, 9) };
     case "tap":
       return {
         length: 0.06,
@@ -207,6 +232,29 @@ async function render(name: SfxName, surface: SfxSurface): Promise<AudioBuffer |
   return buf;
 }
 
+const range = (n: number) => Array.from({ length: n }, (_, i) => i + 1);
+/** Recorded variants per sound (one is picked at random each time); felt gets a muffled copy of the tiles. */
+function recordings(name: SfxName, surface: SfxSurface): string[] {
+  const felt = surface === "felt" ? "-felt" : "";
+  switch (name) {
+    case "discard":
+    case "call":
+      return range(4).map((i) => `tile${i}${felt}`);
+    case "riichi":
+      return range(3).map((i) => `stick${i}`);
+    case "dice":
+      return range(3).map((i) => `dice${i}`);
+    case "sticks":
+      return range(4).map((i) => `collect${i}`);
+    case "shuffle":
+      return ["shuffle"];
+    default:
+      return [];
+  }
+}
+
+const sfxUrl = (file: string) => `${new URL("./", window.location.href).href}audio/sfx/${file}.mp3`;
+
 class SfxPlayer {
   volume = 0.7;
   surface: SfxSurface = "wood";
@@ -221,6 +269,33 @@ class SfxPlayer {
     this.ctx = ctx;
   }
 
+  private files = new Map<string, Promise<AudioBuffer | null>>();
+
+  private file(file: string): Promise<AudioBuffer | null> {
+    let entry = this.files.get(file);
+    if (!entry) {
+      const ctx = this.ctx;
+      entry = ctx
+        ? fetch(sfxUrl(file))
+            .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject()))
+            .then((b) => ctx.decodeAudioData(b))
+            .catch(() => null)
+        : Promise.resolve(null);
+      if (ctx) this.files.set(file, entry);
+    }
+    return entry;
+  }
+
+  /** A recording of this sound if there is one (random variant), else the synthesised one. */
+  private async pick(name: SfxName): Promise<AudioBuffer | null> {
+    const files = recordings(name, this.surface);
+    if (files.length) {
+      const rec = await this.file(files[Math.floor(Math.random() * files.length)]);
+      if (rec) return rec;
+    }
+    return this.buffer(name, this.surface);
+  }
+
   private buffer(name: SfxName, surface: SfxSurface) {
     const key = `${name}:${surface}`;
     let entry = this.cache.get(key);
@@ -233,7 +308,11 @@ class SfxPlayer {
 
   /** Render every sound ahead of the first use (called at the start of a match). */
   preload() {
-    for (const n of ["discard", "draw", "riichi", "call", "win", "roundEnd", "tap"] as SfxName[]) void this.buffer(n, this.surface);
+    const names: SfxName[] = ["discard", "draw", "riichi", "call", "win", "roundEnd", "tap", "dice", "shuffle", "sticks"];
+    for (const n of names) {
+      void this.buffer(n, this.surface);
+      for (const f of recordings(n, this.surface)) void this.file(f);
+    }
   }
 
   async play(name: SfxName, delayMs = 0) {
@@ -243,16 +322,21 @@ class SfxPlayer {
     const now = performance.now();
     if (now - (this.last.get(name) ?? -1e9) < 40) return;
     this.last.set(name, now);
-    const buf = await this.buffer(name, this.surface);
-    if (!buf || !this.ctx) return;
-    const src = this.ctx.createBufferSource();
-    src.buffer = buf;
-    // ±4 % pitch: repeated tiles never sound identical.
-    src.playbackRate.value = name === "win" || name === "roundEnd" ? 1 : 0.96 + Math.random() * 0.08;
-    const gain = this.ctx.createGain();
-    gain.gain.value = this.volume;
-    src.connect(gain).connect(this.ctx.destination);
-    src.start(this.ctx.currentTime + delayMs / 1000);
+    // A meld is two tiles slapped down one after the other.
+    const hits = name === "call" ? [0, 0.07] : [0];
+    for (const [i, at] of hits.entries()) {
+      const buf = await this.pick(name);
+      if (!buf || !this.ctx) return;
+      const src = this.ctx.createBufferSource();
+      src.buffer = buf;
+      // ±4 % pitch on the short table sounds: repeats never sound identical.
+      const steady = name === "win" || name === "roundEnd" || name === "shuffle";
+      src.playbackRate.value = steady ? 1 : 0.96 + Math.random() * 0.08;
+      const gain = this.ctx.createGain();
+      gain.gain.value = this.volume * (i ? 0.75 : 1);
+      src.connect(gain).connect(this.ctx.destination);
+      src.start(this.ctx.currentTime + delayMs / 1000 + at);
+    }
   }
 }
 

@@ -28,3 +28,17 @@ def test_voice_credits_cover_every_heroine():
     strings = (ROOT / "src/i18n/strings.ts").read_text(encoding="utf-8")
     for line in re.findall(r"\| (VOICEVOX:[^|]+?) \|", credits):
         assert strings.count(line) == 2, line  # en + ru
+
+
+def test_player_voice_and_recorded_table_sounds():
+    for name in KINDS + ("yaku_tanyao", "yaku_pinfu", "yaku_chiitoitsu", "yaku_ittsu", "yaku_double_riichi", "yaku_yakuhai"):
+        assert (ROOT / "public/voice/player" / f"{name}.mp3").is_file(), name
+    sfx_src = (ROOT / "src/game/sfx.ts").read_text(encoding="utf-8")
+    files = [f"tile{i}{s}" for i in range(1, 5) for s in ("", "-felt")]
+    files += [f"stick{i}" for i in range(1, 4)] + [f"dice{i}" for i in range(1, 4)]
+    files += [f"collect{i}" for i in range(1, 5)] + ["shuffle"]
+    for f in files:
+        assert (ROOT / "public/audio/sfx" / f"{f}.mp3").is_file(), f
+    assert "audio/sfx/" in sfx_src
+    for clip in ("tanyao", "pinfu", "chiitoitsu", "ittsu", "double_riichi"):
+        assert f'{clip}: "{clip}"' in (ROOT / "src/game/useGameController.ts").read_text(encoding="utf-8")

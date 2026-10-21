@@ -281,7 +281,7 @@ const en = {
   sourceCode: "Source code and licenses",
   credits: "Credits",
   creditsMusic:
-    "Music: \"Joey's Formal Waltz – Unscented\" (menus) and \"Vibing Over Venus\" (table) by Kevin MacLeod (incompetech.com), licensed under Creative Commons: By Attribution 4.0 (creativecommons.org/licenses/by/4.0). Sound effects are synthesised in the app.",
+    "Music: \"Joey's Formal Waltz – Unscented\" (menus) and \"Vibing Over Venus\" (table) by Kevin MacLeod (incompetech.com), licensed under Creative Commons: By Attribution 4.0 (creativecommons.org/licenses/by/4.0). Sounds of tiles, riichi sticks and dice and the player's voice: みんなの創作支援サイトＴスタ (T-Studio, “Free Sound Mahjong Sound Pack”, t-studio-tst.itch.io); the other effects are synthesised in the app.",
   creditsVoiceTitle: "Voices",
   creditsVoice:
     "Heroine calls voiced with VOICEVOX (voicevox.hiroshiba.jp): VOICEVOX:雨晴はう, VOICEVOX:満別花丸, VOICEVOX:春日部つむぎ, VOICEVOX:WhiteCUL, VOICEVOX:もち子(cv 明日葉よもぎ), VOICEVOX:後鬼, VOICEVOX:猫使アル, VOICEVOX:九州そら, VOICEVOX:四国めたん, VOICEVOX:冥鳴ひまり, VOICEVOX:No.7, VOICEVOX:波音リツ.",
@@ -571,7 +571,7 @@ const ru: Record<StringKey, string> = {
   sourceCode: "Исходный код и лицензии",
   credits: "Авторы",
   creditsMusic:
-    "Музыка: «Joey's Formal Waltz – Unscented» (меню) и «Vibing Over Venus» (стол), Kevin MacLeod (incompetech.com), лицензия Creative Commons «Атрибуция» 4.0 (creativecommons.org/licenses/by/4.0). Звуковые эффекты синтезируются в самой игре.",
+    "Музыка: «Joey's Formal Waltz – Unscented» (меню) и «Vibing Over Venus» (стол), Kevin MacLeod (incompetech.com), лицензия Creative Commons «Атрибуция» 4.0 (creativecommons.org/licenses/by/4.0). Звуки костей, палочек риичи и кубиков и голос игрока: みんなの創作支援サイトＴスタ (T-Studio, «Free Sound Mahjong Sound Pack», t-studio-tst.itch.io); остальные эффекты синтезируются в самой игре.",
   creditsVoiceTitle: "Голоса",
   creditsVoice:
     "Возгласы героинь озвучены в VOICEVOX (voicevox.hiroshiba.jp): VOICEVOX:雨晴はう, VOICEVOX:満別花丸, VOICEVOX:春日部つむぎ, VOICEVOX:WhiteCUL, VOICEVOX:もち子(cv 明日葉よもぎ), VOICEVOX:後鬼, VOICEVOX:猫使アル, VOICEVOX:九州そら, VOICEVOX:四国めたん, VOICEVOX:冥鳴ひまり, VOICEVOX:No.7, VOICEVOX:波音リツ.",

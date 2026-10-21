@@ -336,9 +336,9 @@ def test_crash_while_drawing_shows_the_recovery_dialog(make_app):
 
 
 def test_sound_effects_are_synthesised_and_played(make_app):
-    """Table sounds (src/game/sfx.ts) are rendered in the app, not loaded:
-    each one has real signal, the felt and wood clacks differ, and playing a
-    hand triggers discard / draw sounds."""
+    """Table sounds (src/game/sfx.ts): the synthesised fallbacks have real
+    signal, the felt and wood clacks differ, playing a hand triggers discard /
+    draw / dice sounds, and the recordings decode."""
     app = make_app().open("?seed=7", {"aiDelay": 200}).start_game()
     page = app.page
     stats = page.evaluate(
@@ -363,7 +363,19 @@ def test_sound_effects_are_synthesised_and_played(make_app):
     for _ in range(40):
         app.step()
     played = page.evaluate("() => window.__rnSfx")
-    assert "discard" in played and "draw" in played, played
+    assert "discard" in played and "draw" in played and "dice" in played, played
+    # The recorded tile / stick / dice sounds and the player's voice decode.
+    decoded = page.evaluate(
+        """async () => {
+          const ctx = new OfflineAudioContext(1, 44100, 44100);
+          const out = {};
+          for (const f of ['audio/sfx/tile1.mp3', 'audio/sfx/tile3-felt.mp3', 'audio/sfx/stick1.mp3',
+                           'audio/sfx/dice2.mp3', 'audio/sfx/shuffle.mp3', 'voice/player/tsumo.mp3'])
+            out[f] = (await ctx.decodeAudioData(await (await fetch(f)).arrayBuffer())).duration;
+          return out;
+        }"""
+    )
+    assert all(0.1 < d < 3.5 for d in decoded.values()), decoded
     assert not app.errors, app.errors
 
 
