@@ -15,8 +15,9 @@ a few moves instead of waiting for it to happen by chance:
   rivalpon the right-hand rival holds a pair of red dragons and the
            player is dealt the third: cutting it lets her Pon
            (call announcement, outlined new meld)
-  mypon    the player holds a pair of red dragons, the right-hand rival a
-           lone one she cuts early: the player's own Pon announcement
+  mypon    the player holds a pair of red dragons; the right-hand rival is
+           tenpai on a two-sided wait and draws the third first, so she
+           throws it at once: the player's own Pon announcement
   myriichi the player alone starts tenpai (same hand as "riichi"): the
            player's riichi flow, the sideways tile in the player's river
 
@@ -32,6 +33,7 @@ HUMAN = 0
 
 # hand: the player's 13 tiles (a 14th junk tile is added when the player
 # deals; omitted = a shuffled hand); draws: the player's next draws in order;
+# rival_draws: {seat: next draws} for rivals;
 # rivals: 13-tile hands of seats 1, 2, 3 (the dealer gets a 14th from the
 # wall); dora: first dora indicator.
 SCENARIOS: Dict[str, dict] = {
@@ -65,7 +67,8 @@ SCENARIOS: Dict[str, dict] = {
     "mypon": {
         "hand": "77z 123m 58m 46p 79s 33s",
         "junk": "9p",
-        "rivals": ["7z 123m 456m 789p 234s"],
+        "rivals": ["123m 456m 789p 23s 55p"],
+        "rival_draws": {"1": ["7z"]},
         "dora": "1m",
     },
     "myriichi": {
@@ -151,7 +154,11 @@ def rig(engine, name: str) -> None:
         raise ValueError(f"scenario {name}: the hand needs 13 tiles, has {len(mine)}")
     if spec.get("hand") and dealer == HUMAN:
         mine.append(_take_any(ts, pool, spec["junk"]))
-    draws = [_take_any(ts, pool, c) for c in spec.get("draws", [])]
+    # Next draws per seat: the player's ("draws") and rivals' ("rival_draws").
+    draws_by_seat = {HUMAN: [_take_any(ts, pool, c) for c in spec.get("draws", [])]}
+    for seat, codes in spec.get("rival_draws", {}).items():
+        draws_by_seat[int(seat)] = [_take_any(ts, pool, c) for c in codes]
+    draws = [t for tiles in draws_by_seat.values() for t in tiles]
 
     hands: List[list] = [[] for _ in range(n)]
     hands[HUMAN] = mine
@@ -163,10 +170,11 @@ def rig(engine, name: str) -> None:
             hands[seat].append(pool.pop(0))
 
     # The k-th draw of `seat` comes at position offset + n * k of the live wall.
-    offset = (HUMAN - dealer - 1) % n
     wall: List[Optional[object]] = [None] * len(pool + draws)
-    for k, tile in enumerate(draws):
-        wall[offset + n * k] = tile
+    for seat, tiles in draws_by_seat.items():
+        offset = (seat - dealer - 1) % n
+        for k, tile in enumerate(tiles):
+            wall[offset + n * k] = tile
     rest = iter(pool)
     wall = [t if t is not None else next(rest) for t in wall]
     assert sum(len(h) for h in hands) + len(wall) == total

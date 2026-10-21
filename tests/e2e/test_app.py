@@ -298,8 +298,16 @@ def test_crash_while_drawing_shows_the_recovery_dialog(make_app):
 
     def crash_now():
         page.evaluate(crash)
-        page.get_by_role("button", name="Меню").first.click()  # re-renders the table
-        dialog.wait_for(timeout=20_000)
+        # The next re-render throws: rivals' moves cause one; if the table is
+        # idle (the player's turn), opening the menu does.
+        try:
+            dialog.wait_for(timeout=2_000)
+        except Exception:
+            try:
+                page.get_by_role("button", name="Меню").first.click(timeout=2_000)
+            except Exception:
+                pass  # the table was replaced by the dialog meanwhile
+            dialog.wait_for(timeout=20_000)
         assert "Что-то пошло не так" in dialog.inner_text()
         page.evaluate("() => { window.__rnCrash = undefined; }")  # the fault is gone
 
