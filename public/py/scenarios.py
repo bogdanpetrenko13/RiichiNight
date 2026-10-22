@@ -18,6 +18,8 @@ a few moves instead of waiting for it to happen by chance:
   mypon    the player holds a pair of red dragons; the right-hand rival is
            tenpai on a two-sided wait and draws the third first, so she
            throws it at once: the player's own Pon announcement
+  mychi    the left rival is tenpai on 69s and throws the 4s she draws; the player
+           holds 2356s, so Chi offers three choices (the chooser)
   myriichi the player alone starts tenpai (same hand as "riichi"): the
            player's riichi flow, the sideways tile in the player's river
 
@@ -69,6 +71,14 @@ SCENARIOS: Dict[str, dict] = {
         "junk": "9p",
         "rivals": ["123m 456m 789p 23s 55p"],
         "rival_draws": {"1": ["7z"]},
+        "dora": "1m",
+    },
+    "mychi": {
+        # 2356s: the left rival's 4s can be called three ways (23, 35, 56).
+        "hand": "2356s 19m 19p 77z 22z 4z",
+        "junk": "9p",
+        "rivals": ["", "", "123m 456m 789p 11z 78s"],
+        "rival_draws": {"3": ["4s"]},
         "dora": "1m",
     },
     "myriichi": {
@@ -145,7 +155,12 @@ def rig(engine, name: str) -> None:
             ts._wall[slot] = indicator
         pool.append(old)
 
-    rivals = {seat: [_take_any(ts, pool, c) for c in parse(text)] for seat, text in enumerate(spec.get("rivals", []), start=1)}
+    # An empty string leaves that rival's hand shuffled.
+    rivals = {
+        seat: [_take_any(ts, pool, c) for c in parse(text)]
+        for seat, text in enumerate(spec.get("rivals", []), start=1)
+        if text
+    }
     for seat, tiles in rivals.items():
         if len(tiles) != 13:
             raise ValueError(f"scenario {name}: seat {seat} needs 13 tiles, has {len(tiles)}")

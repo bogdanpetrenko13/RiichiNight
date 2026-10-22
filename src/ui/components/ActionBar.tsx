@@ -1,6 +1,8 @@
 import type { ActionName, Prompt, TileCode } from "../../engine/protocol";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
+import { parseTile } from "../tiles";
+import { Tile } from "./Tile";
 import styles from "./ActionBar.module.css";
 
 interface ActionBarProps {
@@ -54,11 +56,25 @@ export function ActionBar({
     );
   }
 
-  // Several Chi options: the tiles are picked in the hand (highlighted there).
+  // Several Chi options: each one is a button showing its three tiles (the
+  // claimed tile ringed like in the river); tapping the hand's highlighted tiles works too.
   if (chiPicker && prompt.chiOptions) {
+    const claimed = prompt.claim?.tile ?? null;
     return (
-      <div className={styles.bar} data-row={row || undefined}>
-        <span className={styles.label}>{t("chooseChiTiles")}</span>
+      <div className={styles.bar} data-chi data-row={row || undefined}>
+        <span className={styles.label}>{t("chooseChi")}</span>
+        <div className={styles.chiOptions}>
+          {prompt.chiOptions.map((option, k) => {
+            const tiles = (claimed ? [...option, claimed] : option).slice().sort((a, b) => parseTile(a).rank - parseTile(b).rank);
+            return (
+              <button key={k} className={styles.chiOption} onClick={() => onAction("chi", k)} disabled={busy} data-chi-option={k}>
+                {tiles.map((c, i) => (
+                  <Tile key={i} code={c} size="river" highlight={c === claimed} />
+                ))}
+              </button>
+            );
+          })}
+        </div>
         <button className={styles.action} data-kind="pass" onClick={() => onChiPicker(false)}>
           {t("cancel")}
         </button>

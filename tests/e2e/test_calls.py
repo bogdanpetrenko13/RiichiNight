@@ -128,3 +128,42 @@ def test_player_pon_uses_the_same_plaque(make_app):
     assert look == ["none", "none"], look
     app.shot("player_pon")
     assert not app.errors, app.errors
+
+
+def test_chi_with_several_choices_shows_each_option(make_app):
+    """Rigged deal (scenario "mychi"): the left rival throws 4s while the
+    player holds 2356s. Chi opens a chooser with the three sequences as
+    tile groups (the claimed 4s ringed); tapping one calls that chi."""
+    app = make_app(PORTRAIT).open("?scenario=mychi", {"aiDelay": 300}).start_game()
+    page = app.page
+    chi = page.get_by_role("button", name="Чи", exact=True)
+    skip = page.get_by_role("button", name="Пропуск", exact=True)
+    for _ in range(300):
+        if chi.count():
+            break
+        if skip.count():
+            skip.first.click()
+            page.wait_for_timeout(200)
+        elif app.my_turn():
+            try:
+                app.discard()
+            except AssertionError:  # the hand re-rendered; try again
+                pass
+        else:
+            page.wait_for_timeout(150)
+    assert chi.count(), "no Chi was offered"
+    # The discard you can call is ringed in the river.
+    assert page.locator("section[aria-label] [class*=river] [class*=highlight]").count() == 1
+    chi.first.click()
+    options = page.locator("[data-chi-option]")
+    options.first.wait_for(timeout=5_000)
+    assert options.count() == 3
+    groups = [o.locator("img").evaluate_all("els => els.map(e => e.getAttribute('src').split('/').pop())") for o in options.all()]
+    assert all(len(g) == 3 for g in groups), groups
+    assert all(o.locator("[class*=highlight]").count() == 1 for o in options.all())
+    app.shot("chi_chooser")
+    options.nth(1).click()  # 3s-4s-5s
+    meld = page.locator("[class*=dock] [class*=meld]").first
+    meld.wait_for(timeout=10_000)
+    assert page.locator("[data-chi-option]").count() == 0
+    assert not app.errors, app.errors

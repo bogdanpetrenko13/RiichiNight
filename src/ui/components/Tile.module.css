@@ -130,21 +130,55 @@
   pointer-events: none;
 }
 
+/* The discard you can call: a larger pointer that bobs above it. */
 .marked::after {
-  border-width: 5px 5px 0;
-  border-top-width: 7px;
+  bottom: calc(100% + 5px);
+  border-width: 7px 7px 0;
+  border-top-width: 10px;
+  border-top-color: var(--pointer);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
+  animation: pointerBob 0.9s ease-in-out infinite alternate;
 }
 
-/* Claimable discard in a river: ring in the accent colour. */
-.highlight {
+@keyframes pointerBob {
+  from {
+    transform: translate(-50%, -3px);
+  }
+  to {
+    transform: translate(-50%, 1px);
+  }
+}
+
+/* Claimable discard in a river: a thick ring in the pointer colour with a
+   soft pulse, drawn on a pseudo-element (the river turns off the tile's own
+   animation, its transform belongs to the discard flight, and a sideways
+   riichi tile has its own shadow). */
+.highlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   box-shadow:
-    0 0 0 2px var(--accent),
-    0 calc(var(--tw) * 0.08) 0 var(--bone-300),
-    0 0 calc(var(--tw) * 0.4) calc(var(--tw) * -0.1) var(--accent);
-  box-shadow:
-    0 0 0 2px var(--accent),
-    0 calc(var(--tw) * 0.08) 0 var(--bone-300),
-    0 0 calc(var(--tw) * 0.4) color-mix(in srgb, var(--accent) 60%, transparent);
+    0 0 0 3px var(--pointer),
+    0 0 12px 3px var(--pointer);
+  pointer-events: none;
+  animation: claimPulse 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes claimPulse {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marked::after,
+  .highlight::before {
+    animation: none;
+  }
 }
 
 /* Tiles you can use for the pending choice: raised + primary ring (A + C). */

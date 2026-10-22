@@ -221,6 +221,11 @@
   --btn-call-text: var(--on-info);
   --btn-win-bg: var(--accent);
   --btn-win-text: var(--on-accent);
+  /* Button depth: a plain shadow here; the felt table's buttons have a
+     tile-like thick bottom edge (and room for it in the padding). */
+  --btn-shadow: var(--shadow-sm);
+  --btn-pass-shadow: none;
+  --btn-edge: 0px;
 
   /* Motion (see src/ui/motion.ts). */
   --dur-fast: 120ms;
@@ -252,18 +257,24 @@
   --portrait-radius: 50%;
   --active-ring: #f2c14e;
   --pointer: #f2c14e;
-  --btn-radius: 999px;
+  /* Buttons "like tiles": ivory calls, the main action in the felt's light
+     tone (--felt-accent, per felt colour below), a thick bottom edge. */
+  --felt-accent: #6cc59a;
+  --btn-radius: 10px;
   --btn-case: uppercase;
   --btn-ls: 0.04em;
-  --btn-bg: rgba(0, 0, 0, 0.3);
+  --btn-bg: rgba(0, 0, 0, 0.25);
   --btn-text: #f3efe2;
-  --btn-border: rgba(255, 255, 255, 0.25);
-  --btn-primary-bg: #f2c14e;
-  --btn-primary-text: #2b1e00;
-  --btn-call-bg: #f3efe2;
+  --btn-border: transparent;
+  --btn-primary-bg: var(--felt-accent);
+  --btn-primary-text: #12140f;
+  --btn-call-bg: #f5f0e3;
   --btn-call-text: #1a3d2f;
   --btn-win-bg: #d2452f;
   --btn-win-text: #ffffff;
+  --btn-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.22), 0 3px 8px rgba(0, 0, 0, 0.35);
+  --btn-pass-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  --btn-edge: 3px;
   color: var(--ink);
 }
 
@@ -275,7 +286,8 @@
 }
 
 /* Felt colours (Settings → Felt colour), set as data-felt next to data-style.
-   Emerald is the base felt above. --btn-call-text is the felt's deep tone. */
+   Emerald is the base felt above. --btn-call-text is the felt's deep tone,
+   --felt-accent its light tone (the main button). */
 [data-style="felt"][data-felt="sapphire"] {
   --tbl-bg: radial-gradient(120% 80% at 50% 40%, #2a4f7a 0%, #183354 55%, #0b1b30 100%);
 }
@@ -292,11 +304,11 @@
   --tbl-bg: repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.06) 0 3px, rgba(255, 255, 255, 0.03) 3px 9px, rgba(0, 0, 0, 0.04) 9px 15px),
     radial-gradient(120% 80% at 50% 40%, #7a5434 0%, #55391f 55%, #2c1d10 100%);
 }
-[data-style="felt"][data-felt="sapphire"] [data-zone] { --btn-call-text: #183354; }
-[data-style="felt"][data-felt="burgundy"] [data-zone] { --btn-call-text: #4a1a24; }
-[data-style="felt"][data-felt="graphite"] [data-zone] { --btn-call-text: #25282c; }
-[data-style="felt"][data-felt="amethyst"] [data-zone] { --btn-call-text: #2c1f48; }
-[data-style="felt"][data-felt="wood"] [data-zone] { --btn-call-text: #55391f; }
+[data-style="felt"][data-felt="sapphire"] [data-zone] { --btn-call-text: #183354; --felt-accent: #79a8e6; }
+[data-style="felt"][data-felt="burgundy"] [data-zone] { --btn-call-text: #4a1a24; --felt-accent: #e38394; }
+[data-style="felt"][data-felt="graphite"] [data-zone] { --btn-call-text: #25282c; --felt-accent: #9ec3e6; }
+[data-style="felt"][data-felt="amethyst"] [data-zone] { --btn-call-text: #2c1f48; --felt-accent: #b49cf0; }
+[data-style="felt"][data-felt="wood"] [data-zone] { --btn-call-text: #55391f; --felt-accent: #e0aa6b; }
 
 /* Turn frame colour (Settings → Turn highlight), data-ring next to data-style;
    without it the style's own colour is used.
