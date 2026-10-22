@@ -102,13 +102,6 @@
   border-radius: var(--portrait-radius) !important;
 }
 
-/* Her newest meld, from the call until the next player's discard. */
-.meld[data-fresh] {
-  border-radius: 4px;
-  outline: 2px solid var(--c);
-  outline-offset: 2px;
-  box-shadow: 0 0 12px var(--c);
-}
 
 /* ---- lower: closed hand and calls / dead wall and counters -------------- */
 .lower {

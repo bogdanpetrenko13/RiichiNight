@@ -41,8 +41,8 @@ export function PlayerBand({
   const me = view.players[0];
   // Dora indicators face up, the rest of the dead-wall row as backs (5 total).
   const hidden = Math.max(0, 5 - view.dora.length);
-  // Landscape: the dora indicators are shown large, near the rivers' size.
-  const doraBig = { ["--tw" as string]: "calc(var(--band-river, 24px) * 0.85)" };
+  // Landscape: the dead wall a little smaller than the river tiles (it is information, not play).
+  const doraBig = { ["--tw" as string]: "calc(var(--band-river, 24px) * 0.62)" };
   // The newest discard flies in from the hand.
   const riverRef = useRef<HTMLDivElement>(null);
   const count = me.discards.length;

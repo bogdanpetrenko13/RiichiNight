@@ -67,8 +67,8 @@ def test_rival_pon_is_announced_in_her_band(make_app, viewport):
         assert box and band and abs(box["x"] - band["x"]) <= 3 and abs(box["width"] - band["width"]) <= 6, (box, band)
         app.shot("rival_pon_" + ("portrait" if viewport == PORTRAIT else "landscape"))
     page.wait_for_function("() => window.__fresh === true", timeout=5_000)
-    # The plaque goes away by itself; the outline stays until the next
-    # player discards.
+    # The plaque goes away by itself; the meld stays marked (data-fresh, no
+    # outline) until the next player discards.
     page.locator(ANNOUNCE).wait_for(state="detached", timeout=5_000)
     for _ in range(100):
         if not page.locator(FRESH).count():
@@ -121,6 +121,10 @@ def test_player_pon_uses_the_same_plaque(make_app):
     mine = [a for a in page.evaluate("() => window.__ann") if a["me"]][0]
     assert "ПОН" in mine["text"].upper() and "у " in mine["text"], mine
     assert mine["font"] == "900 uppercase", mine
-    assert page.locator("[class*=dock] [class*=meld][data-fresh]").count() == 1
+    fresh = page.locator("[class*=dock] [class*=meld][data-fresh]")
+    assert fresh.count() == 1
+    # The new meld is marked for logic only: no outline or glow around it.
+    look = fresh.evaluate("e => { const s = getComputedStyle(e); return [s.outlineStyle, s.boxShadow]; }")
+    assert look == ["none", "none"], look
     app.shot("player_pon")
     assert not app.errors, app.errors

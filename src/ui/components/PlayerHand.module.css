@@ -124,11 +124,3 @@
   visibility: hidden;
 }
 
-/* The player's newest meld, from the call until the next player's discard
-   (same outline as a rival's, in the accent colour). */
-.meld[data-fresh] {
-  border-radius: 4px;
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  box-shadow: 0 0 12px var(--accent);
-}

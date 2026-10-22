@@ -11,7 +11,7 @@ import styles from "./TableInfo.module.css";
  * the wall, honba and riichi sticks on the right. Landscape shows the same
  * five tiles in the player's column.
  */
-const DORA_TILE = { ["--tw" as string]: "24px" };
+const DORA_TILE = { ["--tw" as string]: "18px" };
 /** Tiles shown of the dead wall: up to four kans add indicators to the first. */
 const DEAD_WALL = 5;
 
