@@ -17,6 +17,8 @@
   --caps-ls: 0.08em;
   /* Every call announcement: the cutaway, rival plaques, the player's own. */
   --call-weight: var(--fw-heavy);
+  /* Bundled Inter Black (src/main.tsx), then the system font. */
+  --font-call: "Riichi Call", var(--font-display);
   --call-ls: 0.06em;
   --call-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
 }

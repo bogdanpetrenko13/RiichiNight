@@ -167,7 +167,8 @@ emulator screen is 900×1600 (phone-like portrait).
   `--z-*` scale in `tokens.css`, never a raw `z-index` number.
 - Text style: weights from `--fw-*` (400 / 600 / 700, 900 only for calls);
   every call announcement (cutaway, rival and player plaques) uses the
-  `--call-*` tokens (heavy capitals); small capital labels use `--caps-ls`.
+  `--call-*` tokens and `--font-call` (bundled Inter Black, `public/fonts`,
+  loaded in `src/main.tsx`; heavy capitals); small capital labels use `--caps-ls`.
 - Rivals' lines: say them through `maybeSay` (chance × her `chatty` × the
   "Rivals talk" setting); new situations need lines for all 12 heroines.
   Your record against each heroine is `records.v1` (`addMatch` in storage).

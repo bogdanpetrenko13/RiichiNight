@@ -26,7 +26,7 @@
   border-radius: 14px;
   background: var(--c);
   color: #fff;
-  font-family: var(--font-display);
+  font-family: var(--font-call);
   font-size: clamp(28px, 7vmin, 46px);
   font-weight: var(--call-weight);
   line-height: 1;

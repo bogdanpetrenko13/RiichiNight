@@ -121,6 +121,10 @@ def test_player_pon_uses_the_same_plaque(make_app):
     mine = [a for a in page.evaluate("() => window.__ann") if a["me"]][0]
     assert "ПОН" in mine["text"].upper() and "у " in mine["text"], mine
     assert mine["font"] == "900 uppercase", mine
+    # The bundled Inter Black is loaded and used for the lettering.
+    assert page.evaluate("() => [...document.fonts].some((f) => f.family.includes('Riichi Call') && f.status === 'loaded')")
+    family = page.evaluate("() => getComputedStyle(document.querySelector('[class*=announce] b')).fontFamily")
+    assert family.startswith('"Riichi Call"'), family
     fresh = page.locator("[class*=dock] [class*=meld][data-fresh]")
     assert fresh.count() == 1
     # The new meld is marked for logic only: no outline or glow around it.

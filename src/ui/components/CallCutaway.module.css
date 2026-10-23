@@ -53,7 +53,7 @@
 
 /* Same lettering as every call on the table (tokens.css --call-*). */
 .word {
-  font-family: var(--font-display);
+  font-family: var(--font-call);
   font-size: clamp(40px, 11vw, 78px);
   font-weight: var(--call-weight);
   letter-spacing: var(--call-ls);
