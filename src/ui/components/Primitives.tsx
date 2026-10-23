@@ -71,7 +71,7 @@ export function Segmented<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className={styles.segmented} role="radiogroup">
+    <div className={styles.segmented} role="radiogroup" data-count={options.length}>
       {options.map((o) => (
         <button
           key={o.value}

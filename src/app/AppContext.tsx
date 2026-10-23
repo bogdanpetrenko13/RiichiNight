@@ -90,7 +90,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement;
     root.lang = settings.lang;
     root.dataset.tileset = settings.tileset;
-  }, [settings.voiceVolume, settings.sfxVolume, settings.tableStyle, settings.musicVolume, settings.lang, settings.tileset, settings.aiDelay]);
+    if (settings.tileBack === "auto") delete root.dataset.tileBack;
+    else root.dataset.tileBack = settings.tileBack;
+  }, [settings.voiceVolume, settings.sfxVolume, settings.tableStyle, settings.musicVolume, settings.lang, settings.tileset, settings.tileBack, settings.aiDelay]);
 
   // Audio may only start after a user gesture (Android / Chrome). The first
   // tap anywhere unlocks it; every button press then gives a soft click

@@ -34,10 +34,14 @@
 }
 
 /* ---- table look: colour chips and preview ------------------------------ */
+/* One even row: every chip in an equal column, whatever the count. */
 .swatches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(var(--n, 6), minmax(0, 1fr));
+  justify-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 4px 0;
 }
 
 .swatch {
@@ -62,7 +66,7 @@
 .ringControls {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   width: 100%;
 }
 
@@ -131,4 +135,12 @@
 .lookWind[data-dealer] {
   background: var(--dealer-bg, var(--primary));
   color: var(--dealer-text, var(--on-primary));
+}
+
+/* Tile-back preview: a short row of backs in the chosen colour. */
+.backs {
+  --river-tile: 26px;
+  display: flex;
+  gap: 2px;
+  margin-top: 8px;
 }

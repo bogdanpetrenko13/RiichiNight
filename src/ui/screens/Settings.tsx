@@ -11,12 +11,15 @@ import {
   TABLE_STYLES,
   THEME_MODES,
   TILESETS,
+  TILE_BACKS,
+  TILE_BACK_SWATCH,
   TURN_RINGS,
   TURN_RING_STYLES,
   type Settings,
 } from "../../game/storage";
 import { lookAttrs } from "../tableLook";
 import { TileRow } from "../components/TileRow";
+import { Tile } from "../components/Tile";
 import { AppBar, Group, Row, Segmented, Switch } from "../components/Primitives";
 import styles from "./SettingsScreen.module.css";
 
@@ -57,7 +60,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
       <AppBar title={t("settings")} onBack={onBack} />
       <div className="screen-body">
         <Group>
-          <Row label={t("language")}>
+          <Row label={t("language")} stacked>
             <Segmented
               value={settings.lang}
               options={LANGS.map((l) => ({ value: l, label: l === "ru" ? "Русский" : "English" }))}
@@ -124,7 +127,27 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
               onChange={(tileset) => updateSettings({ tileset })}
             />
             <div className={styles.preview}>
-              <TileRow text="19m 5p 9s 1234z 567z" size={30} hints />
+              <TileRow text="19m 5p 9s 1234z 67z" size={28} hints />
+            </div>
+          </Row>
+          <Row
+            label={t("tileBack")}
+            hint={t(settings.tileBack === "auto" ? "tileBack_auto" : (`feltColor_${settings.tileBack}` as StringKey))}
+            stacked
+          >
+            <Swatches
+              value={settings.tileBack}
+              options={TILE_BACKS.map((c) => ({
+                value: c,
+                label: t(c === "auto" ? "tileBack_auto" : (`feltColor_${c}` as StringKey)),
+                color: c === "auto" ? undefined : TILE_BACK_SWATCH[c],
+              }))}
+              onChange={(tileBack) => updateSettings({ tileBack })}
+            />
+            <div className={styles.backs} aria-hidden>
+              {Array.from({ length: 6 }, (_, i) => (
+                <Tile key={i} back size="river" />
+              ))}
             </div>
           </Row>
           <Row label={t("tileHints")} stacked>
@@ -134,7 +157,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
               onChange={(tileHints) => updateSettings({ tileHints })}
             />
           </Row>
-          <Row label={t("theme")}>
+          <Row label={t("theme")} stacked>
             <Segmented
               value={settings.theme}
               options={THEME_MODES.map((m) => ({ value: m, label: t(`theme_${m}` as StringKey) }))}
@@ -166,7 +189,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
           {toggle("showWaitHints", "waitHints")}
           {toggle("autoDiscardRiichi", "autoDiscardRiichi")}
           {toggle("dealAnimation", "dealAnimation")}
-          <Row label={t("speechFreq")}>
+          <Row label={t("speechFreq")} stacked>
             <Segmented
               value={settings.speechFreq}
               options={(["often", "normal", "rare", "off"] as const).map((v) => ({ value: v, label: t(`speech_${v}` as StringKey) }))}
@@ -179,7 +202,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
         </Group>
 
         <Group title={t("gameRules")}>
-          <Row label={t("gameLength")} hint={t("rulesNote")}>
+          <Row label={t("gameLength")} hint={t("rulesNote")} stacked>
             <Segmented
               value={settings.gameRules.gameLength}
               options={[
@@ -232,7 +255,7 @@ function Swatches<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className={styles.swatches} role="radiogroup">
+    <div className={styles.swatches} role="radiogroup" style={{ ["--n" as string]: options.length }}>
       {options.map((o) => (
         <button
           key={o.value}

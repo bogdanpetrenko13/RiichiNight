@@ -97,6 +97,26 @@ def test_table_look_settings_reach_the_table(make_app):
     assert not app.errors, app.errors
 
 
+def test_tile_backs_and_corner_tabs_follow_settings(make_app):
+    """Settings -> Tile backs paints every face-down tile (rivals' hands, dead
+    wall) in the chosen colour; hints are small coloured corner tabs."""
+    app = make_app(PORTRAIT).open("?seed=7", {"tileBack": "sapphire", "tileHints": "all"}).start_game()
+    app.wait_my_turn()
+    page = app.page
+    assert page.evaluate("() => document.documentElement.dataset.tileBack") == "sapphire"
+    back = page.evaluate(
+        "() => [...document.querySelectorAll('section[aria-label] [class*=tile][class*=back]')].map((e) => getComputedStyle(e).backgroundImage).find((b) => b !== 'none')"
+    )
+    assert "rgb(42, 90, 143)" in back, back
+    tab = page.evaluate(
+        """() => { const e = document.querySelector('[class*=dock] [class*=idx][data-suit]');
+                   const s = getComputedStyle(e), r = e.getBoundingClientRect(), t = e.parentElement.getBoundingClientRect();
+                   return [s.backgroundColor, Math.round(r.left - t.left), Math.round(r.top - t.top)]; }"""
+    )
+    assert tab[0] not in ("rgba(0, 0, 0, 0)", "transparent") and tab[1:] == [0, 0], tab
+    assert not app.errors, app.errors
+
+
 def test_table_centre_shows_dora_and_counters(make_app):
     """Portrait: the strip between the rivals and the player carries the dora
     indicators and the counters; landscape keeps them in the player's column."""

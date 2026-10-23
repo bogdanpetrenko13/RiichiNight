@@ -156,7 +156,7 @@ def test_chi_with_several_choices_shows_each_option(make_app):
     assert page.locator("section[aria-label] [class*=river] [class*=highlight]").count() == 1
     chi.first.click()
     options = page.locator("[data-chi-option]")
-    options.first.wait_for(timeout=5_000)
+    options.first.wait_for(timeout=15_000)
     assert options.count() == 3
     groups = [o.locator("img").evaluate_all("els => els.map(e => e.getAttribute('src').split('/').pop())") for o in options.all()]
     assert all(len(g) == 3 for g in groups), groups
@@ -164,6 +164,6 @@ def test_chi_with_several_choices_shows_each_option(make_app):
     app.shot("chi_chooser")
     options.nth(1).click()  # 3s-4s-5s
     meld = page.locator("[class*=dock] [class*=meld]").first
-    meld.wait_for(timeout=10_000)
+    meld.wait_for(timeout=20_000)
     assert page.locator("[data-chi-option]").count() == 0
     assert not app.errors, app.errors

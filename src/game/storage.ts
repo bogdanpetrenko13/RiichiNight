@@ -27,6 +27,9 @@ export const STYLE_TILESET: Record<TableStyle, Tileset> = { quiet: "modern", fel
 /** Felt colour of the "felt" table style (src/styles/tokens.css). */
 export type FeltColor = "emerald" | "sapphire" | "burgundy" | "graphite" | "amethyst" | "wood";
 export const FELT_COLORS: FeltColor[] = ["emerald", "sapphire", "burgundy", "graphite", "amethyst", "wood"];
+/** Colour of the tile backs; "auto" keeps the tile set's own (e.g. amber for Classic). */
+export type TileBack = "auto" | FeltColor;
+export const TILE_BACKS: TileBack[] = ["auto", ...FELT_COLORS];
 /** Colour of the frame around the band whose turn it is; "auto" follows the table style. */
 export type TurnRing = "auto" | "gold" | "ivory" | "coral" | "aqua" | "sakura" | "sky" | "lime";
 export const TURN_RINGS: TurnRing[] = ["auto", "gold", "ivory", "coral", "aqua", "sakura", "sky", "lime"];
@@ -38,6 +41,15 @@ export const FELT_SWATCH: Record<FeltColor, string> = {
   graphite: "#25282c",
   amethyst: "#2c1f48",
   wood: "#55391f",
+};
+/** Swatches for the tile-back picker (the backs' own tone, see tokens.css). */
+export const TILE_BACK_SWATCH: Record<FeltColor, string> = {
+  emerald: "#2e6b4f",
+  sapphire: "#2a5a8f",
+  burgundy: "#7a2a3a",
+  graphite: "#45494f",
+  amethyst: "#553a85",
+  wood: "#8a5a30",
 };
 export const RING_SWATCH: Record<Exclude<TurnRing, "auto">, string> = {
   gold: "#f2c14e",
@@ -94,6 +106,8 @@ export interface Settings {
   turnRingStyle: TurnRingStyle;
   /** Dealer badge colour. */
   dealerChip: DealerChip;
+  /** Tile back colour (same palette as the felt). */
+  tileBack: TileBack;
   /** Corner index on tiles: none, man + winds, or all. */
   tileHints: TileHints;
   /** Result screen: "How it's scored" section expanded. */
@@ -146,6 +160,7 @@ export function defaultSettings(): Settings {
     turnRingStyle: "line",
     dealerChip: "auto",
     tileHints: "man",
+    tileBack: "auto",
     theme: "system",
     styleVersion: STYLE_VERSION,
     gameRules: { ...DEFAULT_GAME_RULES },
@@ -185,6 +200,7 @@ export async function loadSettings(): Promise<Settings> {
   if (rest.tableStyle !== undefined && !TABLE_STYLES.includes(rest.tableStyle)) delete rest.tableStyle;
   if (rest.feltColor !== undefined && !FELT_COLORS.includes(rest.feltColor)) delete rest.feltColor;
   if (rest.turnRing !== undefined && !TURN_RINGS.includes(rest.turnRing)) delete rest.turnRing;
+  if (rest.tileBack !== undefined && !TILE_BACKS.includes(rest.tileBack)) delete rest.tileBack;
   if (rest.dealerChip !== undefined && !TURN_RINGS.includes(rest.dealerChip)) delete rest.dealerChip;
   if (rest.turnRingStyle !== undefined && !TURN_RING_STYLES.includes(rest.turnRingStyle)) delete rest.turnRingStyle;
   if (rest.aiDelay === undefined && oldSpeed) rest.aiDelay = OLD_SPEED[oldSpeed] ?? AI_DELAY_DEFAULT;

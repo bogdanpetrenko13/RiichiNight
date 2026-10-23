@@ -36,7 +36,7 @@ The owner writes in Russian; reply in Russian.
 | `src/engine/pyBoot.js` | `PY_MODULES`: every new Python module must be listed here |
 | `src/engine/protocol.ts` | Types of everything the bridge returns |
 | `src/game/useGameController.ts` | Game flow, cutaway banner timing, `?seed=` / `?scenario=` |
-| `src/game/storage.ts` | Settings (localStorage key `settings.v1`; Capacitor prefixes it with `CapacitorStorage.`) |
+| `src/game/storage.ts` | Settings (localStorage key `settings.v1`; Capacitor prefixes it with `CapacitorStorage.`); table look (felt, turn ring, dealer chip, tile backs as `data-tile-back` on `<html>`) |
 | `src/ui/useLayout.ts` | Tile / band sizes from the viewport and the measured bands area (fixed sizes from `src/ui/metrics.ts`) |
 | `src/ui/components/Band.module.css` | Band layout; rivers in `River.module.css`, plaques and bubbles in `BandOverlay.module.css`, dead wall / counters / table centre in `TableInfo.module.css` |
 | `src/ui/motion.ts` | FLIP and discard flight animations |

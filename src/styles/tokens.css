@@ -379,3 +379,12 @@
   --bone-shadow: #bdbdbd;
   --tile-back: #2f6fb0;
 }
+
+/* Tile back colour (Settings -> Tile backs), the felt palette in a lighter
+   tone; overrides the tile set's own backs (data-tile-back on <html>). */
+:root[data-tile-back="emerald"] { --tile-back: #2e6b4f; --tile-back-hi: #56a07c; --tile-back-edge: #1a3d2f; }
+:root[data-tile-back="sapphire"] { --tile-back: #2a5a8f; --tile-back-hi: #5a8fc8; --tile-back-edge: #183354; }
+:root[data-tile-back="burgundy"] { --tile-back: #7a2a3a; --tile-back-hi: #ad5868; --tile-back-edge: #4a1a24; }
+:root[data-tile-back="graphite"] { --tile-back: #45494f; --tile-back-hi: #737980; --tile-back-edge: #25282c; }
+:root[data-tile-back="amethyst"] { --tile-back: #553a85; --tile-back-hi: #8567b8; --tile-back-edge: #2c1f48; }
+:root[data-tile-back="wood"] { --tile-back: #8a5a30; --tile-back-hi: #b98a57; --tile-back-edge: #55391f; }
