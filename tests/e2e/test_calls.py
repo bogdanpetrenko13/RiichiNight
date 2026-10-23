@@ -91,7 +91,8 @@ def test_player_pon_uses_the_same_plaque(make_app):
             if (!e.dataset.seen) {
               e.dataset.seen = '1';
               window.__ann.push({ text: e.innerText, me: e.hasAttribute('data-me'),
-                font: getComputedStyle(e.querySelector('b')).fontWeight + ' ' + getComputedStyle(e.querySelector('b')).textTransform });
+                font: getComputedStyle(e.querySelector('b')).fontWeight + ' ' + getComputedStyle(e.querySelector('b')).textTransform,
+                family: getComputedStyle(e.querySelector('b')).fontFamily });
             }
           })).observe(document.body, { childList: true, subtree: true });
         }"""
@@ -123,8 +124,8 @@ def test_player_pon_uses_the_same_plaque(make_app):
     assert mine["font"] == "900 uppercase", mine
     # The bundled Inter Black is loaded and used for the lettering.
     assert page.evaluate("() => [...document.fonts].some((f) => f.family.includes('Riichi Call') && f.status === 'loaded')")
-    family = page.evaluate("() => getComputedStyle(document.querySelector('[class*=announce] b')).fontFamily")
-    assert family.startswith('"Riichi Call"'), family
+    # (read when the plaque appeared: it may be gone by now)
+    assert mine["family"].startswith('"Riichi Call"'), mine
     fresh = page.locator("[class*=dock] [class*=meld][data-fresh]")
     assert fresh.count() == 1
     # The new meld is marked for logic only: no outline or glow around it.
