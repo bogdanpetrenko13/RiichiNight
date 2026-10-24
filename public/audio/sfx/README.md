@@ -12,7 +12,7 @@ Trimmed, peak-normalised, mono mp3.
 | `stick1–3.mp3` | `riich_bets_1–3` | riichi stick put down |
 | `collect1–4.mp3` | `take_the_riich_bets_1–4` | the winner collects riichi sticks |
 | `dice1–3.mp3` | `roll_two_dice_1–3` | start of every hand |
-| `shuffle.mp3` | `shuffle_the_mahjong_tiles`, first 3 s | first hand of a match |
+| `shuffle.mp3` | `shuffle_the_mahjong_tiles`, first 1.3 s (fades out) | first hand of a match |
 
 The same pack's voice (`riichi`, `pung`, `chow`, `kong`, `ron`, `draw` = tsumo,
 and six yaku names) is the player's voice in `public/voice/player/`.

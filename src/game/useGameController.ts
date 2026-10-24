@@ -220,7 +220,7 @@ export function useGameController(): GameController {
             // The wall is built (a shuffle at the first hand of the match), then the dice roll.
             const first = ev.wind === "east" && ev.number === 1 && ev.honba === 0;
             if (first) void sfx.play("shuffle");
-            void sfx.play("dice", first ? 1600 : 200);
+            void sfx.play("dice", first ? 900 : 200);
             setEmotions({});
             setFreshMeld(null);
             // Going into the final hand last: she says something about it once.
