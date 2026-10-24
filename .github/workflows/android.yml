@@ -205,7 +205,10 @@ jobs:
           notes="docs/releases/$tag.md"
           if gh release view "$tag" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$tag" "$apk" --clobber -R "$GITHUB_REPOSITORY"
-            [ -f "$notes" ] && gh release edit "$tag" --notes-file "$notes" -R "$GITHUB_REPOSITORY"
+            # A release published with an empty title gets the commit message
+            # as its name: give it the version name instead.
+            gh release edit "$tag" --title "Riichi Night $version" -R "$GITHUB_REPOSITORY"
+            if [ -f "$notes" ]; then gh release edit "$tag" --notes-file "$notes" -R "$GITHUB_REPOSITORY"; fi
           else
             [ -f "$notes" ] || { echo "Riichi Night $version." > /tmp/notes.md; notes=/tmp/notes.md; }
             gh release create "$tag" "$apk" -R "$GITHUB_REPOSITORY" \
