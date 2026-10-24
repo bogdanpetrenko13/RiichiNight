@@ -485,7 +485,9 @@ def test_audio_sleeps_when_idle_and_in_the_background(make_app):
     assert page.evaluate("() => window.__rnAudio().music"), page.evaluate("() => window.__rnAudio()")
     # Nothing plays while it is your turn: the context goes to sleep.
     page.wait_for_function("() => window.__rnAudio().ctx === 'suspended'", timeout=8_000)
+    # (document.hidden too: Capacitor's web App plugin reads it for pause/resume)
     hide = """(hidden) => { Object.defineProperty(document, 'visibilityState', { value: hidden ? 'hidden' : 'visible', configurable: true });
+                          Object.defineProperty(document, 'hidden', { value: hidden, configurable: true });
                           document.dispatchEvent(new Event('visibilitychange')); }"""
     page.evaluate(hide, True)
     state = page.evaluate("() => window.__rnAudio()")
