@@ -106,7 +106,11 @@ function LessonView({
 }) {
   const { t, lang } = useApp();
   const top = useRef<HTMLDivElement>(null);
-  useEffect(() => top.current?.scrollIntoView({ block: "start" }), [index]);
+  // Braces: newer WebViews (Chrome 15x) return a Promise from scrollIntoView,
+  // and an effect must return nothing or a cleanup function.
+  useEffect(() => {
+    top.current?.scrollIntoView({ block: "start" });
+  }, [index]);
   const last = index === LESSONS.length - 1;
   return (
     <div className={`screen ${styles.lessonScreen}`}>

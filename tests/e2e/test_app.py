@@ -447,3 +447,27 @@ def test_match_end_shows_a_last_word_and_counts_in_profiles(make_app):
     assert "Партий" in profile.inner_text(), profile.inner_text()
     app.shot("rival_profile")
     assert not app.errors, app.errors
+
+
+def test_lessons_page_through_on_new_webviews(make_app):
+    """Newer Android WebViews return a Promise from scrollIntoView; an effect
+    that returned it crashed the lesson screen on "next lesson" (React took
+    the Promise for a cleanup function). Walk every lesson with that
+    behaviour."""
+    app = make_app(PORTRAIT)
+    app.page.add_init_script(
+        """(() => { const orig = Element.prototype.scrollIntoView;
+             Element.prototype.scrollIntoView = function (...a) { orig.apply(this, a); return Promise.resolve(); }; })()"""
+    )
+    app.open()
+    page = app.page
+    page.get_by_text("Обучение").first.click()
+    page.locator("[class*=lessonCard]").first.click()
+    for _ in range(6):
+        nxt = page.locator("button:has-text('→')")
+        if not nxt.count():
+            break
+        nxt.last.click()
+        page.wait_for_timeout(300)
+        assert not page.get_by_text("Что-то пошло не так").count()
+    assert not [e for e in app.errors if "is not a function" in e], app.errors

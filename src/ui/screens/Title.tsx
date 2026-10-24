@@ -19,7 +19,9 @@ interface TitleProps {
 
 export function Title({ saved, onNew, onContinue, onSettings, onLearn, onStats }: TitleProps) {
   const { t, lang, stats } = useApp();
-  useEffect(() => music.play("title"), []);
+  useEffect(() => {
+    music.play("title");
+  }, []);
 
   const tiles: { icon: IconName; label: StringKey; onClick: () => void; hidden?: boolean }[] = [
     { icon: "book", label: "learn", onClick: onLearn },
