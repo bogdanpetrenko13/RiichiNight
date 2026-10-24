@@ -471,3 +471,28 @@ def test_lessons_page_through_on_new_webviews(make_app):
         page.wait_for_timeout(300)
         assert not page.get_by_text("Что-то пошло не так").count()
     assert not [e for e in app.errors if "is not a function" in e], app.errors
+
+
+def test_audio_sleeps_when_idle_and_in_the_background(make_app):
+    """Battery: the shared AudioContext is suspended when nothing plays (a
+    running context keeps the audio output awake), and music and sounds stop
+    while the app is hidden, then the music comes back."""
+    app = make_app(PORTRAIT).open("?seed=7", {"aiDelay": 300, "musicVolume": 0.4}).start_game()
+    app.wait_my_turn()
+    page = app.page
+    page.mouse.click(5, 5)  # a tap: audio may start (autoplay rules)
+    page.wait_for_timeout(300)
+    assert page.evaluate("() => window.__rnAudio().music"), page.evaluate("() => window.__rnAudio()")
+    # Nothing plays while it is your turn: the context goes to sleep.
+    page.wait_for_function("() => window.__rnAudio().ctx === 'suspended'", timeout=8_000)
+    hide = """(hidden) => { Object.defineProperty(document, 'visibilityState', { value: hidden ? 'hidden' : 'visible', configurable: true });
+                          document.dispatchEvent(new Event('visibilitychange')); }"""
+    page.evaluate(hide, True)
+    state = page.evaluate("() => window.__rnAudio()")
+    assert state == {"music": False, "ctx": "suspended"}, state
+    page.evaluate(hide, False)
+    page.wait_for_function("() => window.__rnAudio().music", timeout=3_000)
+    # The next sound wakes the context again.
+    app.discard()
+    page.wait_for_function("() => window.__rnAudio().ctx === 'running'", timeout=3_000)
+    assert not app.errors, app.errors

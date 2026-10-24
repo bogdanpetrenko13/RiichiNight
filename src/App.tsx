@@ -4,6 +4,7 @@ import { getEngine } from "./engine/EngineClient";
 import type { BootStage } from "./engine/protocol";
 import { useGameController } from "./game/useGameController";
 import { loadGame, type SavedGame } from "./game/storage";
+import { setAppActive } from "./game/audio";
 import { CHARACTERS } from "./game/characters";
 import { Boot } from "./ui/screens/Boot";
 import { Title } from "./ui/screens/Title";
@@ -55,13 +56,21 @@ export default function App() {
   // Android back button: leave sub-screens, never kill a game silently.
   useEffect(() => {
     let remove: (() => void) | undefined;
+    // Pause music and table sounds while the app is in the background.
+    const lifecycle = [
+      CapApp.addListener("pause", () => setAppActive(false)),
+      CapApp.addListener("resume", () => setAppActive(true)),
+    ].map((p) => p.catch(() => null));
     void CapApp.addListener("backButton", () => {
       setScreen((s) => (s === "title" || s === "boot" ? s : "title"));
       void loadGame().then(setSaved);
     })
       .then((h) => (remove = () => void h.remove()))
       .catch(() => undefined);
-    return () => remove?.();
+    return () => {
+      remove?.();
+      lifecycle.forEach((p) => void p.then((h) => h?.remove()));
+    };
   }, []);
 
   const startGame = (cast: string[]) => {

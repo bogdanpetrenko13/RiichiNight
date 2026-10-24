@@ -18,7 +18,8 @@ class VoicePlayer {
       this.ctx = new Ctor();
       sfx.attach(this.ctx); // one AudioContext for voices and effects
     }
-    if (this.ctx.state === "suspended") void this.ctx.resume();
+    // The context then sleeps until a sound needs it (sfx.wake).
+    void sfx.wake(0);
   }
 
   private load(url: string): Promise<AudioBuffer | null> {
@@ -51,7 +52,7 @@ class VoicePlayer {
   async play(voiceId: string, kind: CallKind | string, delayMs = 0) {
     if (!this.ctx || this.volume <= 0) return;
     const buffer = await this.load(assetPaths.voice(voiceId, kind));
-    if (!buffer) return;
+    if (!buffer || !(await sfx.wake(delayMs + buffer.duration * 1000))) return;
     const source = this.ctx.createBufferSource();
     const gain = this.ctx.createGain();
     gain.gain.value = this.volume;
@@ -114,6 +115,19 @@ class MusicPlayer {
         .catch(() => undefined); // autoplay may wait for a tap (resume)
   }
 
+  /** e2e: whether the current track is playing. */
+  get playing() {
+    return Boolean(this.el && !this.el.paused);
+  }
+
+  /** App to the background: pause; back to the front: carry on. */
+  setActive(active: boolean) {
+    const el = this.el;
+    if (!el) return;
+    if (!active) el.pause();
+    else if (el.paused && this.volume > 0) void el.play().catch(() => undefined);
+  }
+
   /** Retry playback after a user gesture (autoplay policies). */
   resume() {
     const el = this.el;
@@ -126,3 +140,22 @@ class MusicPlayer {
 }
 
 export const music = new MusicPlayer();
+
+/**
+ * Music and table sounds stop while the app is in the background (home
+ * button, another app, screen off) and come back with it. Page visibility
+ * covers the browser; App.tsx also calls this from Capacitor's pause/resume.
+ */
+export function setAppActive(active: boolean) {
+  music.setActive(active);
+  sfx.setActive(active);
+}
+
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => setAppActive(document.visibilityState === "visible"));
+  // e2e: music playing? state of the shared AudioContext?
+  (window as unknown as { __rnAudio?: () => { music: boolean; ctx: string | null } }).__rnAudio = () => ({
+    music: music.playing,
+    ctx: sfx.contextState,
+  });
+}

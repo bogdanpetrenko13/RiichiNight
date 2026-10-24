@@ -241,6 +241,47 @@ class SfxPlayer {
   /** e2e: every sound that was asked to play. */
   log: SfxName[] = [];
 
+  /** e2e: "running" / "suspended" / null before the first tap. */
+  get contextState(): string | null {
+    return this.ctx?.state ?? null;
+  }
+
+  /** False while the app is in the background: nothing plays. */
+  active = true;
+  private idleTimer: number | undefined;
+
+  /**
+   * The shared AudioContext runs only while something plays: a running
+   * context keeps the phone's audio output awake (battery) even when silent.
+   * Resumes it (after the first user tap that is allowed) and suspends it
+   * `ms` + 1.5 s later unless another sound comes.
+   */
+  async wake(ms: number): Promise<boolean> {
+    const ctx = this.ctx;
+    if (!ctx || !this.active) return false;
+    window.clearTimeout(this.idleTimer);
+    if (ctx.state === "suspended") {
+      try {
+        await ctx.resume();
+      } catch {
+        return false;
+      }
+    }
+    this.idleTimer = window.setTimeout(() => {
+      if (this.ctx === ctx && ctx.state === "running") void ctx.suspend().catch(() => undefined);
+    }, ms + 1500);
+    return true;
+  }
+
+  /** App to the background: stop the clock now; back: it wakes on the next sound. */
+  setActive(active: boolean) {
+    this.active = active;
+    if (!active) {
+      window.clearTimeout(this.idleTimer);
+      if (this.ctx?.state === "running") void this.ctx.suspend().catch(() => undefined);
+    }
+  }
+
   attach(ctx: AudioContext | null) {
     this.ctx = ctx;
   }
@@ -298,6 +339,8 @@ class SfxPlayer {
     const now = performance.now();
     if (now - (this.last.get(name) ?? -1e9) < 40) return;
     this.last.set(name, now);
+    const longest = name === "shuffle" ? 1400 : name === "win" || name === "roundEnd" ? 2000 : 500;
+    if (!(await this.wake(delayMs + longest))) return;
     // A meld is two tiles slapped down one after the other.
     const hits = name === "call" ? [0, 0.07] : [0];
     for (const [i, at] of hits.entries()) {
