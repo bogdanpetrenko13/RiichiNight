@@ -69,7 +69,10 @@ def test_rival_pon_is_announced_in_her_band(make_app, viewport):
     page.wait_for_function("() => window.__fresh === true", timeout=5_000)
     # The plaque goes away by itself; the meld stays marked (data-fresh, no
     # outline) until the next player discards.
-    page.locator(ANNOUNCE).wait_for(state="detached", timeout=5_000)
+    # (that plaque: another rival may call meanwhile and show her own)
+    plaque = page.locator(ANNOUNCE).first.element_handle(timeout=1_000) if page.locator(ANNOUNCE).count() else None
+    if plaque:
+        page.wait_for_function("(e) => !e.isConnected", arg=plaque, timeout=8_000)
     for _ in range(100):
         if not page.locator(FRESH).count():
             break
