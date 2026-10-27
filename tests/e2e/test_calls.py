@@ -150,6 +150,11 @@ def test_chi_with_several_choices_shows_each_option(make_app):
         if chi.count():
             break
         if skip.count():
+            # The Chi button may render a moment after Пропуск: look again
+            # before skipping, or the offer we wait for gets passed.
+            page.wait_for_timeout(250)
+            if chi.count():
+                break
             skip.first.click()
             page.wait_for_timeout(200)
         elif app.my_turn():
