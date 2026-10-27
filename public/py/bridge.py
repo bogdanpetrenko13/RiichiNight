@@ -190,6 +190,8 @@ class Game:
         if action in CALLOUTS:
             self.events.append({"t": "call", "seat": seat, "kind": CALLOUTS[action]})
         if result.discarded:
+            # Who threw the last discard as a riichi declaration (for _riichi_paid).
+            self.last_discard_riichi = seat if action == GameAction.DECLARE_RIICHI else None
             discards = self.engine.get_discards(seat)
             self.events.append(
                 {
@@ -245,6 +247,19 @@ class Game:
                 settled = engine.handle_ryuukyoku()
                 self._finish_draw(settled.ryuukyoku_type.value if settled.ryuukyoku_type else kind.value)
 
+    def _riichi_paid(self, ron_from) -> List[int]:
+        """Seats whose riichi stick (1000) went on the table this hand: part
+        of their score change. A riichi whose declaration tile was ronned
+        never stood (no stick)."""
+        paid = []
+        for seat in range(NUM_PLAYERS):
+            if not self.engine.get_hand(seat).is_riichi:
+                continue
+            if seat == ron_from and getattr(self, "last_discard_riichi", None) == seat:
+                continue
+            paid.append(seat)
+        return paid
+
     def _deltas(self) -> List[int]:
         scores = self.engine.game_state.scores
         return [scores[i] - self.round_start_scores[i] for i in range(NUM_PLAYERS)]
@@ -276,7 +291,12 @@ class Game:
                     "seat": seat,
                     "han": wr.han,
                     "fu": wr.fu,
+                    # Everything this winner gains (pyriichi's total; with a
+                    # double ron it also counts sticks that went to the other).
                     "points": wr.points,
+                    # The hand's own value: what the payers pay without honba
+                    # and riichi sticks (the result screen's headline).
+                    "handPoints": sr.total_points - sr.honba_bonus - sr.riichi_sticks_bonus,
                     "yakuman": bool(sr.is_yakuman),
                     "yaku": [
                         {"key": y.yaku.value, "ja": y.yaku.ja, "en": y.yaku.en, "han": y.han}
@@ -297,6 +317,7 @@ class Game:
             "winnerSeats": seats,
             "deltas": self._deltas(),
             "scores": list(self.engine.game_state.scores),
+            "riichiPaid": self._riichi_paid(from_seat if not tsumo else None),
             "dora": [tstr(t) for t in self.engine.get_revealed_dora_indicators()],
         }
         self.events.append(
@@ -316,6 +337,7 @@ class Game:
             "winnerSeats": [],
             "deltas": self._deltas(),
             "scores": list(self.engine.game_state.scores),
+            "riichiPaid": self._riichi_paid(None),
         }
         self.events.append({"t": "draw_game", "kind": kind})
 

@@ -1,10 +1,11 @@
-import type { GameView, TileCode, WinResult } from "../../engine/protocol";
+import type { GameView, TileCode, WinnerInfo, WinResult } from "../../engine/protocol";
 import type { CharacterDef } from "../../game/characters";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
 import { Portrait } from "./Portrait";
 import { ScoreCalc } from "./ScoreCalc";
+import { handValue } from "../handValue";
 import styles from "./Overlay.module.css";
 
 interface RoundResultProps {
@@ -84,6 +85,7 @@ export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
                   </b>
                 )}
               </span>
+              {d !== 0 && result.riichiPaid?.includes(seat) && <small className={styles.deltaNote}>{t("riichiPaidNote")}</small>}
             </li>
           ))}
         </ul>
@@ -199,12 +201,25 @@ function WinBody({
             </ul>
             <div className={styles.total}>
               {w.yakuman ? t("yakuman") : `${t("han", { n: w.han })} · ${t("fu", { n: w.fu })}`}
-              <b>{t("points", { n: w.points.toLocaleString() })}</b>
+              <b>{t("points", { n: handValue(w).toLocaleString() })}</b>
             </div>
+            <GainExtras winner={w} />
             <ScoreCalc winner={w} payer={payer} />
           </section>
         );
       })}
     </>
   );
+}
+
+/** "+ honba 300 · riichi sticks 2 000 = 10 000" under the headline. */
+function GainExtras({ winner }: { winner: WinnerInfo }) {
+  const { t } = useApp();
+  const honba = winner.calc?.honba ?? 0;
+  const sticks = winner.calc?.sticks ?? 0;
+  if (!honba && !sticks) return null;
+  const total = handValue(winner) + honba + sticks;
+  const f = (x: number) => x.toLocaleString();
+  const key = honba && sticks ? "gainExtras" : honba ? "gainHonba" : "gainSticks";
+  return <p className={styles.gainExtras}>{t(key, { honba: f(honba), sticks: f(sticks), total: f(total) })}</p>;
 }

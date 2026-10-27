@@ -96,7 +96,10 @@ export interface WinnerInfo {
   seat: number;
   han: number;
   fu: number;
+  /** Everything this winner gains: hand + honba + riichi sticks. */
   points: number;
+  /** The hand's own value (payers' total without honba and sticks); absent in old saves. */
+  handPoints?: number;
   yakuman: boolean;
   yaku: YakuEntry[];
   hand: TileCode[];
@@ -145,6 +148,8 @@ export interface WinResult {
   winnerSeats: number[];
   deltas: number[];
   scores: number[];
+  /** Seats whose riichi stick went on the table this hand (part of their delta); absent in old saves. */
+  riichiPaid?: number[];
   dora: TileCode[];
 }
 
@@ -157,6 +162,7 @@ export interface DrawResult {
   winnerSeats: number[];
   deltas: number[];
   scores: number[];
+  riichiPaid?: number[];
 }
 
 export type RoundResult = WinResult | DrawResult;

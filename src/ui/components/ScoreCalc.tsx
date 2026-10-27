@@ -5,6 +5,7 @@ import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
 import styles from "./Overlay.module.css";
+import { handValue } from "../handValue";
 
 const n = (v: number) => v.toLocaleString();
 
@@ -158,6 +159,11 @@ function CalcBody({ winner, calc, payer }: { winner: WinnerInfo; calc: WinCalc; 
           </li>
         )}
       </ul>
+      {(calc.honba > 0 || calc.sticks > 0) && (
+        <div className={styles.calcSum}>
+          {t("calcTotal")}: +{n(handValue(winner) + calc.honba + calc.sticks)}
+        </div>
+      )}
     </div>
   );
 }
