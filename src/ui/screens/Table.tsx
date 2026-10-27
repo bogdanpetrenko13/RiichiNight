@@ -114,7 +114,9 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
 
   // The result panel waits until the Ron/Tsumo banner and the heroine's line
   // have played; a tap anywhere skips the wait.
-  const resultKey = view?.result ? `${view.round.index}:${view.status}:${view.result.type}` : null;
+  // (Not keyed on the status: the last hand of a match goes round_over ->
+  // game_over with the same result, and must not wait and show it again.)
+  const resultKey = view?.result ? `${view.round.index}:${view.result.type}` : null;
   const [released, setReleased] = useState<string | null>(null);
   useEffect(() => {
     if (!resultKey) return;
@@ -320,8 +322,10 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
           cast={cast}
           busy={busy}
           onNext={() => {
-            if (view.status === "game_over") setAckRound(view.round.index);
-            else void game.nextRound();
+            // Seen: if this hand ends the match, the next view (game_over,
+            // same hand) goes straight to the final standings.
+            setAckRound(view.round.index);
+            if (view.status !== "game_over") void game.nextRound();
           }}
         />
       )}

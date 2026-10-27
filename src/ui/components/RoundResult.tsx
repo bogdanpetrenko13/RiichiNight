@@ -30,7 +30,7 @@ export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
   const featuredChar = featured ? cast[featured.seat - 1] : undefined;
 
   return (
-    <div className={styles.backdrop}>
+    <div className={styles.backdrop} data-hand={view.round.index}>
       <div className={`panel ${styles.card}`}>
         {featured && featuredChar && (
           <div className={styles.closeup} style={{ ["--c" as string]: featuredChar.color }}>

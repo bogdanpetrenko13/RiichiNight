@@ -415,8 +415,18 @@ def test_match_end_shows_a_last_word_and_counts_in_profiles(make_app):
     """A whole east match: the results card carries the winner's (or the
     strongest heroine's) last word, and the rival screen then shows the
     match in her record."""
-    app = make_app().open("?seed=3", {"aiDelay": 120, "gameRules": {"gameLength": "east"}}).start_game()
+    app = make_app().open("?seed=5", {"aiDelay": 120, "gameRules": {"gameLength": "east"}}).start_game()
     page = app.page
+    # Each time a hand's result card appears, note the hand (data-hand):
+    # the last hand's card must not come back before the final standings.
+    page.evaluate(
+        """() => { window.__cards = []; let shown = false;
+             new MutationObserver(() => {
+               const card = document.querySelector('[class*=backdrop] [class*=card]');
+               if (card && !shown) window.__cards.push(card.closest('[data-hand]').dataset.hand);
+               shown = Boolean(card);
+             }).observe(document.body, { childList: true, subtree: true }); }"""
+    )
     over = page.get_by_text("Партия окончена")
     for _ in range(3000):
         if over.count():
@@ -433,6 +443,8 @@ def test_match_end_shows_a_last_word_and_counts_in_profiles(make_app):
         except AssertionError:
             page.wait_for_timeout(200)
     over.first.wait_for(timeout=10_000)
+    cards = page.evaluate("() => window.__cards")
+    assert cards and all(a != b for a, b in zip(cards, cards[1:])), cards
     finale = page.locator("figure[class*=finale]")
     finale.wait_for(timeout=5_000)
     quote = finale.locator("p").inner_text().strip()
