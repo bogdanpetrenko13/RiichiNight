@@ -181,6 +181,8 @@ export interface GameView {
     riichiSticks: number;
     dealer: number;
     index: number;
+    /** East of the first hand; ties in the standings go to the seat closer to it. Absent in old saves. */
+    startDealer?: number;
   };
   wall: number | null;
   dora: TileCode[];
@@ -219,6 +221,8 @@ export interface NewGameConfig {
   scenario?: string;
   levels: Level[];
   rules?: GameRules;
+  /** Seat that is East in the first hand (0 = the player); default 0. */
+  dealer?: number;
 }
 
 // ---- worker messages -------------------------------------------------------

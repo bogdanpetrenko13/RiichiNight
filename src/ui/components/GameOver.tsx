@@ -17,7 +17,10 @@ interface GameOverProps {
 export function GameOver({ view, cast, onAgain, onTitle, finale = null }: GameOverProps) {
   const { t, charName } = useApp();
   const scores = view.players.map((p) => p.score);
-  const order = [0, 1, 2, 3].sort((a, b) => scores[b] - scores[a] || a - b);
+  // Ties: the seat closer to the first East ranks higher (as in the engine).
+  const first = view.round.startDealer ?? 0;
+  const fromFirst = (s: number) => (s - first + 4) % 4;
+  const order = [0, 1, 2, 3].sort((a, b) => scores[b] - scores[a] || fromFirst(a) - fromFirst(b));
   const nameOf = (seat: number) => (seat === 0 ? t("you") : charName(cast[seat - 1]));
 
   return (

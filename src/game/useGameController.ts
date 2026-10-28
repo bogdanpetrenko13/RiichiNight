@@ -453,10 +453,24 @@ export function useGameController(): GameController {
 
   const start = useCallback(
     async (castIds: string[]) => {
-      const chars = castIds.map((id) => getCharacter(id)).filter((c): c is CharacterDef => Boolean(c));
+      // As at a real table: the heroines take random seats and the first
+      // East is drawn (tests with ?seed= / ?scenario= keep the fixed order
+      // unless they ask for ?seats=random).
+      const params = testParams();
+      const draw = params.randomSeats ?? !(params.seed || params.scenario);
+      const seated = draw ? shuffled(castIds) : castIds;
+      const dealer = params.dealer ?? (draw ? Math.floor(Math.random() * 4) : 0);
+      const chars = seated.map((id) => getCharacter(id)).filter((c): c is CharacterDef => Boolean(c));
       begin(chars, 0);
+      const { randomSeats: _r, dealer: _d, ...engineParams } = params;
       await run(() =>
-        engine.newGame({ levels: chars.map((c) => c.level), styles: chars.map((c) => c.style), rules: settingsRef.current.gameRules, ...testParams() }),
+        engine.newGame({
+          levels: chars.map((c) => c.level),
+          styles: chars.map((c) => c.style),
+          rules: settingsRef.current.gameRules,
+          dealer,
+          ...engineParams,
+        }),
       );
       greet();
     },
@@ -538,10 +552,26 @@ export function useGameController(): GameController {
  * Android app never has a query string) make a new game reproducible or start
  * it from a rigged deal (public/py/scenarios.py).
  */
-function testParams(): { seed?: number; scenario?: string } {
+function testParams(): { seed?: number; scenario?: string; randomSeats?: boolean; dealer?: number } {
   if (typeof location === "undefined") return {};
   const q = new URLSearchParams(location.search);
   const seed = Number(q.get("seed"));
   const scenario = q.get("scenario") ?? undefined;
-  return { ...(seed > 0 ? { seed } : {}), ...(scenario ? { scenario } : {}) };
+  const seats = q.get("seats");
+  const dealer = q.get("dealer");
+  return {
+    ...(dealer !== null && /^[0-3]$/.test(dealer) ? { dealer: Number(dealer) } : {}),
+    ...(seed > 0 ? { seed } : {}),
+    ...(scenario ? { scenario } : {}),
+    ...(seats ? { randomSeats: seats === "random" } : {}),
+  };
+}
+
+function shuffled<T>(items: T[]): T[] {
+  const out = items.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
 }

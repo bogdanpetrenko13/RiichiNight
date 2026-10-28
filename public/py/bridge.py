@@ -126,6 +126,13 @@ class Game:
         self.engine = RuleEngine(num_players=NUM_PLAYERS)
         self.engine.start_game()
         self.engine._game_state = game_rules.make_game_state(self.rules, NUM_PLAYERS)
+        # Who sits East in the first hand (the UI draws it; rigged deals keep
+        # the player there, their hands assume it).
+        dealer = int(config.get("dealer") or 0) % NUM_PLAYERS
+        if config.get("scenario"):
+            dealer = 0
+        self.start_dealer = dealer
+        self.engine._game_state.set_dealer(dealer)
         self.round_result: Optional[dict] = None
         self.round_start_scores: List[int] = []
         self.events: List[dict] = []
@@ -178,7 +185,9 @@ class Game:
             return
         self.game_end_emitted = True
         scores = list(self.engine.game_state.scores)
-        order = sorted(range(NUM_PLAYERS), key=lambda p: (-scores[p], p))
+        # Ties go to the seat closer to the first East (getattr: old saves).
+        first = getattr(self, "start_dealer", 0)
+        order = sorted(range(NUM_PLAYERS), key=lambda p: (-scores[p], (p - first) % NUM_PLAYERS))
         self.events.append({"t": "game_end", "scores": scores, "placement": order})
 
     # -------------------------------------------------------------- execution
@@ -529,6 +538,8 @@ class Game:
                 "riichiSticks": gs.riichi_sticks,
                 "dealer": gs.dealer,
                 "index": self.round_index,
+                # East of the first hand (ties in the final standings).
+                "startDealer": getattr(self, "start_dealer", 0),
             },
             "wall": engine.get_wall_remaining(),
             "dora": [tstr(t) for t in engine.get_revealed_dora_indicators()],

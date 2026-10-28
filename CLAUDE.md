@@ -35,7 +35,7 @@ The owner writes in Russian; reply in Russian.
 | `resources/android/java/MainActivity.java` | Full-screen (immersive) activity, copied over the generated one by CI; the page keeps clear of the camera cutout with `env(safe-area-inset-*)` |
 | `src/engine/pyBoot.js` | `PY_MODULES`: every new Python module must be listed here |
 | `src/engine/protocol.ts` | Types of everything the bridge returns |
-| `src/game/useGameController.ts` | Game flow, cutaway banner timing, `?seed=` / `?scenario=` |
+| `src/game/useGameController.ts` | Game flow, cutaway banner timing, `?seed=` / `?scenario=` / `?dealer=` / `?seats=random`; a real match shuffles the heroines' seats and draws the first East (`config.dealer`, bridge `start_dealer`) |
 | `src/game/storage.ts` | Settings (localStorage key `settings.v1`; Capacitor prefixes it with `CapacitorStorage.`); table look (felt, turn ring, dealer chip, tile backs as `data-tile-back` on `<html>`) |
 | `src/ui/useLayout.ts` | Tile / band sizes from the viewport and the measured bands area (fixed sizes from `src/ui/metrics.ts`) |
 | `src/ui/components/Band.module.css` | Band layout; rivers in `River.module.css`, plaques and bubbles in `BandOverlay.module.css`, dead wall / counters / table centre in `TableInfo.module.css` |

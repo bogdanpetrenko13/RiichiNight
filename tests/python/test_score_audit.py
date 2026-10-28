@@ -33,7 +33,8 @@ def audit(seeds):
     rng = random.Random(1)
     for seed in seeds:
         rules = {"gameLength": "east"}
-        r = json.loads(bridge.new_game(json.dumps({"seed": seed, "gameRules": rules})))
+        # Every seat takes a turn as the first East (the UI draws it).
+        r = json.loads(bridge.new_game(json.dumps({"seed": seed, "gameRules": rules, "dealer": seed % 4})))
         last_discard = {}; start_scores = None; sticks_at_start = None; honba = None; riichi_this_hand = set()
         for _ in range(20000):
             v = r["view"]; st = v["status"]

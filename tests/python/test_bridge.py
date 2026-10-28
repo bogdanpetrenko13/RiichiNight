@@ -276,3 +276,20 @@ def test_old_save_without_new_attributes_keeps_playing():
             return
         step = json.loads(bridge.act(json.dumps(human_command(bridge._game, brain)), True))
     raise AssertionError("no round end")
+
+
+def test_first_east_is_drawn_and_ties_go_to_the_seat_closer_to_it():
+    """config.dealer picks the first East (the UI draws it): the player's
+    seat wind follows, and ties in the standings go to the seat closer to
+    the first East. (test_score_audit plays whole matches from every seat.)"""
+    for dealer in range(4):
+        view = json.loads(bridge.new_game(json.dumps({"seed": 11, "dealer": dealer, "gameRules": {"gameLength": "east"}})))["view"]
+        assert view["round"]["dealer"] == dealer and view["round"]["startDealer"] == dealer
+        assert view["players"][0]["wind"] == ["east", "north", "west", "south"][dealer], view["players"][0]["wind"]
+    game = bridge._game
+    game.engine.game_state._scores = [25000, 25000, 25000, 25000]
+    game.start_dealer = 2
+    game.game_end_emitted = False
+    game.events = []
+    game._emit_game_end()
+    assert game.events[-1]["placement"] == [2, 3, 0, 1]

@@ -510,3 +510,20 @@ def test_audio_sleeps_when_idle_and_in_the_background(make_app):
     app.discard()
     page.wait_for_function("() => window.__rnAudio().ctx === 'running'", timeout=3_000)
     assert not app.errors, app.errors
+
+
+def test_a_heroine_can_be_the_first_east(make_app):
+    """The first East is drawn at the start of a match (?dealer= fixes it for
+    the test): with seat 2 dealing, the player is West, the dealer badge sits
+    on that heroine's band and the hand plays on."""
+    app = make_app(PORTRAIT).open("?seed=7&dealer=2", {"aiDelay": 200}).start_game()
+    app.wait_my_turn()
+    page = app.page
+    assert page.evaluate("() => document.querySelector('[class*=dock]') !== null")
+    winds = page.evaluate("() => [...document.querySelectorAll('[data-dealer]')].map((e) => e.innerText.trim())")
+    assert winds == ["ВОСТОК"] or winds == ["Восток"], winds
+    me = page.evaluate("() => [...document.querySelectorAll('[class*=wind]')].map((e) => e.innerText.trim())")
+    assert any(w.lower() == "запад" for w in me), me
+    for _ in range(8):
+        app.step()
+    assert not app.errors, app.errors
