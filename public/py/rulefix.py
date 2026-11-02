@@ -40,7 +40,7 @@
   own tiles, the red five first (as Tenhou and Mortal call by default).
 """
 
-from pyriichi import GameAction, RuleEngine, RuleError, Suit, Tile, TileSet
+from pyriichi import GameAction, GamePhase, RuleEngine, RuleError, Suit, Tile, TileSet
 from pyriichi.hand import CombinationType, Hand
 from pyriichi.scoring import ScoreCalculator, ScoreResult
 from pyriichi.yaku import Machi, YakuChecker
@@ -57,10 +57,38 @@ MAX_KANS = 4
 def _draw_rinshan_tile(self, player, result, *, kan_type):
     ts = self._tile_set
     before = len(ts._rinshan_tiles) if ts is not None else 0
+    suukan_ignored = getattr(self, "_ignore_suukan_sanra", False)
     drawn = _original_draw_rinshan(self, player, result, kan_type=kan_type)
     if ts is not None and len(ts._rinshan_tiles) < before and ts._tiles:
         ts._tiles.pop()  # moves to the dead wall
+    if drawn and result.rinshan_tile is not None:
+        # pyriichi declares a winning replacement tile a win by itself, with
+        # no score paid and no choice. Make it an ordinary draw instead: the
+        # player may call Tsumo (rinshan kaihou, see _check_win) or not.
+        self._rinshan_player = player
+        self._last_drawn_tile = (player, result.rinshan_tile)
+        if result.rinshan_win is not None:
+            result.rinshan_win = None
+            self._ignore_suukan_sanra = suukan_ignored
+            self._phase = GamePhase.PLAYING
+            self._waiting_for_actions = {player: self._calculate_turn_actions(player)}
+            result.waiting_for = self._waiting_for_actions
+        elif result.waiting_for:
+            # Tsumo is now known to be possible (the drawn tile is set).
+            self._waiting_for_actions = {player: self._calculate_turn_actions(player)}
+            result.waiting_for = self._waiting_for_actions
     return drawn
+
+
+_original_execute_action = RuleEngine.execute_action
+
+
+def _execute_action(self, player, action, tile=None, **kwargs):
+    # A replacement tile counts as rinshan only for the action right after
+    # the kan (Tsumo); any other action (discard, another kan) ends it.
+    if action != GameAction.TSUMO:
+        self._rinshan_player = None
+    return _original_execute_action(self, player, action, tile, **kwargs)
 
 
 def _wall_empty(self) -> bool:
@@ -421,6 +449,10 @@ _original_check_riichi = YakuChecker.check_riichi
 
 
 def _check_win(self, player, winning_tile, is_chankan=False, is_rinshan=False):
+    if not is_chankan and getattr(self, "_rinshan_player", None) == player:
+        last = self._last_drawn_tile
+        if last is not None and last[0] == player and last[1] == winning_tile:
+            is_rinshan = True
     saved = self._is_first_turn_after_deal
     self._is_first_turn_after_deal = _first_go_around(self, player)
     _CTX["double"] = player in getattr(self, "_double_riichi", ())
@@ -454,6 +486,7 @@ def apply() -> None:
     ScoreCalculator._determine_machi = _determine_machi
     YakuChecker._determine_machi = _determine_machi_yaku
     RuleEngine._draw_rinshan_tile = _draw_rinshan_tile
+    RuleEngine.execute_action = _execute_action
     RuleEngine._check_interrupts = _check_interrupts_ordered
     RuleEngine._can_riichi = _can_riichi
     RuleEngine._can_kan = _can_kan

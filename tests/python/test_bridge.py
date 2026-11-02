@@ -293,3 +293,34 @@ def test_first_east_is_drawn_and_ties_go_to_the_seat_closer_to_it():
     game.events = []
     game._emit_game_end()
     assert game.events[-1]["placement"] == [2, 3, 0, 1]
+
+
+def test_win_on_the_kan_replacement_tile_is_offered_and_paid():
+    """A replacement tile that completes the hand is an ordinary draw: Tsumo
+    is offered (not declared by itself), counts rinshan kaihou and is paid."""
+    step = json.loads(bridge.new_game(json.dumps({"seed": 3, "scenario": "rinshan"})))
+    assert "ankan" in step["view"]["prompt"]["actions"]
+    step = json.loads(bridge.act(json.dumps({"action": "ankan", "tile": "1m"})))
+    view = step["view"]
+    assert view["status"] == "human" and view["result"] is None, view["status"]
+    assert "tsumo" in view["prompt"]["actions"]
+    assert "win" not in [e["t"] for e in step["events"]]
+    step = json.loads(bridge.act(json.dumps({"action": "tsumo"})))
+    result = step["view"]["result"]
+    assert result["type"] == "win" and result["tsumo"]
+    w = result["winners"][0]
+    assert w["seat"] == 0 and w["winTile"] == "2s"
+    assert "rinshan" in [y["key"] for y in w["yaku"]]
+    deltas = result["deltas"]
+    assert deltas[0] == w["points"] > 0 and sum(deltas) == 0, deltas
+    assert all(d < 0 for d in deltas[1:]), deltas
+
+
+def test_kan_replacement_tile_can_be_declined_and_rinshan_ends_with_the_discard():
+    step = json.loads(bridge.new_game(json.dumps({"seed": 3, "scenario": "rinshan"})))
+    step = json.loads(bridge.act(json.dumps({"action": "ankan", "tile": "1m"})))
+    step = json.loads(bridge.act(json.dumps({"action": "discard", "tile": "2s"})))
+    engine = bridge._game.engine
+    assert getattr(engine, "_rinshan_player", None) is None
+    assert step["view"]["result"] is None or step["view"]["result"]["type"] != "win" or \
+        step["view"]["result"]["winners"][0]["seat"] != 0

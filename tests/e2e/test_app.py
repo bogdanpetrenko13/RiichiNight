@@ -37,6 +37,27 @@ def test_tsumo_result_shows_score_breakdown(make_app):
     assert not app.errors, app.errors
 
 
+def test_win_on_the_kan_replacement_tile_is_yours_to_call(make_app):
+    """After a closed kan the replacement tile completes the hand: Tsumo is
+    offered like any draw, and the win is scored (rinshan kaihou, payments)."""
+    app = make_app().open("?scenario=rinshan&seed=3").start_game()
+    app.wait_my_turn()
+    app.button("Кан").first.wait_for(timeout=60_000)
+    app.button("Кан").first.click()
+    app.button("Цумо").first.wait_for(timeout=30_000)
+    assert not app.page.get_by_role("button", name="Как посчитано").count()
+    app.button("Цумо").first.click()
+    app.page.get_by_role("button", name="Как посчитано").wait_for(timeout=30_000)
+    app.page.wait_for_timeout(600)
+    text = app.page.locator("[data-hand]").first.inner_text()
+    assert "Риншан кайхо" in text, text
+    # Every seat's score changed: the winner gains, the three others pay.
+    gains = app.page.locator("[data-hand] [class*=scoreCell] b").all_inner_texts()
+    assert len(gains) == 4 and sum(g.startswith("+") for g in gains) == 1, gains
+    app.shot("rinshan_result")
+    assert not app.errors, app.errors
+
+
 def test_red_five_stays_in_hand_when_plain_five_is_cut(make_app):
     app = make_app().open("?scenario=redfive&seed=6").start_game()
     app.wait_my_turn()

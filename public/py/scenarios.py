@@ -22,6 +22,8 @@ a few moves instead of waiting for it to happen by chance:
            holds 2356s, so Chi offers three choices (the chooser)
   myriichi the player alone starts tenpai (same hand as "riichi"): the
            player's riichi flow, the sideways tile in the player's river
+  rinshan  the player deals with four 1m and waits on 25s; the replacement
+           tile after the closed kan is the 2s (Tsumo offered, rinshan kaihou)
 
 Only the tiles named here are placed; everything else stays shuffled by the
 seed. The human is seat 0. Draw order follows the turn order from the dealer.
@@ -37,7 +39,8 @@ HUMAN = 0
 # deals; omitted = a shuffled hand); draws: the player's next draws in order;
 # rival_draws: {seat: next draws} for rivals;
 # rivals: 13-tile hands of seats 1, 2, 3 (the dealer gets a 14th from the
-# wall); dora: first dora indicator.
+# wall); dora: first dora indicator; rinshan: the next replacement tiles
+# drawn after a kan.
 SCENARIOS: Dict[str, dict] = {
     "tsumo": {
         "hand": "234m 789p 444s 68s 77z",
@@ -84,6 +87,12 @@ SCENARIOS: Dict[str, dict] = {
     "myriichi": {
         "hand": "555z 666z 777z 1122z",
         "junk": "9s",
+        "dora": "9p",
+    },
+    "rinshan": {
+        "hand": "1111m 234p 567p 34s 9s",
+        "junk": "9s",
+        "rinshan": ["2s"],
         "dora": "9p",
     },
 }
@@ -153,6 +162,13 @@ def rig(engine, name: str) -> None:
         slot = next((i for i, t in enumerate(ts._wall) if t is old), None)
         if slot is not None:
             ts._wall[slot] = indicator
+        pool.append(old)
+
+    # Replacement tiles after a kan (the old ones go back to the pool).
+    for k, code in enumerate(spec.get("rinshan", [])):
+        tile = _take(pool, code)
+        old = ts._rinshan_tiles[k]
+        _replace_dead(ts, old, tile)
         pool.append(old)
 
     # An empty string leaves that rival's hand shuffled.
