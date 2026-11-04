@@ -41,4 +41,4 @@ def test_player_voice_and_recorded_table_sounds():
         assert (ROOT / "public/audio/sfx" / f"{f}.mp3").is_file(), f
     assert "audio/sfx/" in sfx_src
     for clip in ("tanyao", "pinfu", "chiitoitsu", "ittsu", "double_riichi"):
-        assert f'{clip}: "{clip}"' in (ROOT / "src/game/useGameController.ts").read_text(encoding="utf-8")
+        assert f'{clip}: "{clip}"' in (ROOT / "src/game/yakuVoice.ts").read_text(encoding="utf-8")
