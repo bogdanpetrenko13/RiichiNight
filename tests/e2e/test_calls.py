@@ -201,3 +201,61 @@ def test_chi_with_several_choices_shows_each_option(make_app):
     side = page.locator("[class*=dock] [data-meld=chi_meld]").first.evaluate('e => [...e.children].map((c) => /sideways/.test(c.className) || Boolean(c.querySelector("[class*=sideways]")))')
     assert side == [True, False, False], side
     assert not app.errors, app.errors
+
+
+@pytest.mark.parametrize("style", ["quiet", "felt"])
+def test_landscape_chi_chooser_is_a_strip_over_the_hand(make_app, style):
+    """Landscape: the Chi options leave the narrow button column for a strip
+    over the hand, all in one row with Cancel, tiles big enough to read."""
+    app = make_app(LANDSCAPE).open("?scenario=mychi&seed=3", {"aiDelay": 300, "tableStyle": style}).start_game()
+    page = app.page
+    chi = page.get_by_role("button", name="Чи", exact=True)
+    skip = page.get_by_role("button", name="Пропуск", exact=True)
+    for _ in range(300):
+        if chi.count():
+            break
+        if skip.count():
+            page.wait_for_timeout(250)
+            if chi.count():
+                break
+            skip.first.click()
+            page.wait_for_timeout(200)
+        elif app.my_turn():
+            try:
+                app.discard()
+            except AssertionError:
+                pass
+        else:
+            page.wait_for_timeout(150)
+    assert chi.count(), "no Chi was offered"
+    chi.first.click()
+    options = page.locator("[data-chi-option]")
+    options.first.wait_for(timeout=15_000)
+    page.wait_for_timeout(300)
+    geo = page.evaluate(
+        """() => {
+          const r = (e) => e.getBoundingClientRect();
+          const strip = document.querySelector('[data-chi][data-strip]');
+          const opts = [...document.querySelectorAll('[data-chi-option]')].map(r);
+          const cancel = r(strip.querySelector('[data-kind=pass]'));
+          const hand = [...document.querySelectorAll('[class*=dock] [data-k]')].map(r);
+          const tile = r(document.querySelector('[data-chi-option] [class*=tile]'));
+          return { strip: r(strip).toJSON(), opts: opts.map((o) => o.toJSON()), cancel: cancel.toJSON(),
+                   handTop: Math.min(...hand.map((h) => h.top)), tileW: tile.width,
+                   vw: innerWidth, inColumn: Boolean(strip.closest('[data-actions]')) };
+        }"""
+    )
+    assert not geo["inColumn"], geo
+    # One row: options and Cancel share a line.
+    tops = {round(o["top"]) for o in geo["opts"]}
+    assert len(tops) == 1, geo
+    assert abs(geo["cancel"]["top"] + geo["cancel"]["height"] / 2 - (geo["opts"][0]["top"] + geo["opts"][0]["height"] / 2)) < 4, geo
+    # Readable tiles (they were 17 px in the column), on screen, over the hand.
+    assert geo["tileW"] >= 24, geo
+    assert geo["strip"]["left"] >= 0 and geo["strip"]["right"] <= geo["vw"], geo
+    assert geo["strip"]["bottom"] <= geo["handTop"] + 1, geo
+    app.shot(f"chi_strip_{style}")
+    options.nth(1).click()
+    page.locator("[class*=dock] [data-meld]").first.wait_for(timeout=20_000)
+    assert page.locator("[data-chi-option]").count() == 0
+    assert not app.errors, app.errors

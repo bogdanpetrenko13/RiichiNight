@@ -286,6 +286,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
       }}
       onChiPicker={setChiPicker}
       row={portrait}
+      strip={!portrait && chiPicker}
     />
   );
   const waitsChip = (
@@ -395,8 +396,11 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
             fixed height to its right. Either way the hand and the bands keep
             their size when buttons appear (the waits live in the player band). */}
         <div className={portrait ? styles.actionsRow : styles.actions} data-actions>
-          {actionBar}
+          {portrait || !chiPicker ? actionBar : null}
         </div>
+        {/* Landscape Chi chooser: a strip over the hand (the button column is
+            too narrow for three sequences at a readable size). */}
+        {!portrait && chiPicker ? <div className={styles.chiStrip}>{actionBar}</div> : null}
       </div>
 
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title={t("menu")}>

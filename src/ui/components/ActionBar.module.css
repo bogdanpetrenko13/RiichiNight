@@ -198,3 +198,36 @@
 .bar[data-chi]:not([data-row]) > .action {
   min-height: 36px;
 }
+
+/* Landscape strip over the hand: the three sequences and Cancel in one row,
+   tiles about two thirds of a hand tile. */
+.bar[data-chi][data-strip] {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.bar[data-chi][data-strip] .chiOptions {
+  flex-wrap: nowrap;
+  gap: 12px;
+}
+
+.bar[data-chi][data-strip] .chiOption {
+  --river-tile: clamp(24px, calc(var(--hand-tile, 50px) * 0.66), 40px);
+  align-items: center;
+  padding: 8px 10px;
+}
+
+.bar[data-chi][data-strip] > .action {
+  flex: none;
+  width: auto;
+  min-height: 0;
+  padding: 0 20px;
+}

@@ -25,6 +25,8 @@ a few moves instead of waiting for it to happen by chance:
   riichitsumo the player deals tenpai (as "myriichi"), declares riichi with
            the junk tile and draws a winning 1z next: the riichi stick
            going down and swept up by the winner
+  riichicalled the player declares riichi with the 9s, which the right
+           rival can pon (the next discard then lies sideways)
   rinshan  the player deals with four 1m and waits on 25s; the replacement
            tile after the closed kan is the 2s (Tsumo offered, rinshan kaihou)
 
@@ -96,6 +98,14 @@ SCENARIOS: Dict[str, dict] = {
         "hand": "555z 666z 777z 1122z",
         "junk": "9s",
         "draws": ["1z"],
+        "dora": "9p",
+    },
+    "riichicalled": {
+        # The player deals tenpai and declares riichi with the 9s; the right
+        # rival holds 99s and can pon the riichi tile.
+        "hand": "555z 666z 777z 1122z",
+        "junk": "9s",
+        "rivals": ["99s 123m 456m 789p 34z"],
         "dora": "9p",
     },
     "rinshan": {

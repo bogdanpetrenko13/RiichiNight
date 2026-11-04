@@ -21,11 +21,11 @@ The owner writes in Russian; reply in Russian.
 
 | Path | What |
 |---|---|
-| `public/py/bridge.py` | JSON bridge to pyriichi: `new_game`, `act`, `ai_step`, `next_round`, `save`, `load`; views show only what the player may see (incl. per-river-tile `tsumogiri` flags and the player's `safe` kinds against riichi, from its own `discard_log`) |
+| `public/py/bridge.py` | JSON bridge to pyriichi: `new_game`, `act`, `ai_step`, `next_round`, `save`, `load`; views show only what the player may see (incl. per-river-tile `tsumogiri` flags and the player's `safe` kinds against riichi, from its own `discard_log`; `riichiIndex` from `riichi_side`: the next discard lies sideways when the riichi tile was called) |
 | `public/py/ai.py` | Heroine AI: level (mistakes) + style (`STYLES`: folding, calls, dama, flush, value); each heroine's `style` is in `src/game/characters.ts` and matches her bio |
 | `public/py/yakufix.py` | Fixes to pyriichi: ryanpeikou vs chiitoitsu, chanta without sequences, dora counting (melds; tsumo tile counted twice) |
 | `public/py/calcinfo.py` | Score explanation for the result screen (fu parts, dora split, payments) + open-hand ron 30 fu minimum |
-| `public/py/scenarios.py` | Rigged first deals for tests (`?scenario=tsumo`, `redfive`, `riichi`, `myriichi`, `rivalpon`, `mypon`, `mychi`, `rinshan`, `riichitsumo`) |
+| `public/py/scenarios.py` | Rigged first deals for tests (`?scenario=tsumo`, `redfive`, `riichi`, `myriichi`, `rivalpon`, `mypon`, `mychi`, `rinshan`, `riichitsumo`, `riichicalled`) |
 | `public/py/fastpatch.py` | Speed-up of pyriichi's tenpai search |
 | `public/py/rulefix.py` | Game-flow and scoring fixes to pyriichi found against Mortal's rules (kan wall, kuikae, furiten, ippatsu, double riichi, dora after 7z, mangan cap, waits, chi/riichi red fives, no calls on the last discard, a winning kan replacement tile offers Tsumo instead of winning unpaid, ...) |
 | `public/py/mjai.py` | The game as mjai events (`MjaiLog` on `Game.mjai`, `masked()` per seat) |

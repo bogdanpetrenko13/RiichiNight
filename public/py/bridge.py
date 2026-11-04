@@ -160,6 +160,9 @@ class Game:
         self.riichi_at = {}
         # (seat, kind) of kans added to a pon (shouminkan): drawn stacked.
         self.added_kans = set()
+        # River index of each seat's sideways (riichi) tile; "next" when the
+        # riichi tile was called away: her next discard lies sideways instead.
+        self.riichi_side = {}
         gs = self.engine.game_state
         self.events.append(
             {
@@ -219,6 +222,9 @@ class Game:
                 log.append((seat, tstr(thrown).lstrip("r")))
                 if action == GameAction.DECLARE_RIICHI:
                     self.riichi_at[seat] = len(log) - 1
+            side = getattr(self, "riichi_side", None)
+            if side is not None and (action == GameAction.DECLARE_RIICHI or side.get(seat) == "next"):
+                side[seat] = len(discards) - 1
             self.events.append(
                 {
                     "t": "discard",
@@ -229,6 +235,11 @@ class Game:
                     "tsumogiri": tsumogiri,
                 }
             )
+        side = getattr(self, "riichi_side", None)
+        if side is not None and discarder is not None and result.called_action in (GameAction.PON, GameAction.CHI, GameAction.KAN):
+            at = side.get(discarder)
+            if isinstance(at, int) and at >= len(self.engine.get_discards(discarder)):
+                side[discarder] = "next"
         if result.called_action in (GameAction.PON, GameAction.CHI, GameAction.KAN):
             self.events.append(
                 {
@@ -296,6 +307,16 @@ class Game:
         elif len(mine) < river:
             mine[:0] = [False] * (river - len(mine))
         return mine
+
+    def _riichi_index(self, seat: int) -> Optional[int]:
+        """River index of the tile lying sideways: the riichi tile or, when
+        that one was called, the discard after it (None while waiting for it).
+        Games saved before this was tracked use pyriichi's index."""
+        side = getattr(self, "riichi_side", None)
+        if side is None or seat not in side:
+            return self.engine.get_hand(seat).riichi_discard_index
+        at = side[seat]
+        return at if isinstance(at, int) else None
 
     def _safe_tiles(self) -> Optional[List[str]]:
         """Tile kinds no rival in riichi can ron (genbutsu): her own discards
@@ -588,7 +609,7 @@ class Game:
                 "wind": gs.seat_winds[seat].value,
                 "score": gs.scores[seat],
                 "riichi": hand.is_riichi,
-                "riichiIndex": hand.riichi_discard_index,
+                "riichiIndex": self._riichi_index(seat),
                 "discards": [tstr(t) for t in discards],
                 "tsumogiri": list(self._river_marks(seat)),
                 "melds": self._melds(seat),

@@ -18,6 +18,8 @@ interface ActionBarProps {
   onChiPicker: (on: boolean) => void;
   /** One horizontal row (portrait, under the hand) instead of a column. */
   row?: boolean;
+  /** Landscape Chi chooser as a strip over the hand: options and Cancel in one row. */
+  strip?: boolean;
 }
 
 // Wins first, then riichi, calls, abort, skip.
@@ -34,6 +36,7 @@ export function ActionBar({
   onRiichiMode,
   onChiPicker,
   row = false,
+  strip = false,
 }: ActionBarProps) {
   const { t } = useApp();
   if (!prompt) return null;
@@ -61,7 +64,7 @@ export function ActionBar({
   if (chiPicker && prompt.chiOptions) {
     const claimed = prompt.claim?.tile ?? null;
     return (
-      <div className={styles.bar} data-chi data-row={row || undefined}>
+      <div className={styles.bar} data-chi data-row={row || undefined} data-strip={strip || undefined}>
         <span className={styles.label}>{t("chooseChi")}</span>
         <div className={styles.chiOptions}>
           {prompt.chiOptions.map((option, k) => {

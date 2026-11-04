@@ -495,3 +495,37 @@ def test_added_kan_is_flagged_and_other_kans_are_not():
         if added and plain:
             break
     assert added, (added, plain)
+
+
+def test_called_riichi_tile_turns_the_next_discard_sideways():
+    """When a rival calls the riichi tile, it leaves the river and the
+    declarer's next discard lies sideways instead (riichiIndex follows)."""
+    from pyriichi.rules import GameAction
+
+    game = bridge.Game({"seed": 7, "scenario": "riichicalled", "dealer": 0})
+    engine = game.engine
+    assert engine.game_state.dealer == 0
+    nine = next(t for t in engine.get_hand(0).tiles if str(t) == "9s")
+    game._exec(0, GameAction.DECLARE_RIICHI, nine)
+    me = game.view()["players"][0]
+    assert me["riichi"] and me["riichiIndex"] == 0, me
+    assert GameAction.PON in engine.get_available_actions(1)
+    game._exec(1, GameAction.PON, nine)
+    me = game.view()["players"][0]
+    assert me["discards"] == [] and me["riichiIndex"] is None, me
+    # Play on until the player has thrown her next tile.
+    for _ in range(40):
+        if engine.get_discards(0) or game.round_result is not None:
+            break
+        if game.engine.get_available_actions(0):
+            actions = engine.get_available_actions(0)
+            a, t, kw = Brain("easy", random.Random(1)).decide(engine, 0, actions)
+            game._exec(0, a, t, **kw)
+        else:
+            game.run_ai()
+    me = game.view()["players"][0]
+    assert len(me["discards"]) == 1, me
+    assert me["riichiIndex"] == 0, me
+    # Old saves (no tracking): pyriichi's own index.
+    del game.riichi_side
+    assert game.view()["players"][0]["riichiIndex"] == engine.get_hand(0).riichi_discard_index
