@@ -146,6 +146,16 @@ export interface WinCalc {
   uraIndicators: TileCode[] | null;
 }
 
+/** A rival's hand as the hand ended (result card, "Rivals' hands"). */
+export interface EndHand {
+  seat: number;
+  hand: TileCode[];
+  melds: Meld[];
+  riichi: boolean;
+  /** Tiles she was waiting on (empty: not tenpai). */
+  waits: TileCode[];
+}
+
 export interface WinResult {
   type: "win";
   tsumo: boolean;
@@ -157,6 +167,8 @@ export interface WinResult {
   /** Seats whose riichi stick went on the table this hand (part of their delta); absent in old saves. */
   riichiPaid?: number[];
   dora: TileCode[];
+  /** Rivals' hands at the end; absent in old saves. */
+  hands?: EndHand[];
 }
 
 export interface DrawResult {
@@ -169,6 +181,8 @@ export interface DrawResult {
   deltas: number[];
   scores: number[];
   riichiPaid?: number[];
+  /** Rivals' hands at the end; absent in old saves. */
+  hands?: EndHand[];
 }
 
 export type RoundResult = WinResult | DrawResult;

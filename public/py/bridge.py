@@ -308,6 +308,28 @@ class Game:
             safe = kinds if safe is None else safe & kinds
         return sorted(safe or (), key=lambda c: (tile_index(Tile_from(c)), c))
 
+    def _end_hands(self) -> List[dict]:
+        """The rivals' hands as the hand ended (shown only then, on the
+        result card): concealed tiles, melds and, when she was tenpai, her
+        waits."""
+        out = []
+        for seat in range(NUM_PLAYERS):
+            if seat == HUMAN:
+                continue
+            hand = self.engine.get_hand(seat)
+            tiles = list(hand.tiles)
+            waits = hand.get_machi_tiles() if len(tiles) % 3 == 1 else []
+            out.append(
+                {
+                    "seat": seat,
+                    "hand": [tstr(t) for t in sorted(tiles, key=tile_sort_key)],
+                    "melds": self._melds(seat),
+                    "riichi": bool(hand.is_riichi),
+                    "waits": sorted({tstr(t) for t in waits}, key=lambda c: (tile_index(Tile_from(c)), c)),
+                }
+            )
+        return out
+
     def _riichi_paid(self, ron_from) -> List[int]:
         """Seats whose riichi stick (1000) went on the table this hand: part
         of their score change. A riichi whose declaration tile was ronned
@@ -380,6 +402,7 @@ class Game:
             "scores": list(self.engine.game_state.scores),
             "riichiPaid": self._riichi_paid(from_seat if not tsumo else None),
             "dora": [tstr(t) for t in self.engine.get_revealed_dora_indicators()],
+            "hands": self._end_hands(),
         }
         self.events.append(
             {"t": "win", "winners": seats, "from": from_seat, "tsumo": tsumo}
@@ -399,6 +422,7 @@ class Game:
             "deltas": self._deltas(),
             "scores": list(self.engine.game_state.scores),
             "riichiPaid": self._riichi_paid(None),
+            "hands": self._end_hands(),
         }
         self.events.append({"t": "draw_game", "kind": kind})
 

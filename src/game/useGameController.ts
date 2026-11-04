@@ -6,6 +6,7 @@ import { music, voice } from "./audio";
 import { sfx } from "./sfx";
 import { landingMs } from "../ui/motion";
 import { fxScale } from "../ui/tableFx";
+import { PLAYER_VOICE, yakuClips } from "./yakuVoice";
 import { getCharacter, pickLine, rivalsUnlockedBy, type CharacterDef, type Emotion, type SpeechKind } from "./characters";
 import { applyEvents } from "./stats";
 import { SPEECH_FREQ_FACTOR, clearGame, loadGame, saveGame, type SavedGame } from "./storage";
@@ -42,15 +43,6 @@ const CALLOUT_MS = 1600;
 /** Ron / Tsumo / Riichi banner: 0.3 s in, 1.5 s readable, 0.4 s out. */
 export const CUTAWAY_MS = 2200;
 const SPEECH_MS = 3200;
-const PLAYER_VOICE = "player";
-/** Yaku the player's voice can name (public/voice/player/yaku_<clip>.mp3); value tiles map to "yakuhai". */
-const YAKU_VOICE: Record<string, string> = {
-  tanyao: "tanyao",
-  pinfu: "pinfu",
-  chiitoitsu: "chiitoitsu",
-  ittsu: "ittsu",
-  double_riichi: "double_riichi",
-};
 const MANGAN = 8000;
 
 export interface GameController {
@@ -284,16 +276,13 @@ export function useGameController(): GameController {
             if (!fxScale() && result?.type === "win" && result.winners.some((w) => (w.calc?.sticks ?? 0) > 0))
               void sfx.play("sticks", 1300);
             // Your own win: you name its yaku (the ones the voice pack has).
-            if (humanWin && result?.type === "win") {
+            // With table animations on, the result card says each as its
+            // row appears (RoundResult).
+            if (humanWin && result?.type === "win" && !fxScale()) {
               const mine = result.winners.find((w) => w.seat === 0);
-              const said = new Set<string>();
-              for (const y of mine?.yaku ?? []) {
-                const clip = YAKU_VOICE[y.key] ?? (/^(haku|hatsu|chun|round_wind_|seat_wind_)/.test(y.key) ? "yakuhai" : null);
-                if (clip && !said.has(clip) && said.size < 3) {
-                  void voice.play(PLAYER_VOICE, `yaku_${clip}`, CUTAWAY_MS + 200 + said.size * 1000);
-                  said.add(clip);
-                }
-              }
+              yakuClips(mine?.yaku ?? []).forEach(({ clip }, n) =>
+                void voice.play(PLAYER_VOICE, `yaku_${clip}`, CUTAWAY_MS + 200 + n * 1000),
+              );
             }
             const pointsOf = (seat: number) =>
               result?.type === "win" ? result.winners.find((w) => w.seat === seat)?.points ?? 0 : 0;

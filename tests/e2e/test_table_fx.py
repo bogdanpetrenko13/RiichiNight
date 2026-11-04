@@ -73,7 +73,7 @@ def test_points_change_hands_on_the_table_before_the_result_card(make_app, fx):
 
 
 def test_riichi_stick_goes_down_and_the_winner_sweeps_it_up(make_app):
-    app = make_app(PORTRAIT).open("?scenario=riichitsumo&seed=3").start_game()
+    app = make_app(PORTRAIT).open("?scenario=riichitsumo&seed=3", {"tableFx": "full"}).start_game()
     page = app.page
     app.wait_my_turn()
     app.button("Риичи").first.click()
@@ -100,7 +100,7 @@ def test_riichi_stick_goes_down_and_the_winner_sweeps_it_up(make_app):
 
 
 def test_a_new_dora_turns_over_after_a_kan(make_app):
-    app = make_app(PORTRAIT).open("?scenario=rinshan&seed=3").start_game()
+    app = make_app(PORTRAIT).open("?scenario=rinshan&seed=3", {"tableFx": "full"}).start_game()
     page = app.page
     app.wait_my_turn()
     app.button("Кан").first.click()
@@ -108,4 +108,69 @@ def test_a_new_dora_turns_over_after_a_kan(make_app):
     turning = page.evaluate("() => document.querySelectorAll('[data-dead-wall] [data-kind]')[1].getAnimations().length")
     assert turning > 0
     assert page.evaluate("() => document.querySelectorAll('[data-dead-wall] [data-kind]')[0].getAnimations().length") == 0
+    assert not app.errors, app.errors
+
+
+def test_a_win_is_laid_out_step_by_step_and_a_tap_shows_it_all(make_app):
+    """The result card of a win: hand tiles go down one by one, the winning
+    tile after them, then the yaku rows in order, then the points count up;
+    a tap on the card shows everything at once."""
+    app = make_app(PORTRAIT).open("?scenario=tsumo&seed=5", {"tableFx": "full"}).start_game()
+    page = app.page
+    _cut_junk(app)
+    app.button("Цумо").first.wait_for(timeout=60_000)
+    app.button("Цумо").first.click()
+    card = page.locator("[data-reveal]")
+    card.wait_for(timeout=15_000)
+    # Start times go up: tiles, then the winning tile, then each row, then the total.
+    order = page.evaluate(
+        """() => {
+          const d = (e) => parseFloat(getComputedStyle(e).getPropertyValue('--d')) || 0;
+          const tiles = [...document.querySelectorAll('[data-win-hand] > [data-kind]')].map(d);
+          const win = d(document.querySelector('[data-rv="win"]'));
+          const rows = [...document.querySelectorAll('[class*=yaku] > li')].map(d);
+          const total = d(document.querySelector('[data-points]').closest('[data-rv]'));
+          return { tiles, win, rows, total };
+        }"""
+    )
+    tiles, rows = order["tiles"], order["rows"]
+    assert tiles == sorted(tiles) and len(set(tiles)) == len(tiles), tiles
+    assert order["win"] > tiles[-1] and rows[0] > order["win"], order
+    assert rows == sorted(rows) and order["total"] > rows[-1], order
+    # The points count up: a smaller number shows before the final one.
+    points = page.locator("[data-points]")
+    final = int(points.get_attribute("data-points"))
+    page.wait_for_function(
+        "(f) => { const b = document.querySelector('[data-points]'); const n = Number(b.textContent.replace(/\\D/g, '')); return n > 0 && n < f; }",
+        arg=final,
+        timeout=10_000,
+    )
+    app.shot("win_reveal")
+    # A tap shows it all: no more reveal, the final points at once.
+    page.locator("[class*=card]").first.click(position={"x": 30, "y": 30})
+    assert page.locator("[data-reveal]").count() == 0
+    assert int("".join(c for c in points.inner_text() if c.isdigit())) == final
+    assert not app.errors, app.errors
+
+
+def test_rivals_hands_open_on_the_result_card(make_app):
+    app = make_app(PORTRAIT).open("?scenario=tsumo&seed=5").start_game()
+    page = app.page
+    _cut_junk(app)
+    app.button("Цумо").first.wait_for(timeout=60_000)
+    app.button("Цумо").first.click()
+    toggle = page.locator("[data-hands-toggle]")
+    toggle.wait_for(timeout=30_000)
+    assert page.locator("[data-rival-hands]").count() == 0
+    toggle.click()
+    hands = page.locator("[data-rival-hands] section")
+    assert hands.count() == 3
+    for i in range(3):
+        sec = hands.nth(i)
+        tiles = sec.locator("[class*=hand] [data-kind], [class*=hand] [aria-hidden]").count()
+        assert tiles >= 13, tiles
+        waits = sec.locator("[data-waits]").count()
+        text = sec.inner_text()
+        assert ("Ждала" in text) == bool(waits) and (("Не в темпае" in text) != bool(waits)), text
+    app.shot("rival_hands")
     assert not app.errors, app.errors

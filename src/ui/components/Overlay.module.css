@@ -447,3 +447,115 @@
   font-size: 12px;
   color: var(--ink-soft);
 }
+
+/* Rivals' hands on the result card (RivalHands.tsx), behind a toggle. */
+.rivalHands {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 4px 0 8px;
+}
+
+.rivalHand header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.riichiTag {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--caps-ls);
+  text-transform: uppercase;
+}
+
+.rivalWaits {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 0;
+  font-size: 13px;
+}
+
+.toggle {
+  display: block;
+  margin: 2px 0 6px;
+  padding: 6px 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+
+/* A win laid out step by step (RoundResult, data-reveal): each part waits
+   for its moment (--d, set inline) and comes in; without data-reveal
+   (skipped, or table animations off) everything is simply there. */
+.card[data-reveal] [data-rv],
+.card[data-reveal] [data-win-hand] > [data-kind],
+.card[data-reveal] .meldGroup > [data-kind] {
+  animation: rvIn 320ms var(--ease-out) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.card[data-reveal] [data-win-hand] > [data-kind],
+.card[data-reveal] .meldGroup > [data-kind] {
+  animation-name: rvTile;
+  animation-duration: 260ms;
+}
+
+.card[data-reveal] [data-rv="win"] {
+  animation-name: rvWin;
+  animation-duration: 460ms;
+}
+
+.card[data-reveal] [data-ura] [data-kind] {
+  animation: rvFlip 520ms var(--ease-out) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes rvIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+}
+
+@keyframes rvTile {
+  from {
+    opacity: 0;
+    transform: translateY(-45%);
+  }
+}
+
+@keyframes rvWin {
+  0% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.94);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes rvFlip {
+  0% {
+    transform: perspective(160px) rotateY(90deg);
+    filter: brightness(1.6);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}

@@ -69,7 +69,9 @@ def browser():
         b.close()
 
 
-SETTINGS = {"lang": "ru", "aiDelay": 120, "dealAnimation": False, "adultConfirmed": False}
+# Table animations off by default: most tests measure the table or the
+# result card and should not wait for effects; test_table_fx.py turns them on.
+SETTINGS = {"lang": "ru", "aiDelay": 120, "dealAnimation": False, "adultConfirmed": False, "tableFx": "off"}
 
 
 class App:

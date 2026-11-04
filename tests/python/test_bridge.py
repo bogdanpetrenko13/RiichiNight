@@ -412,3 +412,45 @@ def test_safe_tiles_against_riichi_follow_every_discard_of_the_hand():
     game = bridge._game
     del game.discard_log
     game.view()
+
+
+def test_rivals_hands_are_shown_only_when_the_hand_is_over():
+    """result.hands: each rival's concealed tiles, melds and waits, sent only
+    with the result; the tiles add up with her melds, and a rival marked
+    tenpai on an exhaustive draw has waits (and one with waits is tenpai)."""
+    seen_draw = seen_win = 0
+    for seed in range(1, 25):
+        step = json.loads(bridge.new_game(json.dumps({"seed": seed})))
+        for _ in range(3000):
+            view = step["view"]
+            if view["status"] in ("round_over", "game_over"):
+                break
+            assert view["result"] is None
+            for p in view["players"][1:]:
+                assert "hand" not in p, "a rival's hand leaked into the view"
+            if view["status"] == "human":
+                pr = view["prompt"]
+                if "pass" in pr["actions"]:
+                    step = json.loads(bridge.act(json.dumps({"action": "pass"})))
+                elif "discard" in pr["actions"]:
+                    me = view["players"][0]
+                    step = json.loads(bridge.act(json.dumps({"action": "discard", "tile": me.get("drawn") or me["hand"][-1]})))
+                else:
+                    step = json.loads(bridge.act(json.dumps({"action": pr["actions"][0]})))
+            else:
+                step = json.loads(bridge.ai_step())
+        result = step["view"]["result"]
+        hands = result["hands"]
+        assert [h["seat"] for h in hands] == [1, 2, 3]
+        for h in hands:
+            tiles = len(h["hand"]) + sum(3 for _ in h["melds"])
+            assert tiles in (13, 14), h
+            if result["type"] == "draw" and result["kind"] == "exhaustive_draw":
+                assert bool(h["waits"]) == (h["seat"] in result["tenpai"]), (h, result["tenpai"])
+        if result["type"] == "draw":
+            seen_draw += 1
+        else:
+            seen_win += 1
+        if seen_draw >= 2 and seen_win >= 3:
+            break
+    assert seen_draw and seen_win, (seen_draw, seen_win)

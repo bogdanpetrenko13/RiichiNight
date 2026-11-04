@@ -41,6 +41,7 @@ The owner writes in Russian; reply in Russian.
 | `src/ui/components/Band.module.css` | Band layout; rivers in `River.module.css`, plaques and bubbles in `BandOverlay.module.css`, dead wall / counters / table centre in `TableInfo.module.css` |
 | `src/ui/motion.ts` | FLIP and discard flight animations |
 | `src/ui/tableFx.ts` | Table animations (Settings → «Анимации стола»: full / short / off, `fxMs`): new dora turns over (`DeadWall.tsx`), riichi stick goes down / is swept to the winner, points change hands before the result card (`BandScore.tsx`, timing in `Table.tsx`), round splash (`RoundSplash.tsx`; the first hand rolls two dice for the first East, no sum shown); e2e in `tests/e2e/test_table_fx.py` |
+| `src/ui/components/RoundResult.tsx` | Result card: a win is laid out step by step (tiles, winning tile, yaku rows with your voice naming them via `src/game/yakuVoice.ts`, ura flip, points count up; a tap shows all), «Руки соперниц» from `result.hands` (`RivalHands.tsx`; the bridge sends rivals' hands only with the result). e2e `conftest.py` runs with table animations off unless a test turns them on |
 | `src/ui/usePeek.ts` | Long press on a tile: its visible copies light up, the rest dims (`data-kind` on face tiles) |
 | `src/ui/components/QuickSettings.tsx` | Settings in the table menu (speed, volumes, hints, talk); the rivals wait while the menu is open (`setPaused`) |
 | `src/i18n/strings.ts` | en + ru strings (both must have the same keys) |

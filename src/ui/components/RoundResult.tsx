@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import type { GameView, TileCode, WinnerInfo, WinResult } from "../../engine/protocol";
 import type { CharacterDef } from "../../game/characters";
 import { useApp } from "../../app/AppContext";
@@ -6,6 +8,73 @@ import { Tile } from "./Tile";
 import { Portrait } from "./Portrait";
 import { ScoreCalc } from "./ScoreCalc";
 import { handValue } from "../handValue";
+import { RivalHands } from "./RivalHands";
+import { fxScale } from "../tableFx";
+import { voice } from "../../game/audio";
+import { PLAYER_VOICE, yakuClips } from "../../game/yakuVoice";
+
+/**
+ * A win is laid out step by step (Settings -> Table animations): the hand's
+ * tiles go down one by one, the winning tile last with a pop, then each
+ * yaku row (your voice names the yaku it knows as its row appears), the ura
+ * indicators turn over, and the points count up; the rest of the card
+ * follows. A tap on the card shows everything at once. Times in ms before
+ * the effects factor.
+ */
+const STEP = { tile: 45, start: 120, winGap: 120, afterWin: 380, row: 380, count: 700 };
+
+/** Dora rows of a winner: dora / red fives / ura when the engine splits them. */
+function doraRowsOf(w: WinnerInfo): [StringKey, number][] {
+  const yakuHan = w.yaku.reduce((sum, y) => sum + y.han, 0);
+  const dora = w.yakuman ? 0 : Math.max(0, w.han - yakuHan);
+  const rows: [StringKey, number][] = w.calc
+    ? [
+        ["doraHan", w.calc.dora],
+        ["akaHan", w.calc.aka],
+        ["uraHan", w.calc.ura],
+      ]
+    : [["doraHan", dora]];
+  return rows.filter(([, v]) => v > 0);
+}
+
+function winTimeline(w: WinnerInfo, doraShown: boolean) {
+  const tiles = w.hand.length + w.melds.reduce((n, m) => n + m.tiles.length, 0);
+  const win = STEP.start + tiles * STEP.tile + STEP.winGap;
+  const rows0 = win + STEP.afterWin;
+  const ura = Boolean(w.calc?.uraIndicators && w.calc.uraIndicators.length > 0);
+  const rows = w.yaku.length + (w.yakuman ? 0 : doraRowsOf(w).length + (doraShown ? 1 : 0) + (ura ? 1 : 0));
+  const total = rows0 + rows * STEP.row;
+  return { win, rows0, total, end: total + STEP.count };
+}
+
+const delay = (ms: number, k: number): CSSProperties => ({ ["--d" as string]: `${Math.round(ms * k)}ms` });
+
+/** A number that counts up from 0 after `delayMs` (or shows its value). */
+function CountUp({ value, delayMs, ms, run }: { value: number; delayMs: number; ms: number; run: boolean }) {
+  const [shown, setShown] = useState(run ? 0 : value);
+  useEffect(() => {
+    if (!run) {
+      setShown(value);
+      return;
+    }
+    setShown(0);
+    let raf = 0;
+    const timer = window.setTimeout(() => {
+      const start = performance.now();
+      const tick = (now: number) => {
+        const p = Math.min(1, (now - start) / ms);
+        setShown(Math.round(value * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    }, delayMs);
+    return () => {
+      window.clearTimeout(timer);
+      cancelAnimationFrame(raf);
+    };
+  }, [value, delayMs, ms, run]);
+  return <>{shown.toLocaleString()}</>;
+}
 import styles from "./Overlay.module.css";
 
 interface RoundResultProps {
@@ -17,7 +86,24 @@ interface RoundResultProps {
 
 export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
   const { t, charName, yakuName } = useApp();
+  const [showHands, setShowHands] = useState(false);
+  const [skipped, setSkipped] = useState(false);
   const result = view.result;
+  const k = fxScale();
+  const reveal = k > 0 && !skipped && result?.type === "win";
+  const doraShown = view.dora.length > 0;
+  const end = result?.type === "win" ? Math.max(...result.winners.map((w) => winTimeline(w, doraShown).end)) : 0;
+  // Your own win: the voice names each yaku as its row appears.
+  const mine = result?.type === "win" ? result.winners.find((w) => w.seat === 0) : undefined;
+  useEffect(() => {
+    if (!reveal || !mine) return;
+    const tl = winTimeline(mine, doraShown);
+    const timers = yakuClips(mine.yaku).map(({ index, clip }) =>
+      window.setTimeout(() => void voice.play(PLAYER_VOICE, `yaku_${clip}`), (tl.rows0 + index * STEP.row) * k),
+    );
+    return () => timers.forEach((id) => window.clearTimeout(id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reveal, mine]);
   if (!result) return null;
   const nameOf = (seat: number) => (seat === 0 ? t("you") : cast[seat - 1] ? charName(cast[seat - 1]) : `#${seat}`);
 
@@ -32,14 +118,19 @@ export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
 
   return (
     <div className={styles.backdrop} data-hand={view.round.index}>
-      <div className={`panel ${styles.card}`}>
+      <div
+        className={`panel ${styles.card}`}
+        data-reveal={reveal || undefined}
+        data-revealing-until={reveal ? Math.round(end * k) : undefined}
+        onClick={() => setSkipped(true)}
+      >
         {featured && featuredChar && (
           <div className={styles.closeup} style={{ ["--c" as string]: featuredChar.color }}>
             <Portrait character={featuredChar} emotion={featured.emotion} size={96} round />
           </div>
         )}
         {result.type === "win" ? (
-          <WinBody result={result} doraIndicators={view.dora} nameOf={nameOf} yakuName={yakuName} />
+          <WinBody result={result} doraIndicators={view.dora} nameOf={nameOf} yakuName={yakuName} reveal={reveal} k={k} />
         ) : (
           <>
             <h2 className={styles.title}>{t(`drawKind_${result.kind}` as StringKey) || t("draw")}</h2>
@@ -59,7 +150,7 @@ export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
         )}
 
         {/* Scores: each heroine's face shows how the hand went for her. */}
-        <ul className={styles.list}>
+        <ul className={styles.list} data-rv style={delay(end, k)}>
           {result.deltas.map((d, seat) => (
             <li key={seat}>
               <span className={styles.who}>
@@ -90,6 +181,15 @@ export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
           ))}
         </ul>
 
+        {result.hands && result.hands.length > 0 && (
+          <div data-rv style={delay(end, k)}>
+            <button className={styles.toggle} onClick={() => setShowHands((v) => !v)} aria-expanded={showHands} data-hands-toggle>
+              {t("rivalHands")} {showHands ? "▾" : "›"}
+            </button>
+            {showHands && <RivalHands hands={result.hands} cast={cast} />}
+          </div>
+        )}
+
         <div className={styles.buttons}>
           <button className="btn btn-primary" onClick={onNext} disabled={busy}>
             {view.gameOver ? t("continueBtn") : t("nextRound")}
@@ -105,7 +205,11 @@ function WinBody({
   doraIndicators,
   nameOf,
   yakuName,
+  reveal,
+  k,
 }: {
+  reveal: boolean;
+  k: number;
   result: WinResult;
   /** Dora indicators of the hand (shown next to the ura indicators). */
   doraIndicators: TileCode[];
@@ -116,17 +220,14 @@ function WinBody({
   return (
     <>
       {result.winners.map((w) => {
-        const yakuHan = w.yaku.reduce((sum, y) => sum + y.han, 0);
-        const dora = w.yakuman ? 0 : Math.max(0, w.han - yakuHan);
         // Dora split into dora / red fives / ura when the engine reports it.
-        const doraRows: [StringKey, number][] = w.calc
-          ? [
-              ["doraHan", w.calc.dora],
-              ["akaHan", w.calc.aka],
-              ["uraHan", w.calc.ura],
-            ]
-          : [["doraHan", dora]];
+        const doraRows = doraRowsOf(w);
         const payer = !result.tsumo && result.from !== null ? (result.from === 0 ? "you" : nameOf(result.from)) : null;
+        const tl = winTimeline(w, doraIndicators.length > 0);
+        let tileN = 0;
+        const tileDelay = () => delay(STEP.start + STEP.tile * tileN++, k);
+        let rowN = 0;
+        const rowDelay = () => delay(tl.rows0 + STEP.row * rowN++, k);
         return (
           <section key={w.seat} className={styles.winner}>
             <h2 className={styles.title}>
@@ -147,39 +248,37 @@ function WinBody({
               }}
             >
               {w.hand.map((c, i) => (
-                <Tile key={i} code={c} size="meld" />
+                <Tile key={i} code={c} size="meld" style={tileDelay()} />
               ))}
               {w.winTile && (
-                <span className={styles.winTile} title={t(result.tsumo ? "tsumoWin" : "ronWin")}>
+                <span className={styles.winTile} title={t(result.tsumo ? "tsumoWin" : "ronWin")} data-rv="win" style={delay(tl.win, k)}>
                   <Tile code={w.winTile} size="meld" highlight />
                 </span>
               )}
               {w.melds.map((m, i) => (
                 <span key={`m${i}`} className={styles.meldGroup}>
                   {m.tiles.map((c, j) => (
-                    <Tile key={j} code={c} size="meld" />
+                    <Tile key={j} code={c} size="meld" style={tileDelay()} />
                   ))}
                 </span>
               ))}
             </div>
             <ul className={styles.yaku}>
               {w.yaku.map((y) => (
-                <li key={y.key}>
+                <li key={y.key} data-rv style={rowDelay()}>
                   <span>{yakuName(y.key, y.en)}</span>
                   <span>{w.yakuman ? t("yakuman") : t("han", { n: y.han })}</span>
                 </li>
               ))}
               {!w.yakuman &&
-                doraRows
-                  .filter(([, v]) => v > 0)
-                  .map(([key, v]) => (
-                    <li key={key}>
+                doraRows.map(([key, v]) => (
+                    <li key={key} data-rv style={rowDelay()}>
                       <span>{t(key)}</span>
                       <span>{t("han", { n: v })}</span>
                     </li>
                   ))}
               {!w.yakuman && doraIndicators.length > 0 && (
-                <li>
+                <li data-rv style={rowDelay()}>
                   <span>{t("doraIndicator")}</span>
                   <span className={styles.calcTiles}>
                     {doraIndicators.map((c, i) => (
@@ -189,7 +288,7 @@ function WinBody({
                 </li>
               )}
               {!w.yakuman && w.calc?.uraIndicators && w.calc.uraIndicators.length > 0 && (
-                <li>
+                <li data-rv data-ura style={rowDelay()}>
                   <span>{t("uraIndicator")}</span>
                   <span className={styles.calcTiles}>
                     {w.calc.uraIndicators.map((c, i) => (
@@ -199,12 +298,20 @@ function WinBody({
                 </li>
               )}
             </ul>
-            <div className={styles.total}>
+            <div className={styles.total} data-rv style={delay(tl.total, k)}>
               {w.yakuman ? t("yakuman") : `${t("han", { n: w.han })} · ${t("fu", { n: w.fu })}`}
-              <b>{t("points", { n: handValue(w).toLocaleString() })}</b>
+              <b data-points={handValue(w)}>
+                {t("points", { n: "\u0000" })
+                  .split("\u0000")
+                  .flatMap((part, i) =>
+                    i === 0 ? [part] : [<CountUp key="n" value={handValue(w)} delayMs={tl.total * k} ms={STEP.count * k} run={reveal} />, part],
+                  )}
+              </b>
             </div>
-            <GainExtras winner={w} />
-            <ScoreCalc winner={w} payer={payer} />
+            <div data-rv style={delay(tl.end, k)}>
+              <GainExtras winner={w} />
+              <ScoreCalc winner={w} payer={payer} />
+            </div>
           </section>
         );
       })}
