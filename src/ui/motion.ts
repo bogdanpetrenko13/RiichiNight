@@ -28,6 +28,44 @@ export function animate(el: Element, frames: Keyframe[], ms: number, easing = EA
   return (el as HTMLElement).animate(frames, { duration: ms * speed, easing, fill: "backwards" });
 }
 
+/** The discard the player is claiming (Pon / Chi / Kan): where it lies in
+ *  the rival's river, so it can fly from there into the new meld. */
+let claim: { rect: DOMRect; at: number } | null = null;
+
+export function rememberClaim(el: Element | null) {
+  claim = el ? { rect: el.getBoundingClientRect(), at: Date.now() } : null;
+}
+
+/** The claimed tile's river rect if a claim was just made (used once). */
+export function takeClaim(): DOMRect | null {
+  const c = claim;
+  claim = null;
+  return c && Date.now() - c.at < 4000 ? c.rect : null;
+}
+
+/**
+ * `el` (already in its new place) moves there from `from` (a viewport rect):
+ * position and size, keeping its own transform (a sideways tile stays
+ * turned).
+ */
+export function flyFrom(el: HTMLElement, from: DOMRect, ms: number, delay = 0): Animation | null {
+  if (reduced() || typeof el.animate !== "function") return null;
+  const to = el.getBoundingClientRect();
+  if (!to.width || !from.width) return null;
+  const base = getComputedStyle(el).transform;
+  const own = base && base !== "none" ? ` ${base}` : "";
+  const dx = from.left + from.width / 2 - (to.left + to.width / 2);
+  const dy = from.top + from.height / 2 - (to.top + to.height / 2);
+  const s = Math.max(from.width / to.width, from.height / to.height);
+  return el.animate(
+    [
+      { transform: `translate(${dx}px, ${dy}px) scale(${s})${own}` },
+      { transform: `translate(0, 0) scale(1)${own}` },
+    ],
+    { duration: ms * speed, delay: delay * speed, easing: EASE_IN, fill: "backwards" },
+  );
+}
+
 /** Where the player's last discard started (viewport rect), for its flight into the river. */
 let flight: { rect: DOMRect; at: number } | null = null;
 

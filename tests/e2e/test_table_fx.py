@@ -146,10 +146,41 @@ def test_a_win_is_laid_out_step_by_step_and_a_tap_shows_it_all(make_app):
         timeout=10_000,
     )
     app.shot("win_reveal")
+    # The reveal has sounds: tiles going down, the rows, the total.
+    page.wait_for_function(
+        "() => ['lay', 'row', 'total'].every((n) => (window.__rnSfx || []).includes(n))", timeout=10_000
+    )
+    # 4 han 30 fu is no named limit: no rank label.
+    assert page.locator("[data-rank]").count() == 0
     # A tap shows it all: no more reveal, the final points at once.
     page.locator("[class*=card]").first.click(position={"x": 30, "y": 30})
     assert page.locator("[data-reveal]").count() == 0
     assert int("".join(c for c in points.inner_text() if c.isdigit())) == final
+    assert not app.errors, app.errors
+
+
+def test_a_limit_hand_shows_its_rank_under_the_points(make_app):
+    """Three yakuman: «Тройной якуман» under the points, quietly, with its own chime."""
+    app = make_app(PORTRAIT).open("?scenario=riichitsumo&seed=3", {"tableFx": "full"}).start_game()
+    page = app.page
+    app.wait_my_turn()
+    tile = page.locator("[class*=dock] button[aria-label='9s']").last
+    tile.click()
+    page.wait_for_timeout(150)
+    tile.click()
+    app.button("Цумо").first.wait_for(timeout=60_000)
+    app.button("Цумо").first.click()
+    rank = page.locator("[data-rank]")
+    rank.wait_for(timeout=15_000)
+    # Daisangen + suuankou + tsuuiisou: three yakuman.
+    assert rank.get_attribute("data-rank") == "triple_yakuman", rank.get_attribute("data-rank")
+    assert rank.inner_text().strip().lower() == "тройной якуман"
+    # Below the points, not above them.
+    pts = page.locator("[data-points]").bounding_box()
+    box = rank.bounding_box()
+    assert box["y"] >= pts["y"] + pts["height"] - 1, (box, pts)
+    page.wait_for_function("() => (window.__rnSfx || []).includes('rank')", timeout=15_000)
+    app.shot("win_rank")
     assert not app.errors, app.errors
 
 

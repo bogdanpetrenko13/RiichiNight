@@ -2,7 +2,7 @@ import type { PlayerView, Prompt, TileCode } from "../../engine/protocol";
 import { useApp } from "../../app/AppContext";
 import { sameType } from "../tiles";
 import { HAND_UNITS_BASE } from "../useLayout";
-import { DUR, EASE_IN, animate, setHandLocator } from "../motion";
+import { DUR, EASE_IN, animate, flyFrom, setHandLocator, takeClaim } from "../motion";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
 import { Tile } from "./Tile";
@@ -124,13 +124,15 @@ export function PlayerHand({
 
   // FLIP: tiles that moved glide from their old place; new tiles slide in.
   const rowRef = useRef<HTMLDivElement>(null);
-  const prev = useRef<Map<string, { x: number; y: number }>>(new Map());
+  const prev = useRef<Map<string, { x: number; y: number; w: number }>>(new Map());
+  const prevRects = useRef<Map<string, DOMRect>>(new Map());
+  const prevMelds = useRef(0);
   const prevDeal = useRef(dealId);
   const prevWidth = useRef(0);
   useLayoutEffect(() => {
     const row = rowRef.current;
     if (!row) return;
-    const next = new Map<string, { x: number; y: number }>();
+    const next = new Map<string, { x: number; y: number; w: number }>();
     const nodes = Array.from(row.querySelectorAll<HTMLElement>("[data-k]"));
     // A swiped tile left the hand; an element React reused for another copy
     // of it must not keep the swipe's offset.
@@ -144,7 +146,9 @@ export function PlayerHand({
         n.style.transform = "";
       }
     }
-    for (const n of nodes) next.set(n.dataset.k!, { x: n.offsetLeft, y: n.offsetTop });
+    for (const n of nodes) next.set(n.dataset.k!, { x: n.offsetLeft, y: n.offsetTop, w: n.offsetWidth });
+    const rects = new Map<string, DOMRect>();
+    for (const n of nodes) rects.set(n.dataset.k!, n.getBoundingClientRect());
     // A new deal (dealId changed):
     // the deal animation shows it, so no slide-ins here. This effect runs
     // before the table switches `dealing` on, and its slide-ins used to show
@@ -161,8 +165,19 @@ export function PlayerHand({
         const old = prev.current.get(n.dataset.k!);
         const now = next.get(n.dataset.k!)!;
         if (old) {
+          // Place and size: after a call the tiles get a little bigger or
+          // smaller (the row fits the melds), so both glide.
           const dx = old.x - now.x;
-          if (Math.abs(dx) > 1) animate(n, [{ transform: `translateX(${dx}px)` }, { transform: "translateX(0)" }], DUR.base);
+          const s = now.w ? old.w / now.w : 1;
+          if (Math.abs(dx) > 1 || Math.abs(s - 1) > 0.01)
+            animate(
+              n,
+              [
+                { transform: `translateX(${dx}px) scale(${s})`, transformOrigin: "left bottom" },
+                { transform: "translateX(0) scale(1)", transformOrigin: "left bottom" },
+              ],
+              DUR.base + 40,
+            );
         } else {
           animate(
             n,
@@ -176,6 +191,22 @@ export function PlayerHand({
         }
       }
     }
+    // A new meld (Pon / Chi / Kan): its tiles fly in from where they were
+    // in the hand, the claimed one from the rival's river.
+    const meldEls = row.querySelectorAll<HTMLElement>("[data-meld]");
+    if (!dealing && !newDeal && !resized && meldEls.length > prevMelds.current && prevRects.current.size) {
+      const newest = meldEls[meldEls.length - 1];
+      const gone = [...prevRects.current.keys()].filter((k) => !next.has(k));
+      const claimed = takeClaim();
+      newest.querySelectorAll<HTMLElement>("[data-kind]").forEach((t, i) => {
+        const kind = t.dataset.kind;
+        const k = gone.findIndex((key) => key.replace(/^r/, "").startsWith(`${kind}#`));
+        const from = k >= 0 ? prevRects.current.get(gone.splice(k, 1)[0]) : claimed;
+        if (from) flyFrom(t, from, DUR.slow, i * 30);
+      });
+    }
+    prevMelds.current = meldEls.length;
+    prevRects.current = rects;
     prev.current = next;
   });
 

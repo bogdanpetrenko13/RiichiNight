@@ -5,7 +5,7 @@ import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { bandVars, useLayout } from "../useLayout";
 import { sameType } from "../tiles";
-import { rememberHandDiscard } from "../motion";
+import { rememberClaim, rememberHandDiscard } from "../motion";
 import { PlayerHand } from "../components/PlayerHand";
 import { ActionBar } from "../components/ActionBar";
 import { RoundResult } from "../components/RoundResult";
@@ -251,6 +251,8 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
 
   const act = (action: ActionName, extra?: { tile?: TileCode; option?: number }) => {
     if (extra?.tile && (action === "discard" || action === "riichi")) rememberHandDiscard(extra.tile);
+    // A claimed discard flies from the rival's river into the new meld.
+    if (action === "pon" || action === "chi" || action === "kan") rememberClaim(document.querySelector("[class*=river] [class*=highlight]"));
     setSelected(null);
     setRiichiMode(false);
     setChiPicker(false);

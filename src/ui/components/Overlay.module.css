@@ -570,3 +570,15 @@
     filter: none;
   }
 }
+
+/* The hand's limit name under the points (mangan and up): a quiet gold
+   label in small capitals. */
+.rank {
+  margin-top: 2px;
+  text-align: right;
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}

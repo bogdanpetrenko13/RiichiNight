@@ -7,11 +7,12 @@ import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
 import { Portrait } from "./Portrait";
 import { ScoreCalc } from "./ScoreCalc";
-import { handValue } from "../handValue";
+import { handRank, handValue, yakumanCount } from "../handValue";
 import { RivalHands } from "./RivalHands";
 import { MeldTiles } from "./MeldTiles";
 import { fxScale } from "../tableFx";
 import { voice } from "../../game/audio";
+import { sfx } from "../../game/sfx";
 import { PLAYER_VOICE, yakuClips } from "../../game/yakuVoice";
 
 /**
@@ -107,6 +108,26 @@ export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
     return () => timers.forEach((id) => window.clearTimeout(id));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reveal, mine]);
+  // Each step sounds as it appears: the tiles set down, the winning tile,
+  // a chime per yaku row (a little higher each time), the points ticking
+  // up, then a closing chord (a brighter one for mangan and up).
+  const first = result?.type === "win" ? result.winners[0] : undefined;
+  useEffect(() => {
+    if (!reveal || !first) return;
+    const tl = winTimeline(first, doraShown);
+    const at: [number, () => void][] = [];
+    const tiles = first.hand.length + first.melds.reduce((n, m) => n + m.tiles.length, 0);
+    for (let i = 0; i < tiles; i++) at.push([STEP.start + i * STEP.tile, () => void sfx.play("lay")]);
+    at.push([tl.win, () => void sfx.play("discard")]);
+    const rows = Math.round((tl.total - tl.rows0) / STEP.row);
+    for (let i = 0; i < rows; i++) at.push([tl.rows0 + i * STEP.row, () => void sfx.play("row", 0, { rate: 1 + 0.06 * i })]);
+    for (let t = 0; t < STEP.count; t += 90) at.push([tl.total + t, () => void sfx.play("tap", 0, { gain: 0.6 })]);
+    const rank = handRank(first, Boolean(view.rules?.kiriageMangan));
+    at.push([tl.end, () => void sfx.play(rank ? "rank" : "total")]);
+    const timers = at.map(([ms, run]) => window.setTimeout(run, ms * k));
+    return () => timers.forEach((id) => window.clearTimeout(id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reveal, first]);
   if (!result) return null;
   const nameOf = (seat: number) => (seat === 0 ? t("you") : cast[seat - 1] ? charName(cast[seat - 1]) : `#${seat}`);
 
@@ -133,7 +154,15 @@ export function RoundResult({ view, cast, busy, onNext }: RoundResultProps) {
           </div>
         )}
         {result.type === "win" ? (
-          <WinBody result={result} doraIndicators={view.dora} nameOf={nameOf} yakuName={yakuName} reveal={reveal} k={k} />
+          <WinBody
+            result={result}
+            doraIndicators={view.dora}
+            nameOf={nameOf}
+            yakuName={yakuName}
+            reveal={reveal}
+            k={k}
+            kiriage={Boolean(view.rules?.kiriageMangan)}
+          />
         ) : (
           <>
             <h2 className={styles.title}>{t(`drawKind_${result.kind}` as StringKey) || t("draw")}</h2>
@@ -210,9 +239,11 @@ function WinBody({
   yakuName,
   reveal,
   k,
+  kiriage,
 }: {
   reveal: boolean;
   k: number;
+  kiriage: boolean;
   result: WinResult;
   /** Dora indicators of the hand (shown next to the ura indicators). */
   doraIndicators: TileCode[];
@@ -310,6 +341,16 @@ function WinBody({
                   )}
               </b>
             </div>
+            {(() => {
+              // Mangan and up: its name under the points, quietly, once they are counted.
+              // A single yakuman already says so next to the points.
+              const rank = handRank(w, kiriage);
+              return rank && rank !== "yakuman" ? (
+                <div className={styles.rank} data-rv data-rank={rank} style={delay(tl.end, k)}>
+                  {t(`rank_${rank}` as StringKey, { n: yakumanCount(w) })}
+                </div>
+              ) : null;
+            })()}
             <div data-rv style={delay(tl.end, k)}>
               <GainExtras winner={w} />
               <ScoreCalc winner={w} payer={payer} />

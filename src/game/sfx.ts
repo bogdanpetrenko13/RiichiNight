@@ -6,7 +6,22 @@
 // AudioBuffer and played with a tiny random pitch change so repeats do not
 // sound mechanical.
 
-export type SfxName = "discard" | "riichi" | "call" | "win" | "roundEnd" | "tap" | "dice" | "shuffle" | "sticks";
+export type SfxName =
+  | "discard"
+  | "riichi"
+  | "call"
+  | "win"
+  | "roundEnd"
+  | "tap"
+  | "dice"
+  | "shuffle"
+  | "sticks"
+  // The result card laid out step by step (RoundResult): a tile set down,
+  // a yaku row, the total, the hand's limit name (mangan and up).
+  | "lay"
+  | "row"
+  | "total"
+  | "rank";
 /** Tile sounds follow the table style: a hard wooden clack or a soft felt mat. */
 export type SfxSurface = "wood" | "felt";
 
@@ -176,6 +191,25 @@ function recipe(name: SfxName, surface: SfxSurface): Recipe {
     case "shuffle":
     case "sticks":
       return { length: 0.2, peak: 0.5, draw: (c, o) => clack(c, o, 0, surface, 1, 0.6, 9) };
+    case "lay":
+      return { length: 0.1, peak: 0.5, draw: (c, o) => tick(c, o, 0, surface) };
+    case "row":
+      return { length: 0.5, peak: 0.4, draw: (c, o) => bell(c, o, 0, 1318.5, 0.5, 0.6) };
+    case "total":
+      return {
+        length: 1.1,
+        peak: 0.5,
+        draw: (c, o) => {
+          bell(c, o, 0, 783.99, 0.9, 0.7);
+          bell(c, o, 0.07, 1046.5, 0.9, 0.6);
+        },
+      };
+    case "rank":
+      return {
+        length: 1.4,
+        peak: 0.55,
+        draw: (c, o) => [1046.5, 1318.5, 1568, 2093].forEach((f, i) => bell(c, o, i * 0.06, f, 1, 0.6)),
+      };
     case "tap":
       return {
         length: 0.06,
@@ -215,6 +249,7 @@ function recordings(name: SfxName, surface: SfxSurface): string[] {
   switch (name) {
     case "discard":
     case "call":
+    case "lay":
       return range(4).map((i) => `tile${i}${felt}`);
     case "riichi":
       return range(3).map((i) => `stick${i}`);
@@ -325,21 +360,22 @@ class SfxPlayer {
 
   /** Render every sound ahead of the first use (called at the start of a match). */
   preload() {
-    const names: SfxName[] = ["discard", "riichi", "call", "win", "roundEnd", "tap", "dice", "shuffle", "sticks"];
+    const names: SfxName[] = ["discard", "riichi", "call", "win", "roundEnd", "tap", "dice", "shuffle", "sticks", "lay", "row", "total", "rank"];
     for (const n of names) {
       void this.buffer(n, this.surface);
       for (const f of recordings(n, this.surface)) void this.file(f);
     }
   }
 
-  async play(name: SfxName, delayMs = 0) {
+  /** `rate`: playback rate (pitch); `gain`: relative volume. */
+  async play(name: SfxName, delayMs = 0, opts: { rate?: number; gain?: number } = {}) {
     this.log.push(name);
     if (this.log.length > 200) this.log.splice(0, 100);
     if (!this.ctx || this.volume <= 0) return;
     const now = performance.now();
     if (now - (this.last.get(name) ?? -1e9) < 40) return;
     this.last.set(name, now);
-    const longest = name === "shuffle" ? 1400 : name === "win" || name === "roundEnd" ? 2000 : 500;
+    const longest = name === "shuffle" ? 1400 : name === "win" || name === "roundEnd" || name === "total" || name === "rank" ? 2000 : 500;
     if (!(await this.wake(delayMs + longest))) return;
     // A meld is two tiles slapped down one after the other.
     const hits = name === "call" ? [0, 0.07] : [0];
@@ -349,10 +385,12 @@ class SfxPlayer {
       const src = this.ctx.createBufferSource();
       src.buffer = buf;
       // ±4 % pitch on the short table sounds: repeats never sound identical.
-      const steady = name === "win" || name === "roundEnd" || name === "shuffle";
-      src.playbackRate.value = steady ? 1 : 0.96 + Math.random() * 0.08;
+      const steady = name === "win" || name === "roundEnd" || name === "shuffle" || name === "row" || name === "total" || name === "rank";
+      src.playbackRate.value = opts.rate ?? (steady ? 1 : 0.96 + Math.random() * 0.08);
       const gain = this.ctx.createGain();
-      gain.gain.value = this.volume * (i ? 0.75 : 1);
+      // Laying the result's tiles: softer than a discard.
+      const quiet = name === "lay" ? 0.45 : name === "row" ? 0.6 : 1;
+      gain.gain.value = this.volume * (i ? 0.75 : 1) * quiet * (opts.gain ?? 1);
       src.connect(gain).connect(this.ctx.destination);
       src.start(this.ctx.currentTime + delayMs / 1000 + at);
     }

@@ -101,6 +101,14 @@ def test_player_pon_uses_the_same_plaque(make_app):
                 family: getComputedStyle(e.querySelector('b')).fontFamily });
             }
           })).observe(document.body, { childList: true, subtree: true });
+          // The new meld's tiles fly in (from the hand and the river), not pop up.
+          window.__meldFly = null;
+          new MutationObserver(() => {
+            const m = document.querySelector('[class*=dock] [data-meld]');
+            if (m && window.__meldFly === null) {
+              window.__meldFly = [...m.querySelectorAll('[data-kind]')].map((t) => t.getAnimations().length);
+            }
+          }).observe(document.body, { childList: true, subtree: true });
         }"""
     )
     called = False
@@ -140,6 +148,8 @@ def test_player_pon_uses_the_same_plaque(make_app):
     # The new meld is marked for logic only: no outline or glow around it.
     look = fresh.evaluate("e => { const s = getComputedStyle(e); return [s.outlineStyle, s.boxShadow]; }")
     assert look == ["none", "none"], look
+    fly = page.evaluate("() => window.__meldFly")
+    assert fly and len(fly) == 3 and all(n > 0 for n in fly), fly
     app.shot("player_pon")
     assert not app.errors, app.errors
 
