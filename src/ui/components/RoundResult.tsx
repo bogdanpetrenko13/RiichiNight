@@ -73,7 +73,9 @@ function CountUp({ value, delayMs, ms, run }: { value: number; delayMs: number; 
       cancelAnimationFrame(raf);
     };
   }, [value, delayMs, ms, run]);
-  return <>{shown.toLocaleString()}</>;
+  // Not running (skipped, or animations off): the final value in this very
+  // render, not after the effect (a frame of the half-counted number).
+  return <>{(run ? shown : value).toLocaleString()}</>;
 }
 import styles from "./Overlay.module.css";
 
