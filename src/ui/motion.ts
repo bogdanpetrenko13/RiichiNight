@@ -28,6 +28,13 @@ export function animate(el: Element, frames: Keyframe[], ms: number, easing = EA
   return (el as HTMLElement).animate(frames, { duration: ms * speed, easing, fill: "backwards" });
 }
 
+/** The element's own CSS transform (a sideways riichi tile's turn), to keep
+ *  at the end of every keyframe: an animated transform replaces it. */
+export function ownTransform(el: Element): string {
+  const t = getComputedStyle(el).transform;
+  return t && t !== "none" ? ` ${t}` : "";
+}
+
 /** The discard the player is claiming (Pon / Chi / Kan): where it lies in
  *  the rival's river, so it can fly from there into the new meld. */
 let claim: { rect: DOMRect; at: number } | null = null;
@@ -52,8 +59,7 @@ export function flyFrom(el: HTMLElement, from: DOMRect, ms: number, delay = 0): 
   if (reduced() || typeof el.animate !== "function") return null;
   const to = el.getBoundingClientRect();
   if (!to.width || !from.width) return null;
-  const base = getComputedStyle(el).transform;
-  const own = base && base !== "none" ? ` ${base}` : "";
+  const own = ownTransform(el);
   const dx = from.left + from.width / 2 - (to.left + to.width / 2);
   const dy = from.top + from.height / 2 - (to.top + to.height / 2);
   const s = Math.max(from.width / to.width, from.height / to.height);
@@ -82,12 +88,14 @@ export function landDiscard(el: Element | null) {
   if (!to.width) return;
   const dx = from.left + from.width / 2 - (to.left + to.width / 2);
   const dy = from.top + from.height / 2 - (to.top + to.height / 2);
-  const s = from.width / to.width;
+  // Unrotated width: a sideways riichi tile's rect is turned.
+  const s = from.width / ((el as HTMLElement).offsetWidth || to.width);
+  const own = ownTransform(el);
   animate(
     el,
     [
-      { transform: `translate(${dx}px, ${dy}px) scale(${s})`, opacity: 1 },
-      { transform: "translate(0, 0) scale(1)", opacity: 1 },
+      { transform: `translate(${dx}px, ${dy}px) scale(${s})${own}`, opacity: 1 },
+      { transform: `translate(0, 0) scale(1)${own}`, opacity: 1 },
     ],
     DUR.slow - 40,
     EASE,

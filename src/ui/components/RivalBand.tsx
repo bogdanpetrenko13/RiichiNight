@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import type { CallKind, PlayerView, TileCode } from "../../engine/protocol";
-import { DUR, EASE_IN, animate } from "../motion";
+import { DUR, EASE_IN, animate, ownTransform } from "../motion";
 import type { CharacterDef, Emotion } from "../../game/characters";
 import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
@@ -88,13 +88,16 @@ export function RivalBand({
         const to = tile.getBoundingClientRect();
         const dx = from.left + from.width / 2 - (to.left + to.width / 2);
         const dy = from.top + from.height / 2 - (to.top + to.height / 2);
-        const s = from.width / Math.max(1, to.width);
+        // Unrotated width and her own transform: a riichi tile flies already
+        // lying sideways instead of turning only once it has landed.
+        const s = from.width / Math.max(1, (tile as HTMLElement).offsetWidth || to.width);
+        const own = ownTransform(tile);
         animate(
           tile,
           [
-            { transform: `translate(${dx}px, ${dy}px) scale(${s}) rotate(-8deg)`, filter: "brightness(0.55)" },
-            { transform: `translate(${dx * 0.4}px, ${dy * 0.55 - 10}px) scale(${(s + 1.15) / 2}) rotate(-4deg)`, filter: "brightness(0.9)", offset: 0.55 },
-            { transform: "translate(0, 0) scale(1) rotate(0)", filter: "none" },
+            { transform: `translate(${dx}px, ${dy}px) scale(${s}) rotate(-8deg)${own}`, filter: "brightness(0.55)" },
+            { transform: `translate(${dx * 0.4}px, ${dy * 0.55 - 10}px) scale(${(s + 1.15) / 2}) rotate(-4deg)${own}`, filter: "brightness(0.9)", offset: 0.55 },
+            { transform: `translate(0, 0) scale(1) rotate(0)${own}`, filter: "none" },
           ],
           DUR.slow,
           EASE_IN,

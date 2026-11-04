@@ -164,3 +164,39 @@ def test_tile_depth_follows_the_back_colour_and_stays_under_the_riichi_tile(make
     # The art covers ~92 % of the face's width, as on a real tile.
     assert 0.88 < info["artW"] < 0.95, info["artW"]
     assert not app.errors, app.errors
+
+
+def test_a_riichi_tile_flies_into_the_river_already_sideways(make_app):
+    """A rival's riichi discard lies sideways for its whole flight, not
+    upright until it lands and then turned."""
+    app = make_app(PORTRAIT).open("?scenario=riichi", {"aiDelay": 300}).start_game()
+    page = app.page
+    page.evaluate(
+        """() => {
+          window.__riichiFly = [];
+          new MutationObserver((list) => {
+            for (const m of list) for (const n of m.addedNodes) {
+              if (!(n instanceof HTMLElement) || !/sideways/.test(n.className) || !n.closest('[class*=river]')) continue;
+              const a = n.getAnimations()[0];
+              if (!a) { window.__riichiFly.push(null); continue; }
+              a.pause();
+              a.currentTime = a.effect.getComputedTiming().duration * 0.5;
+              const r = n.getBoundingClientRect();
+              window.__riichiFly.push(r.width / r.height);
+              a.play();
+            }
+          }).observe(document.body, { childList: true, subtree: true });
+        }"""
+    )
+    for _ in range(600):
+        if page.evaluate("() => window.__riichiFly.length") or app.result_shown():
+            break
+        try:
+            app.step()
+        except AssertionError:
+            page.wait_for_timeout(300)
+    fly = page.evaluate("() => window.__riichiFly")
+    assert fly, "no riichi discard seen"
+    # Mid-flight it is wider than tall: lying sideways.
+    assert all(f is not None and f > 1.1 for f in fly), fly
+    assert not app.errors, app.errors

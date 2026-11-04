@@ -231,7 +231,8 @@ def test_landscape_drawn_tiles_stay_in_place(make_app):
         # A rival holding her drawn tile: it stays inside her column.
         # Tile and band measured in one call: the turn may move between two.
         pair = app.page.evaluate(
-            """() => { const d = document.querySelector('section [data-drawn]'); if (!d) return null;
+            # (only once it has slid in: it starts 80 % to the right)
+            """() => { const d = document.querySelector('section [data-drawn]'); if (!d || d.getAnimations().length) return null;
                  const b = d.getBoundingClientRect(), s = d.closest('section').getBoundingClientRect();
                  return [b.right, s.right]; }"""
         )
@@ -240,6 +241,11 @@ def test_landscape_drawn_tiles_stay_in_place(make_app):
             checked_rival += 1
         if app.my_turn() and not app.button("Пропуск").count():
             app.page.wait_for_timeout(500)
+            # Measured at rest: under load the draw or a re-layout may still be moving.
+            app.page.wait_for_function(
+                "() => [...document.querySelectorAll('[class*=dock] [data-k]')].every((e) => !e.getAnimations().length)",
+                timeout=5_000,
+            )
             tiles = app.page.locator("[class*=dock] [data-k]")
             last = tiles.last.bounding_box()
             actions = app.page.locator("[data-actions]").first.bounding_box()
