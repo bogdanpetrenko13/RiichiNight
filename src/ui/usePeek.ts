@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
-import type { GameView, TileCode } from "../engine/protocol";
+import type { TileCode } from "../engine/protocol";
 
 /** How long a finger rests on a tile before its copies light up. */
 export const PEEK_MS = 420;
@@ -9,28 +9,6 @@ const MOVE_PX = 10;
 
 /** Tile kind without the red-five mark ("r5p" -> "5p"). */
 export const tileKind = (code: TileCode) => code.replace(/^r/, "");
-
-/**
- * Copies of a tile kind the player can see: the own hand (and drawn tile),
- * every river, every meld (a closed kan shows its kind on all four) and the
- * dora indicators. Called tiles sit in a meld, not in the river, so nothing
- * is counted twice.
- */
-export function visibleCopies(view: GameView, kind: string): number {
-  let n = 0;
-  const count = (codes: (TileCode | null | undefined)[] | undefined) => {
-    for (const c of codes ?? []) if (c && tileKind(c) === kind) n += 1;
-  };
-  for (const p of view.players) {
-    count(p.discards);
-    for (const m of p.melds) count(m.tiles);
-  }
-  const me = view.players[0];
-  count(me.hand);
-  count([me.drawn]);
-  count(view.dora);
-  return n;
-}
 
 /**
  * Long press on any face-up tile of the table (hand, rivers, melds, dora):

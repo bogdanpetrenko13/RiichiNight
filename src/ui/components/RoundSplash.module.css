@@ -65,3 +65,74 @@
     transform: translate(8%, -50%);
   }
 }
+
+/* First hand: two dice for the first East (DiceRoll), tumbling for --roll
+   while their faces change, then at rest. */
+.dice {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.die {
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  width: 34px;
+  height: 34px;
+  padding: 5px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #fff, #e9e4d8);
+  box-shadow:
+    inset 0 -3px 0 #cfc7b4,
+    0 5px 10px rgba(0, 0, 0, 0.45);
+  animation: tumble var(--roll, 900ms) cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.die:last-child {
+  animation-name: tumble2;
+}
+
+.die i {
+  width: 6px;
+  height: 6px;
+  place-self: center;
+  border-radius: 50%;
+  background: #1b1b1b;
+}
+
+.die i[data-red] {
+  width: 10px;
+  height: 10px;
+  background: #d81e1e;
+}
+
+@keyframes tumble {
+  0% {
+    transform: translate(-60px, -26px) rotate(-200deg) scale(0.7);
+  }
+  60% {
+    transform: translate(4px, 3px) rotate(18deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(-8deg);
+  }
+}
+
+@keyframes tumble2 {
+  0% {
+    transform: translate(70px, -30px) rotate(230deg) scale(0.7);
+  }
+  60% {
+    transform: translate(-4px, 2px) rotate(-14deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(10deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .die {
+    animation: none;
+  }
+}

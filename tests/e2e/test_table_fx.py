@@ -17,7 +17,7 @@ def _cut_junk(app):
 
 
 @pytest.mark.parametrize("fx", ["full", "off"])
-def test_round_splash_names_the_round_and_the_first_east(make_app, fx):
+def test_round_splash_rolls_the_dice_and_names_the_first_east(make_app, fx):
     app = make_app(PORTRAIT).open("?seed=12&dealer=2", {"tableFx": fx, "aiDelay": 400})
     page = app.page
     page.get_by_text("Новая игра").first.click()
@@ -33,6 +33,13 @@ def test_round_splash_names_the_round_and_the_first_east(make_app, fx):
     assert "Восток 1" in text, text
     # Seat 2 (across) is the first East: one of the heroines, named.
     assert "Первый Восток — " in text and "вы" not in text.split("—")[-1], text
+    # Two dice tumble and land on a pair that counts from the player to the
+    # first East (seat 2): (a + b - 1) % 4 == 2. Only the dice, no sum.
+    page.wait_for_timeout(1200)
+    faces = page.evaluate("() => [...document.querySelectorAll('[data-round-splash] [data-die]')].map((d) => Number(d.dataset.die))")
+    assert len(faces) == 2 and (sum(faces) - 1) % 4 == 2, faces
+    assert "=" not in splash.text_content() and "+" not in splash.text_content()
+    app.shot("round_splash_dice")
     splash.wait_for(state="detached", timeout=5_000)
     assert not app.errors, app.errors
 

@@ -72,7 +72,6 @@ export function Tile({ code, back, size = "hand", selected, dimmed, highlight, s
         <span className={styles.safe} data-safe title={tr("safeTileLabel")}>
           <svg viewBox="0 0 12 14" aria-hidden="true">
             <path d="M6 0.6 11 2.4v4.2c0 3.2-2.1 5.6-5 6.8C3.1 12.2 1 9.8 1 6.6V2.4z" />
-            <path d="M3.4 7.1 5.3 9l3.4-3.8" fill="none" />
           </svg>
         </span>
       )}

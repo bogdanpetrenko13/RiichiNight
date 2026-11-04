@@ -174,25 +174,7 @@
 }
 
 /* Long press on a tile (usePeek): the other face-up tiles dim, the held
-   kind's copies get a ring (an inline rule in Table.tsx), and a chip above
-   the hand counts them. */
+   kind's copies get a ring (an inline rule in Table.tsx). */
 .table[data-peek] [data-kind] {
   filter: brightness(0.5) saturate(0.6);
-}
-
-.peekChip {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 8px);
-  transform: translateX(-50%);
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 14px;
-  font-weight: var(--fw-bold, 700);
-  white-space: nowrap;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
-  pointer-events: none;
-  z-index: var(--z-callout);
 }

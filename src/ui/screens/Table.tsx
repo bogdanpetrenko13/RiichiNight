@@ -20,7 +20,7 @@ import { WaitsChip } from "../components/WaitsChip";
 import { IconButton, Sheet } from "../components/Primitives";
 import { Icon } from "../icons";
 import { lookAttrs } from "../tableLook";
-import { usePeek, visibleCopies } from "../usePeek";
+import { usePeek } from "../usePeek";
 import { QuickSettings } from "../components/QuickSettings";
 import type { ScoreFx } from "../components/BandScore";
 import { flyCopies, fxMs } from "../tableFx";
@@ -110,7 +110,11 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   }, [dealKey, settings.dealAnimation]);
 
   // A splash names the round and the dealer as each hand starts.
-  const splashMs = fxMs(1500);
+  // The first hand of a match also rolls the dice for the first East: a
+  // longer splash, the dice land with the dice sound (~0.9 s).
+  const firstHand = roundIndex === 1;
+  const splashMs = fxMs(firstHand ? 2400 : 1500);
+  const rollMs = firstHand ? fxMs(900) : 0;
   const [splash, setSplash] = useState<string | null>(null);
   useLayoutEffect(() => {
     if (!splashMs || !roundIndex || !dealKey || splashedKey === dealKey) return;
@@ -266,8 +270,6 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
     <WaitsChip player={me} prompt={prompt} selectedCode={selectedTile} riichiMode={riichiMode} />
   );
 
-  const peekSeen = peek.kind ? visibleCopies(view, peek.kind) : 0;
-
   const showRound =
     !holding &&
     view.result !== null &&
@@ -285,7 +287,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
       {...peek.handlers}
       style={layout.vars}
     >
-      {/* Long press on a tile: its copies stay lit, the rest of the table dims. */}
+      {/* Long press on a tile: its visible copies stay lit, the rest of the table dims. */}
       {peek.kind && (
         <style>{`[data-peek="${peek.kind}"] [data-kind="${peek.kind}"][data-kind] { filter: none; outline: 3px solid var(--pointer); outline-offset: 1px; z-index: var(--z-local); }`}</style>
       )}
@@ -324,7 +326,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
           );
         })}
         {portrait && <TableCenter view={view} />}
-        {splash === dealKey && <RoundSplash view={view} cast={cast} ms={splashMs} />}
+        {splash === dealKey && <RoundSplash view={view} cast={cast} ms={splashMs} rollMs={rollMs} />}
         <PlayerBand
           view={view}
           active={view.current === 0 && view.status === "human"}
@@ -366,11 +368,6 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
             else if (matches.length > 1) setChiFirst(i);
           }}
         />
-        {peek.kind && (
-          <div className={styles.peekChip} role="status" data-peek-chip>
-            {t("peekCount", { seen: peekSeen, left: Math.max(0, 4 - peekSeen) })}
-          </div>
-        )}
         {/* Portrait: a reserved row under the hand; landscape: a column of
             fixed height to its right. Either way the hand and the bands keep
             their size when buttons appear (the waits live in the player band). */}

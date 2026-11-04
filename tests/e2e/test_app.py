@@ -551,8 +551,9 @@ def test_a_heroine_can_be_the_first_east(make_app):
 
 
 def test_long_press_lights_up_the_visible_copies_of_a_tile(make_app):
-    """Holding a tile lights its copies on the table (hand, rivers, melds,
-    dora), counts them in a chip, and does not lift or discard the tile."""
+    """Holding a tile lights its copies on the table (hand, discards, melds,
+    dora) and dims the rest, with no count chip, and does not lift or
+    discard the tile."""
     app = make_app().open("?scenario=tsumo&seed=5").start_game()
     app.wait_my_turn()
     page = app.page
@@ -562,21 +563,19 @@ def test_long_press_lights_up_the_visible_copies_of_a_tile(make_app):
     page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
     page.mouse.down()
     page.wait_for_timeout(700)
-    chip = page.locator("[data-peek-chip]")
-    assert chip.count() == 1, "no chip while holding"
     seen = page.evaluate("() => document.querySelectorAll('[data-kind=\"4s\"]').length")
     assert seen >= 3, seen  # the scenario deals 444s
-    assert chip.inner_text() == f"Видно {seen} · осталось {4 - seen}", chip.inner_text()
     lit = page.evaluate(
         """() => [...document.querySelectorAll('[data-kind]')].map((e) =>
              [e.getAttribute('data-kind'), getComputedStyle(e).outlineStyle, getComputedStyle(e).filter])"""
     )
     assert all(o == "solid" and f == "none" for k, o, f in lit if k == "4s"), lit
     assert all(o != "solid" and f != "none" for k, o, f in lit if k != "4s"), lit
+    assert page.locator("[role=status]:has-text('Видно')").count() == 0
     app.shot("peek_hold")
     page.mouse.up()
     page.wait_for_timeout(400)
-    assert chip.count() == 0
+    assert page.evaluate("() => document.querySelector('[data-peek]')") is None
     # The held tile was neither lifted nor discarded.
     assert page.locator("[class*=dock] button[aria-label]").count() == hand_before
     assert not page.locator("[class*=dock] [class*=selected]").count()
@@ -642,7 +641,7 @@ def test_table_menu_pauses_the_rivals_and_changes_settings_on_the_spot(make_app)
     before = page.evaluate(rivers)
     page.wait_for_timeout(1500)  # ten rival moves at this speed
     assert page.evaluate(rivers) == before, "rivals moved while the menu was open"
-    switch = sheet.get_by_role("switch", name="Цумогири в реке")
+    switch = sheet.get_by_role("switch", name="Цумогири в сбросе")
     assert switch.get_attribute("aria-checked") == "true"
     switch.click()
     assert switch.get_attribute("aria-checked") == "false"
