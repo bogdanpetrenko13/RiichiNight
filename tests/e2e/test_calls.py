@@ -142,7 +142,9 @@ def test_chi_with_several_choices_shows_each_option(make_app):
     """Rigged deal (scenario "mychi"): the left rival throws 4s while the
     player holds 2356s. Chi opens a chooser with the three sequences as
     tile groups (the claimed 4s ringed); tapping one calls that chi."""
-    app = make_app(PORTRAIT).open("?scenario=mychi", {"aiDelay": 300}).start_game()
+    # A fixed seed: with a random one the hand sometimes ended (a rival's
+    # call or win) before the left rival threw the 4s, and Chi never came.
+    app = make_app(PORTRAIT).open("?scenario=mychi&seed=3", {"aiDelay": 300}).start_game()
     page = app.page
     chi = page.get_by_role("button", name="Чи", exact=True)
     skip = page.get_by_role("button", name="Пропуск", exact=True)
