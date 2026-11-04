@@ -67,6 +67,9 @@ def test_rival_pon_is_announced_in_her_band(make_app, viewport):
         assert box and band and abs(box["x"] - band["x"]) <= 3 and abs(box["width"] - band["width"]) <= 6, (box, band)
         app.shot("rival_pon_" + ("portrait" if viewport == PORTRAIT else "landscape"))
     page.wait_for_function("() => window.__fresh === true", timeout=5_000)
+    # The 7z came from you, the player before her: it lies sideways on the left.
+    side = page.locator("section[aria-label] [data-meld=pon_meld]").first.evaluate('e => [...e.children].map((c) => /sideways/.test(c.className) || Boolean(c.querySelector("[class*=sideways]")))')
+    assert side == [True, False, False], side
     # The plaque goes away by itself; the meld stays marked (data-fresh, no
     # outline) until the next player discards.
     # (that plaque: another rival may call meanwhile and show her own)
@@ -131,6 +134,9 @@ def test_player_pon_uses_the_same_plaque(make_app):
     assert mine["family"].startswith('"Riichi Call"'), mine
     fresh = page.locator("[class*=dock] [class*=meld][data-fresh]")
     assert fresh.count() == 1
+    # Claimed from the player after you (right): the sideways tile is on the right.
+    side = fresh.evaluate('e => [...e.children].map((c) => /sideways/.test(c.className) || Boolean(c.querySelector("[class*=sideways]")))')
+    assert side == [False, False, True], side
     # The new meld is marked for logic only: no outline or glow around it.
     look = fresh.evaluate("e => { const s = getComputedStyle(e); return [s.outlineStyle, s.boxShadow]; }")
     assert look == ["none", "none"], look
@@ -181,4 +187,7 @@ def test_chi_with_several_choices_shows_each_option(make_app):
     meld = page.locator("[class*=dock] [class*=meld]").first
     meld.wait_for(timeout=20_000)
     assert page.locator("[data-chi-option]").count() == 0
+    # Chi always comes from the left: the claimed 4s lies sideways first.
+    side = page.locator("[class*=dock] [data-meld=chi_meld]").first.evaluate('e => [...e.children].map((c) => /sideways/.test(c.className) || Boolean(c.querySelector("[class*=sideways]")))')
+    assert side == [True, False, False], side
     assert not app.errors, app.errors

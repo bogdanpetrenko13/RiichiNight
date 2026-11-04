@@ -63,10 +63,11 @@
   --tw: 20px;
 }
 
-/* The art keeps an even margin from the tile's edges (and the corner tab). */
+/* The art covers the face as on a real tile: about 92 % of its width and
+   86 % of its height (the SVGs are 3:4, the tile 1:1.42), a thin even margin. */
 .art {
-  width: 84%;
-  height: 84%;
+  width: 92%;
+  height: 92%;
   display: block;
   object-fit: contain;
   pointer-events: none;

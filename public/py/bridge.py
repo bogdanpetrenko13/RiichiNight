@@ -158,6 +158,8 @@ class Game:
         # and where in it each riichi was declared (safe tiles, _safe_tiles).
         self.discard_log = []
         self.riichi_at = {}
+        # (seat, kind) of kans added to a pon (shouminkan): drawn stacked.
+        self.added_kans = set()
         gs = self.engine.game_state
         self.events.append(
             {
@@ -200,6 +202,7 @@ class Game:
     def _exec(self, seat: int, action: GameAction, tile: Optional[Tile] = None, **kwargs):
         discarder = self.engine.get_last_discard_player()
         drawn_before = self.engine.get_hand(seat).last_drawn_tile
+        pons_before = {tstr(m.tiles[0]).lstrip("r") for m in self.engine.get_hand(seat).melds if m.type.value == "pon_meld"}
         self.log.before(self.engine)
         result = self.engine.execute_action(seat, action, tile, **kwargs)
         if action in CALLOUTS:
@@ -236,6 +239,14 @@ class Game:
                     "from": discarder,
                 }
             )
+        if pons_before:
+            for m in self.engine.get_hand(seat).melds:
+                kind = tstr(m.tiles[0]).lstrip("r")
+                if m.type.value == "open_kan" and kind in pons_before:
+                    added = getattr(self, "added_kans", None)
+                    if added is None:
+                        added = self.added_kans = set()
+                    added.add((seat, kind))
         if result.rinshan_win is not None:
             result.winners = [result.rinshan_win.player]
             result.win_results[result.rinshan_win.player] = result.rinshan_win
@@ -519,6 +530,9 @@ class Game:
                 "tiles": [tstr(t) for t in m.tiles],
                 "called": tstr(m.called_tile),
                 "from": m.called_from,
+                # A kan added to a pon: its fourth tile lies on the sideways one.
+                "added": m.type.value == "open_kan"
+                and (seat, tstr(m.tiles[0]).lstrip("r")) in getattr(self, "added_kans", set()),
             }
             for m in self.engine.get_hand(seat).melds
         ]

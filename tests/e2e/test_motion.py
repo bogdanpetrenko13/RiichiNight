@@ -5,7 +5,7 @@ import math
 import re
 import os
 
-from conftest import PORTRAIT
+from conftest import LANDSCAPE, PORTRAIT
 
 PROBE = os.path.join(os.path.dirname(__file__), "motion_probe.js")
 
@@ -226,4 +226,33 @@ def test_next_hand_deals_in_without_a_flash(make_app):
     for keys, count, visible in new:
         assert visible >= seen - 1, f"tiles vanished mid-deal: {visible} after {seen}"
         seen = max(seen, visible)
+    assert not app.errors, app.errors
+
+
+def test_turning_the_phone_rebuilds_the_table_out_of_sight(make_app):
+    """Portrait -> landscape: the bands and the hand are hidden while they
+    take the new shape (no tile slides from the old layout), then fade in."""
+    app = make_app(PORTRAIT).open("?scenario=mypon&seed=3", {"aiDelay": 4000}).start_game()
+    page = app.page
+    app.wait_my_turn()
+    page.wait_for_timeout(500)
+    page.evaluate(
+        """() => { window.__rot = []; const t0 = performance.now();
+          const tick = () => {
+            const hand = [...document.querySelectorAll('[class*=dock] [data-k]')];
+            const sliding = hand.filter((e) => e.getAnimations().some((a) => a.playState === 'running')).length;
+            window.__rot.push([performance.now() - t0, Number(getComputedStyle(document.querySelector('[class*=bands]')).opacity), sliding,
+              document.querySelector('[data-reflow]') !== null]);
+            if (performance.now() - t0 < 1000) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick); }"""
+    )
+    page.set_viewport_size(LANDSCAPE)
+    page.wait_for_timeout(1300)
+    frames = page.evaluate("() => window.__rot")
+    after = [f for f in frames[1:]]
+    assert any(f[3] for f in after), "the table was not hidden while turning"
+    assert all(f[2] == 0 for f in after), [f for f in after if f[2]][:3]
+    # Whenever the bands show at all, they show the new layout (nothing half-sized).
+    assert after[-1][1] == 1 and not after[-1][3], after[-1]
     assert not app.errors, app.errors

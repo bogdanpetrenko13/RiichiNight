@@ -139,7 +139,7 @@ def test_tile_depth_follows_the_back_colour_and_stays_under_the_riichi_tile(make
     """A tile's edge is its back layer, in the tile back colour (graphite
     here, not the set's amber), and a sideways riichi tile keeps its edge
     under it in the traditional sets too (it used to jut out to the left);
-    the face art keeps a margin from the tile's edges."""
+    the face art covers the face like a real tile's (a thin margin)."""
     settings = {"aiDelay": 200, "tileset": "classic", "tableStyle": "felt", "tileBack": "graphite",
                 "styleVersion": 3, "theme": "dark"}
     app = make_app(PORTRAIT).open("?scenario=myriichi", settings).start_game()
@@ -161,5 +161,6 @@ def test_tile_depth_follows_the_back_colour_and_stays_under_the_riichi_tile(make
     assert any(s["color"] == "rgb(69, 73, 79)" for s in info["hand"]), info["hand"]
     drawn = [s for s in info["side"] if s["x"] or s["y"]]
     assert drawn and all(s["y"] == 0 and s["x"] > 0 for s in drawn), info["side"]
-    assert info["artW"] < 0.88, info["artW"]
+    # The art covers ~92 % of the face's width, as on a real tile.
+    assert 0.88 < info["artW"] < 0.95, info["artW"]
     assert not app.errors, app.errors

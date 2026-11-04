@@ -6,6 +6,7 @@ import { DUR, EASE_IN, animate, setHandLocator } from "../motion";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
 import { Tile } from "./Tile";
+import { MeldTiles } from "./MeldTiles";
 import styles from "./PlayerHand.module.css";
 
 interface PlayerHandProps {
@@ -103,6 +104,7 @@ export function PlayerHand({
 
   // Size tiles so concealed tiles + melds always fit one row (real counts).
   const meldTiles = player.melds.reduce((n, m) => n + m.tiles.length, 0);
+  const openMelds = player.melds.filter((m) => m.type !== "closed_kan" && m.from !== null).length;
   // The drawn tile's slot is always reserved (an empty placeholder between
   // turns), so tile size and centring do not change when a tile is drawn or
   // discarded: only the tiles that really move animate.
@@ -112,7 +114,10 @@ export function PlayerHand({
     all.length +
       (drawn || reserveSlot ? 0.3 : 0) +
       (reserveSlot ? 1 : 0) +
-      (player.melds.length ? 0.3 + meldTiles * (MELD_SCALE + 0.02) + (player.melds.length - 1) * 0.3 : 0) +
+      // (A claimed tile lies sideways: 0.42 of a tile wider.)
+      (player.melds.length
+        ? 0.3 + meldTiles * (MELD_SCALE + 0.02) + openMelds * 0.42 * MELD_SCALE + (player.melds.length - 1) * 0.3
+        : 0) +
       0.2,
   );
   const rowStyle = { ["--hand-tile" as string]: `min(var(--hand-max), calc((100cqw - 4px) / ${units.toFixed(2)}))` };
@@ -121,6 +126,7 @@ export function PlayerHand({
   const rowRef = useRef<HTMLDivElement>(null);
   const prev = useRef<Map<string, { x: number; y: number }>>(new Map());
   const prevDeal = useRef(dealId);
+  const prevWidth = useRef(0);
   useLayoutEffect(() => {
     const row = rowRef.current;
     if (!row) return;
@@ -145,7 +151,12 @@ export function PlayerHand({
     // the whole hand for a moment before the deal started.
     const newDeal = dealId !== prevDeal.current;
     prevDeal.current = dealId;
-    if (!dealing && !newDeal && prev.current.size) {
+    // The row changed width (the phone turned, the window resized): every
+    // tile moved because of that, not because of play; no slides.
+    const width = row.clientWidth;
+    const resized = Math.abs(width - prevWidth.current) > 2;
+    prevWidth.current = width;
+    if (!dealing && !newDeal && !resized && prev.current.size) {
       for (const n of nodes) {
         const old = prev.current.get(n.dataset.k!);
         const now = next.get(n.dataset.k!)!;
@@ -307,17 +318,15 @@ export function PlayerHand({
         {player.melds.length > 0 && (
           <div className={styles.melds}>
             {player.melds.map((m, i) => (
-              <span key={i} className={styles.meld} data-fresh={(freshMeld && i === player.melds.length - 1) || undefined}>
-                {m.tiles.map((code, j) => (
-                  <Tile
-                    key={j}
-                    code={code}
-                    size="meld"
-                    back={m.type === "closed_kan" && (j === 0 || j === 3)}
-                    style={{ ["--tw" as string]: `calc(var(--hand-tile) * ${MELD_SCALE})` }}
-                  />
-                ))}
-              </span>
+              <MeldTiles
+                key={i}
+                meld={m}
+                owner={player.seat}
+                size="meld"
+                className={styles.meld}
+                data-fresh={(freshMeld && i === player.melds.length - 1) || undefined}
+                tileStyle={{ ["--tw" as string]: `calc(var(--hand-tile) * ${MELD_SCALE})` }}
+              />
             ))}
           </div>
         )}

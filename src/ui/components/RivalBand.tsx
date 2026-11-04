@@ -6,6 +6,7 @@ import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { Portrait } from "./Portrait";
 import { Tile } from "./Tile";
+import { MeldTiles } from "./MeldTiles";
 import { Tenbo } from "./Tenbo";
 import { BandScore, useStickDrop, type ScoreFx } from "./BandScore";
 import styles from "./Band.module.css";
@@ -188,17 +189,15 @@ export function RivalBand({
         {player.melds.length > 0 && (
           <div className={styles.melds}>
             {player.melds.map((m, i) => (
-              <span key={i} className={styles.meld} data-fresh={(freshMeld && i === player.melds.length - 1) || undefined}>
-                {m.tiles.map((code, j) => (
-                  <Tile
-                    key={j}
-                    code={code}
-                    size="river"
-                    back={m.type === "closed_kan" && (j === 0 || j === 3)}
-                    style={backStyle}
-                  />
-                ))}
-              </span>
+              <MeldTiles
+                key={i}
+                meld={m}
+                owner={player.seat}
+                size="river"
+                className={styles.meld}
+                data-fresh={(freshMeld && i === player.melds.length - 1) || undefined}
+                tileStyle={backStyle}
+              />
             ))}
           </div>
         )}

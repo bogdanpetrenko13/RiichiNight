@@ -454,3 +454,44 @@ def test_rivals_hands_are_shown_only_when_the_hand_is_over():
         if seen_draw >= 2 and seen_win >= 3:
             break
     assert seen_draw and seen_win, (seen_draw, seen_win)
+
+
+def test_added_kan_is_flagged_and_other_kans_are_not():
+    """melds[].added: true exactly for an open kan made from the seat's own
+    earlier pon (shouminkan), drawn with its fourth tile on the sideways one."""
+    added = plain = 0
+    for seed in range(1, 120):
+        step = json.loads(bridge.new_game(json.dumps({"seed": seed})))
+        pons = {s: set() for s in range(4)}
+        for _ in range(3000):
+            view = step["view"]
+            for p in view["players"]:
+                for m in p["melds"]:
+                    kind = m["tiles"][0].lstrip("r")
+                    if m["type"] == "open_kan":
+                        assert m["added"] == (kind in pons[p["seat"]]), (seed, p["seat"], m, pons[p["seat"]])
+                        added += m["added"]
+                        plain += not m["added"]
+                    else:
+                        assert not m["added"], m
+                pons[p["seat"]] |= {m["tiles"][0].lstrip("r") for m in p["melds"] if m["type"] == "pon_meld"}
+            if view["status"] in ("round_over", "game_over"):
+                break
+            if view["status"] == "human":
+                pr = view["prompt"]
+                me = view["players"][0]
+                if "kan" in pr["actions"]:
+                    step = json.loads(bridge.act(json.dumps({"action": "kan"})))
+                elif "pon" in pr["actions"]:
+                    step = json.loads(bridge.act(json.dumps({"action": "pon"})))
+                elif "pass" in pr["actions"]:
+                    step = json.loads(bridge.act(json.dumps({"action": "pass"})))
+                elif "discard" in pr["actions"]:
+                    step = json.loads(bridge.act(json.dumps({"action": "discard", "tile": me.get("drawn") or me["hand"][-1]})))
+                else:
+                    step = json.loads(bridge.act(json.dumps({"action": pr["actions"][0]})))
+            else:
+                step = json.loads(bridge.ai_step())
+        if added and plain:
+            break
+    assert added, (added, plain)

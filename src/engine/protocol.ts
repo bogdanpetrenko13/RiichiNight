@@ -51,6 +51,8 @@ export interface Meld {
   tiles: TileCode[];
   called: TileCode | null;
   from: number | null;
+  /** A kan added to an earlier pon (its fourth tile is drawn on top). */
+  added?: boolean;
 }
 
 export interface PlayerView {

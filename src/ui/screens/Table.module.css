@@ -178,3 +178,22 @@
 .table[data-peek] [data-kind] {
   filter: brightness(0.5) saturate(0.6);
 }
+
+/* Turning the phone (Table.tsx, data-reflow): the bands and the hand are
+   rebuilt out of sight, then fade in settled. */
+.bands,
+.dock {
+  transition: opacity 220ms var(--ease-out);
+}
+
+.table[data-reflow] .bands,
+.table[data-reflow] .dock {
+  opacity: 0;
+  transition: none;
+}
+
+.table[data-reflow] .bands *,
+.table[data-reflow] .dock * {
+  transition: none !important;
+  animation: none !important;
+}

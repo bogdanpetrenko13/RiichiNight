@@ -9,6 +9,7 @@ import { Portrait } from "./Portrait";
 import { ScoreCalc } from "./ScoreCalc";
 import { handValue } from "../handValue";
 import { RivalHands } from "./RivalHands";
+import { MeldTiles } from "./MeldTiles";
 import { fxScale } from "../tableFx";
 import { voice } from "../../game/audio";
 import { PLAYER_VOICE, yakuClips } from "../../game/yakuVoice";
@@ -244,9 +245,12 @@ function WinBody({
               className={styles.hand}
               data-win-hand
               style={{
-                // Tile slots on the line: hand + winning tile + calls, plus the gaps.
+                // Tile slots on the line: hand + winning tile + calls (a sideways
+                // claimed tile is 1.42 wide), plus the gaps.
                 ["--n" as string]:
-                  w.hand.length + (w.winTile ? 1.25 : 0) + w.melds.reduce((n, m) => n + m.tiles.length + 0.25, 0),
+                  w.hand.length +
+                  (w.winTile ? 1.25 : 0) +
+                  w.melds.reduce((n, m) => n + m.tiles.length + 0.25 + (m.type !== "closed_kan" && m.from !== null ? 0.42 : 0), 0),
               }}
             >
               {w.hand.map((c, i) => (
@@ -258,11 +262,7 @@ function WinBody({
                 </span>
               )}
               {w.melds.map((m, i) => (
-                <span key={`m${i}`} className={styles.meldGroup}>
-                  {m.tiles.map((c, j) => (
-                    <Tile key={j} code={c} size="meld" style={tileDelay()} />
-                  ))}
-                </span>
+                <MeldTiles key={`m${i}`} meld={m} owner={w.seat} size="meld" className={styles.meldGroup} tileStyle={tileDelay()} />
               ))}
             </div>
             <ul className={styles.yaku}>

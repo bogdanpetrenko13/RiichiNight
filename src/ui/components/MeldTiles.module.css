@@ -1,0 +1,13 @@
+/* A meld (MeldTiles.tsx): tiles on one baseline, the claimed one sideways. */
+.meld {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+/* An added kan: the sideways tile with the fourth on top of it. */
+.stack {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-end;
+}

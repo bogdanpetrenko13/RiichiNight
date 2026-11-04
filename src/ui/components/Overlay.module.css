@@ -511,6 +511,17 @@
   animation-duration: 260ms;
 }
 
+/* A sideways claimed tile keeps its rotation: it only fades in. */
+.card[data-reveal] .meldGroup [class*="sideways"] {
+  animation-name: rvFade;
+}
+
+@keyframes rvFade {
+  from {
+    opacity: 0;
+  }
+}
+
 .card[data-reveal] [data-rv="win"] {
   animation-name: rvWin;
   animation-duration: 460ms;

@@ -59,6 +59,26 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const [ackRound, setAckRound] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const peek = usePeek();
+  // Turning the phone: the table is rebuilt for the new shape out of sight
+  // (bands and hand hidden, no slides), then fades in already settled,
+  // instead of tiles and bands visibly squeezing into place.
+  const [reflow, setReflow] = useState(false);
+  const shownOrientation = useRef(layout.orientation);
+  useLayoutEffect(() => {
+    if (shownOrientation.current === layout.orientation) return;
+    shownOrientation.current = layout.orientation;
+    setReflow(true);
+    let raf = 0;
+    const timer = window.setTimeout(() => {
+      raf = requestAnimationFrame(() => {
+        raf = requestAnimationFrame(() => setReflow(false));
+      });
+    }, 140);
+    return () => {
+      window.clearTimeout(timer);
+      cancelAnimationFrame(raf);
+    };
+  }, [layout.orientation]);
   // Rivals wait while the menu is open.
   useEffect(() => {
     gameRef.current.setPaused(menuOpen);
@@ -282,6 +302,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
       data-orientation={layout.orientation}
       data-style={settings.tableStyle}
       data-peek={peek.kind ?? undefined}
+      data-reflow={reflow || undefined}
       data-sticks-taken={(resultKey !== null && sticksTaken === resultKey) || undefined}
       {...lookAttrs(settings)}
       {...peek.handlers}

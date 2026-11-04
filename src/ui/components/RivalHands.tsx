@@ -2,6 +2,7 @@ import type { EndHand } from "../../engine/protocol";
 import type { CharacterDef } from "../../game/characters";
 import { useApp } from "../../app/AppContext";
 import { Tile } from "./Tile";
+import { MeldTiles } from "./MeldTiles";
 import { Portrait } from "./Portrait";
 import styles from "./Overlay.module.css";
 
@@ -16,7 +17,8 @@ export function RivalHands({ hands, cast }: { hands: EndHand[]; cast: CharacterD
     <div className={styles.rivalHands} data-rival-hands>
       {hands.map((h) => {
         const c = cast[h.seat - 1];
-        const slots = h.hand.length + h.melds.reduce((n, m) => n + m.tiles.length + 0.25, 0);
+        const slots =
+          h.hand.length + h.melds.reduce((n, m) => n + m.tiles.length + 0.25 + (m.type !== "closed_kan" && m.from !== null ? 0.42 : 0), 0);
         return (
           <section key={h.seat} className={styles.rivalHand} data-seat={h.seat}>
             <header>
@@ -29,11 +31,7 @@ export function RivalHands({ hands, cast }: { hands: EndHand[]; cast: CharacterD
                 <Tile key={i} code={code} size="meld" />
               ))}
               {h.melds.map((m, i) => (
-                <span key={`m${i}`} className={styles.meldGroup}>
-                  {m.tiles.map((code, j) => (
-                    <Tile key={j} code={code} size="meld" />
-                  ))}
-                </span>
+                <MeldTiles key={`m${i}`} meld={m} owner={h.seat} size="meld" className={styles.meldGroup} />
               ))}
             </div>
             <p className={styles.rivalWaits} data-waits={h.waits.join(" ") || undefined}>
