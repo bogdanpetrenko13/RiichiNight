@@ -133,3 +133,33 @@ def test_landscape_bands_keep_their_size_with_buttons(make_app):
     # The waits sit inside the player's column, fully on screen.
     assert app.in_viewport(ME)
     assert not app.errors, app.errors
+
+
+def test_tile_depth_follows_the_back_colour_and_stays_under_the_riichi_tile(make_app):
+    """A tile's edge is its back layer, in the tile back colour (graphite
+    here, not the set's amber), and a sideways riichi tile keeps its edge
+    under it in the traditional sets too (it used to jut out to the left);
+    the face art keeps a margin from the tile's edges."""
+    settings = {"aiDelay": 200, "tileset": "classic", "tableStyle": "felt", "tileBack": "graphite",
+                "styleVersion": 3, "theme": "dark"}
+    app = make_app(PORTRAIT).open("?scenario=myriichi", settings).start_game()
+    _riichi_offered(app)
+    _declare(app)
+    info = app.page.evaluate(
+        """() => {
+          const shadows = (el) => getComputedStyle(el).boxShadow.split(/,(?![^(]*\\))/).map((s) => s.trim())
+            .filter((s) => !s.includes('inset')).map((s) => {
+              const n = s.replace(/rgba?\\([^)]*\\)/, '').trim().split(/\\s+/).map(parseFloat);
+              return { color: (s.match(/rgba?\\([^)]*\\)/) || [''])[0], x: n[0], y: n[1] };
+            });
+          const hand = document.querySelector('[class*=dock] button[aria-label]');
+          const art = hand.querySelector('img').getBoundingClientRect();
+          const side = document.querySelector('[class*=river] [class*=sideways]');
+          return { hand: shadows(hand), side: shadows(side), artW: art.width / hand.getBoundingClientRect().width };
+        }"""
+    )
+    assert any(s["color"] == "rgb(69, 73, 79)" for s in info["hand"]), info["hand"]
+    drawn = [s for s in info["side"] if s["x"] or s["y"]]
+    assert drawn and all(s["y"] == 0 and s["x"] > 0 for s in drawn), info["side"]
+    assert info["artW"] < 0.88, info["artW"]
+    assert not app.errors, app.errors

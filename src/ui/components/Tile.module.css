@@ -1,6 +1,25 @@
-/* Tile body in CSS, face artwork from SVG. Size comes from --tw (tile width). */
+/* Tile body in CSS, face artwork from SVG. Size comes from --tw (tile width).
+
+   The depth is drawn like a real tile's layers: a thin bone layer under the
+   face, then the back layer in the tile back colour (Settings -> Tile backs)
+   with a darker line, then the shadow. --dx / --dy give the direction the
+   depth falls in (down; sideways tiles turn it so it still ends up under the
+   tile), --edge its thickness (in tile widths). */
 .tile {
   --tw: 40px;
+  --dx: 0;
+  --dy: 1;
+  --edge: 0.08;
+  /* Ring + glow of a tile in the pending choice (.eligible), drawn by every
+     tile set's box-shadow. */
+  --ring: 0 0 0 0 transparent;
+  --depth:
+    calc(var(--dx) * var(--tw) * 0.035) calc(var(--dy) * var(--tw) * 0.035) 0 var(--bone-200),
+    calc(var(--dx) * var(--tw) * var(--edge)) calc(var(--dy) * var(--tw) * var(--edge)) 0 var(--tile-back),
+    calc(var(--dx) * var(--tw) * (var(--edge) + 0.015)) calc(var(--dy) * var(--tw) * (var(--edge) + 0.015)) 0
+      var(--tile-back-edge),
+    calc(var(--dx) * var(--tw) * (var(--edge) + 0.06)) calc(var(--dy) * var(--tw) * (var(--edge) + 0.06))
+      calc(var(--tw) * 0.2) rgba(0, 0, 0, 0.35);
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -11,12 +30,11 @@
   padding: 0;
   border: none;
   border-radius: calc(var(--tw) * 0.16);
-  background: linear-gradient(180deg, var(--bone-50) 0%, var(--bone-100) 75%, var(--bone-200) 100%);
+  background: linear-gradient(180deg, var(--bone-50) 0%, var(--bone-100) 78%, var(--bone-200) 100%);
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.06) inset,
-    0 calc(var(--tw) * 0.07) 0 var(--bone-300),
-    0 calc(var(--tw) * 0.08) 0 var(--bone-shadow),
-    0 calc(var(--tw) * 0.14) calc(var(--tw) * 0.24) rgba(0, 0, 0, 0.35);
+    var(--ring),
+    0 0 0 1px rgba(0, 0, 0, 0.07) inset,
+    var(--depth);
   color: var(--honor-ink);
   font-family: var(--font-tile);
   line-height: 1;
@@ -40,9 +58,10 @@
   --tw: 20px;
 }
 
+/* The art keeps an even margin from the tile's edges (and the corner tab). */
 .art {
-  width: 96%;
-  height: 94%;
+  width: 84%;
+  height: 84%;
   display: block;
   object-fit: contain;
   pointer-events: none;
@@ -85,22 +104,37 @@
   background: var(--suit-sou);
 }
 
+/* Face down: the back layer is on top, so the depth shows the back's dark
+   line and then the bone layer. */
 .back {
+  --depth:
+    calc(var(--dx) * var(--tw) * 0.035) calc(var(--dy) * var(--tw) * 0.035) 0 var(--tile-back-edge),
+    calc(var(--dx) * var(--tw) * var(--edge)) calc(var(--dy) * var(--tw) * var(--edge)) 0 var(--bone-200),
+    calc(var(--dx) * var(--tw) * (var(--edge) + 0.015)) calc(var(--dy) * var(--tw) * (var(--edge) + 0.015)) 0
+      var(--bone-shadow),
+    calc(var(--dx) * var(--tw) * (var(--edge) + 0.06)) calc(var(--dy) * var(--tw) * (var(--edge) + 0.06))
+      calc(var(--tw) * 0.2) rgba(0, 0, 0, 0.35);
   background: linear-gradient(145deg, var(--tile-back-hi), var(--tile-back));
   box-shadow:
-    0 calc(var(--tw) * 0.07) 0 var(--bone-200),
-    0 calc(var(--tw) * 0.08) 0 var(--bone-shadow),
-    0 calc(var(--tw) * 0.14) calc(var(--tw) * 0.24) rgba(0, 0, 0, 0.35);
+    var(--ring),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+    var(--depth);
 }
 
-/* Traditional sets keep the thick 3D edge. */
+/* Traditional sets: a thicker tile with a light bevel along the bottom of
+   the face. */
 :global(:root[data-tileset="classic"]) .tile,
 :global(:root[data-tileset="ivory"]) .tile {
+  --edge: 0.1;
+}
+
+:global(:root[data-tileset="classic"]) .tile:not(.back),
+:global(:root[data-tileset="ivory"]) .tile:not(.back) {
   box-shadow:
-    0 calc(var(--tw) * -0.06) 0 inset rgba(255, 255, 255, 0.6),
-    0 calc(var(--tw) * 0.1) 0 var(--bone-300),
-    0 calc(var(--tw) * 0.12) 0 var(--bone-shadow),
-    0 calc(var(--tw) * 0.16) calc(var(--tw) * 0.2) rgba(0, 0, 0, 0.35);
+    var(--ring),
+    0 calc(var(--tw) * -0.05) 0 inset rgba(255, 255, 255, 0.55),
+    0 0 0 1px rgba(0, 0, 0, 0.07) inset,
+    var(--depth);
 }
 
 .clickable {
@@ -181,16 +215,12 @@
 }
 
 /* Tiles you can use for the pending choice: raised + primary ring (A + C). */
+/* The tile keeps its full depth; the ring goes around the face. (No
+   color-mix() here: in a custom property it would not fall back on old
+   WebViews and the whole shadow would vanish.) */
 .eligible {
+  --ring: 0 0 0 2.5px var(--primary), 0 0 calc(var(--tw) * 0.45) calc(var(--tw) * -0.1) var(--primary);
   transform: translateY(calc(var(--tw) * -0.16));
-  box-shadow:
-    0 0 0 2.5px var(--primary),
-    0 calc(var(--tw) * 0.08) 0 var(--bone-300),
-    0 0 calc(var(--tw) * 0.45) calc(var(--tw) * -0.1) var(--primary);
-  box-shadow:
-    0 0 0 2.5px var(--primary),
-    0 calc(var(--tw) * 0.08) 0 var(--bone-300),
-    0 0 calc(var(--tw) * 0.45) color-mix(in srgb, var(--primary) 55%, transparent);
 }
 
 .eligible.selected {
@@ -217,25 +247,24 @@
 /* Riichi tile lies sideways. Rotated, it is 1.42 tiles wide and 1 tall:
    margins of (1.42 - 1) / 2 on each side make room for it exactly, and it is
    moved down by the same amount so its face sits on the row's baseline like
-   its neighbours. The 3D edge is drawn along the x axis, which the rotation
-   turns into "down", so the edge stays under the tile instead of jutting out
-   to the left over the previous discard. */
+   its neighbours. The depth is drawn along the x axis (--dx), which the
+   rotation turns into "down", so it stays under the tile instead of jutting
+   out to the left over the previous discard (in every tile set). */
 .sideways {
+  --dx: 1;
+  --dy: 0;
   transform: rotate(90deg) translateX(calc(var(--tw) * 0.21));
   margin: 0 calc(var(--tw) * 0.21);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.06) inset,
-    calc(var(--tw) * 0.07) 0 0 var(--bone-300),
-    calc(var(--tw) * 0.08) 0 0 var(--bone-shadow),
-    calc(var(--tw) * 0.14) 0 calc(var(--tw) * 0.24) rgba(0, 0, 0, 0.35);
 }
 
 /* Flat tile set: no 3D edge, crisp outline. */
 :global(:root[data-tileset="flat"]) .tile {
+  --depth: calc(var(--dx) * 2px) calc(var(--dy) * 2px) 4px rgba(0, 0, 0, 0.25);
   background: var(--bone-50);
   box-shadow:
+    var(--ring),
     0 0 0 1px rgba(0, 0, 0, 0.18),
-    0 2px 4px rgba(0, 0, 0, 0.25);
+    var(--depth);
 }
 
 :global(:root[data-tileset="flat"]) .back {
