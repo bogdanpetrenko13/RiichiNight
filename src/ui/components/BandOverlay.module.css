@@ -119,3 +119,57 @@
   left: 40px;
   top: 40px;
 }
+
+/* Points changing hands (BandScore): the change floats up beside the score
+   and fades; green for a gain, red for a payment. */
+.delta {
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  /* A dark pill: it passes over the river's first tiles and must read there. */
+  padding: 1px 9px 2px;
+  border-radius: 999px;
+  background: rgba(12, 14, 16, 0.86);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  animation: deltaFloat 1.8s var(--ease-out) both;
+  z-index: var(--z-callout);
+}
+
+.delta[data-sign="plus"] {
+  color: var(--ok);
+}
+
+.delta[data-sign="minus"] {
+  color: var(--danger);
+}
+
+@keyframes deltaFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(-20%) scale(0.85);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(-55%) scale(1.08);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-75%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-120%) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .delta {
+    animation: none;
+    transform: translateY(-50%);
+  }
+}

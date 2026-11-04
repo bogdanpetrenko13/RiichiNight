@@ -1,6 +1,6 @@
 import type { GameView } from "../../engine/protocol";
 import { useApp } from "../../app/AppContext";
-import { Tile } from "./Tile";
+import { DeadWall } from "./DeadWall";
 import { Tenbo } from "./Tenbo";
 import styles from "./TableInfo.module.css";
 
@@ -12,21 +12,12 @@ import styles from "./TableInfo.module.css";
  * five tiles in the player's column.
  */
 const DORA_TILE = { ["--tw" as string]: "18px" };
-/** Tiles shown of the dead wall: up to four kans add indicators to the first. */
-const DEAD_WALL = 5;
 
 export function TableCenter({ view }: { view: GameView }) {
   const { t } = useApp();
   return (
     <div className={styles.center} data-table-center>
-      <div className={styles.centerDora} aria-label={t("dora")}>
-        {view.dora.map((d, i) => (
-          <Tile key={i} code={d} size="river" style={DORA_TILE} />
-        ))}
-        {Array.from({ length: Math.max(0, DEAD_WALL - view.dora.length) }, (_, i) => (
-          <Tile key={`b${i}`} back size="river" style={DORA_TILE} />
-        ))}
-      </div>
+      <DeadWall dora={view.dora} round={view.round.index} tileStyle={DORA_TILE} className={styles.centerDora} label={t("dora")} />
       <TableCounters view={view} />
     </div>
   );
@@ -49,7 +40,7 @@ export function TableCounters({ view, compact = false }: { view: GameView; compa
         <Tenbo kind="100" width="var(--cnt-stick)" />
         {view.round.honba}
       </span>
-      <span title={t("riichiSticks")}>
+      <span title={t("riichiSticks")} data-sticks-counter>
         <Tenbo kind="1000" width="var(--cnt-stick)" />
         {view.round.riichiSticks}
       </span>

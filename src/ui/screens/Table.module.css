@@ -59,6 +59,7 @@
 /* ---- bands ------------------------------------------------------------------ */
 .bands {
   grid-area: bands;
+  position: relative;
   min-height: 0;
   display: flex;
   flex-direction: column;

@@ -5,6 +5,7 @@ import { useApp } from "../app/AppContext";
 import { music, voice } from "./audio";
 import { sfx } from "./sfx";
 import { landingMs } from "../ui/motion";
+import { fxScale } from "../ui/tableFx";
 import { getCharacter, pickLine, rivalsUnlockedBy, type CharacterDef, type Emotion, type SpeechKind } from "./characters";
 import { applyEvents } from "./stats";
 import { SPEECH_FREQ_FACTOR, clearGame, loadGame, saveGame, type SavedGame } from "./storage";
@@ -279,7 +280,9 @@ export function useGameController(): GameController {
             const humanWin = ev.winners.includes(0);
             void sfx.play(humanWin ? "win" : "roundEnd", 600);
             // The winner sweeps up the riichi sticks on the table.
-            if (result?.type === "win" && result.winners.some((w) => (w.calc?.sticks ?? 0) > 0)) void sfx.play("sticks", 1300);
+            // (With table animations on, the table plays it as the sticks fly.)
+            if (!fxScale() && result?.type === "win" && result.winners.some((w) => (w.calc?.sticks ?? 0) > 0))
+              void sfx.play("sticks", 1300);
             // Your own win: you name its yaku (the ones the voice pack has).
             if (humanWin && result?.type === "win") {
               const mine = result.winners.find((w) => w.seat === 0);

@@ -6,6 +6,7 @@ import {
   FELT_SWATCH,
   RING_SWATCH,
   STYLE_TILESET,
+  TABLE_FX,
   TABLE_STYLES,
   THEME_MODES,
   TILESETS,
@@ -174,6 +175,13 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
           {toggle("markTsumogiri", "markTsumogiri", "markTsumogiriHint")}
           {toggle("safeTiles", "safeTiles", "safeTilesHint")}
           {toggle("dealAnimation", "dealAnimation")}
+          <Row label={t("tableFx")} hint={t("tableFxHint")} stacked>
+            <Segmented
+              value={settings.tableFx}
+              options={TABLE_FX.map((v) => ({ value: v, label: t(`tableFx_${v}` as StringKey) }))}
+              onChange={(tableFx) => updateSettings({ tableFx })}
+            />
+          </Row>
           <Row label={t("speechFreq")} stacked>
             <Segmented
               value={settings.speechFreq}

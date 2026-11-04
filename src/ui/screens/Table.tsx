@@ -22,6 +22,10 @@ import { Icon } from "../icons";
 import { lookAttrs } from "../tableLook";
 import { usePeek, visibleCopies } from "../usePeek";
 import { QuickSettings } from "../components/QuickSettings";
+import type { ScoreFx } from "../components/BandScore";
+import { flyCopies, fxMs } from "../tableFx";
+import { sfx } from "../../game/sfx";
+import { RoundSplash } from "../components/RoundSplash";
 import styles from "./Table.module.css";
 
 interface TableProps {
@@ -34,6 +38,8 @@ interface TableProps {
 
 /** The deal that already played its animation (survives leaving the table). */
 let dealtKey = "";
+/** The deal whose round splash already played (not again on re-opening the table). */
+let splashedKey = "";
 
 export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   testCrash("table");
@@ -103,6 +109,19 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dealKey, settings.dealAnimation]);
 
+  // A splash names the round and the dealer as each hand starts.
+  const splashMs = fxMs(1500);
+  const [splash, setSplash] = useState<string | null>(null);
+  useLayoutEffect(() => {
+    if (!splashMs || !roundIndex || !dealKey || splashedKey === dealKey) return;
+    splashedKey = dealKey;
+    if (!freshDeal || view?.result) return;
+    setSplash(dealKey);
+    const timer = window.setTimeout(() => setSplash(null), splashMs);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dealKey, splashMs]);
+
   // In riichi the only legal move is discarding the drawn tile: do it for the player.
   const onlyDiscard =
     view?.status === "human" &&
@@ -125,11 +144,52 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   // game_over with the same result, and must not wait and show it again.)
   const resultKey = view?.result ? `${view.round.index}:${view.result.type}` : null;
   const [released, setReleased] = useState<string | null>(null);
+  // Points change hands on the table first (Settings -> Table animations):
+  // after the Ron/Tsumo banner the riichi sticks fly to the winner and every
+  // score counts to its new value with the change floating beside it; then
+  // the result card.
+  const isWin = Boolean(resultKey?.endsWith(":win"));
+  const transferDelay = isWin ? CUTAWAY_MS + 100 : 500;
+  const transferMs = fxMs(1300);
+  const scoreFx = useMemo<(ScoreFx | null)[]>(() => {
+    const result = view?.result;
+    if (!view || !result || !resultKey || !transferMs) return [null, null, null, null];
+    return view.players.map((p) => ({
+      key: resultKey,
+      from: p.score - (result.deltas[p.seat] ?? 0),
+      to: p.score,
+      delay: transferDelay,
+      duration: transferMs,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resultKey, transferMs]);
+  const [sticksTaken, setSticksTaken] = useState<string | null>(null);
   useEffect(() => {
     if (!resultKey) return;
-    const ms = resultKey.endsWith(":win") ? CUTAWAY_MS + 600 : 900;
+    const ms = transferMs ? transferDelay + transferMs + 450 : isWin ? CUTAWAY_MS + 600 : 900;
     const timer = window.setTimeout(() => setReleased(resultKey), ms);
-    return () => window.clearTimeout(timer);
+    // The winner sweeps up the riichi sticks: the ones in front of the
+    // rivers and those left on the table from earlier hands.
+    const result = gameRef.current.view?.result;
+    const sticksTimer =
+      transferMs && result?.type === "win"
+        ? window.setTimeout(() => {
+            const first = result.winners[0];
+            const earlier = Math.max(0, Math.round((first?.calc?.sticks ?? 0) / 1000) - (result.riichiPaid?.length ?? 0));
+            const lines = [...document.querySelectorAll("[data-riichi-stick]:not([data-empty]) > *")];
+            const counter = document.querySelector("[data-sticks-counter] > svg");
+            const sources = [...lines, ...(counter ? Array.from({ length: Math.min(3, earlier) }, () => counter) : [])];
+            if (!sources.length || !first) return;
+            flyCopies(sources, document.querySelector(`[data-score-seat="${first.seat}"]`), Math.round(transferMs * 0.6));
+            setSticksTaken(resultKey);
+            void sfx.play("sticks", Math.round(transferMs * 0.45));
+          }, transferDelay)
+        : undefined;
+    return () => {
+      window.clearTimeout(timer);
+      window.clearTimeout(sticksTimer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resultKey]);
   const holding = resultKey !== null && released !== resultKey;
   const skipHold = () => {
@@ -220,6 +280,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
       data-orientation={layout.orientation}
       data-style={settings.tableStyle}
       data-peek={peek.kind ?? undefined}
+      data-sticks-taken={(resultKey !== null && sticksTaken === resultKey) || undefined}
       {...lookAttrs(settings)}
       {...peek.handlers}
       style={layout.vars}
@@ -258,10 +319,12 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
               claimed={prompt?.claim?.from === seat ? prompt.claim.tile : null}
               riverCols={layout.orientation === "portrait" ? 9 : 6}
               tsumogiri={game.tsumogiri[seat]}
+              scoreFx={scoreFx[seat]}
             />
           );
         })}
         {portrait && <TableCenter view={view} />}
+        {splash === dealKey && <RoundSplash view={view} cast={cast} ms={splashMs} />}
         <PlayerBand
           view={view}
           active={view.current === 0 && view.status === "human"}
@@ -269,6 +332,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
           callout={calloutBySeat[0] ?? null}
           calloutFrom={calloutBySeat[0] ? calloutFrom(0) : null}
           riverCols={portrait ? 9 : 6}
+          scoreFx={scoreFx[0]}
         />
       </div>
 

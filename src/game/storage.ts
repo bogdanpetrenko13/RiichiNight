@@ -22,6 +22,9 @@ export const THEME_MODES: ThemeMode[] = ["system", "light", "dark"];
 export type TableStyle = "quiet" | "felt";
 export const TABLE_STYLES: TableStyle[] = ["quiet", "felt"];
 /** Tile set that suits each table style (applied when the style changes). */
+export type TableFx = "full" | "short" | "off";
+export const TABLE_FX: TableFx[] = ["full", "short", "off"];
+
 export const STYLE_TILESET: Record<TableStyle, Tileset> = { quiet: "modern", felt: "classic" };
 
 /** Felt colour of the "felt" table style (src/styles/tokens.css). */
@@ -114,6 +117,8 @@ export interface Settings {
   markTsumogiri: boolean;
   /** Shield on hand tiles that are safe against every rival in riichi. */
   safeTiles: boolean;
+  /** Table effects: dora flip, riichi sticks, points changing hands, round splash. */
+  tableFx: TableFx;
   /** Result screen: "How it's scored" section expanded. */
   scoreDetails?: boolean;
   theme: ThemeMode;
@@ -166,6 +171,7 @@ export function defaultSettings(): Settings {
     tileHints: "man",
     markTsumogiri: true,
     safeTiles: false,
+    tableFx: "full",
     tileBack: "auto",
     theme: "system",
     styleVersion: STYLE_VERSION,
@@ -209,6 +215,7 @@ export async function loadSettings(): Promise<Settings> {
   if (rest.tileBack !== undefined && !TILE_BACKS.includes(rest.tileBack)) delete rest.tileBack;
   if (rest.dealerChip !== undefined && !TURN_RINGS.includes(rest.dealerChip)) delete rest.dealerChip;
   if (rest.turnRingStyle !== undefined && !TURN_RING_STYLES.includes(rest.turnRingStyle)) delete rest.turnRingStyle;
+  if (rest.tableFx !== undefined && !TABLE_FX.includes(rest.tableFx)) delete rest.tableFx;
   if (rest.aiDelay === undefined && oldSpeed) rest.aiDelay = OLD_SPEED[oldSpeed] ?? AI_DELAY_DEFAULT;
   // The old on/off switch for rivals' lines becomes "off" / the default.
   const oldBubbles = (rest as { speechBubbles?: boolean }).speechBubbles;

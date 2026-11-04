@@ -7,6 +7,7 @@ import type { StringKey } from "../../i18n/strings";
 import { Portrait } from "./Portrait";
 import { Tile } from "./Tile";
 import { Tenbo } from "./Tenbo";
+import { BandScore, useStickDrop, type ScoreFx } from "./BandScore";
 import styles from "./Band.module.css";
 import riverStyles from "./River.module.css";
 import overlay from "./BandOverlay.module.css";
@@ -29,6 +30,8 @@ interface RivalBandProps {
   riverCols?: number;
   /** Her last discard was the tile she had just drawn. */
   tsumogiri?: boolean;
+  /** Points changing hands at the end of the hand (Table.tsx). */
+  scoreFx?: ScoreFx | null;
 }
 
 /**
@@ -48,6 +51,7 @@ export function RivalBand({
   claimed,
   riverCols = 6,
   tsumogiri = false,
+  scoreFx = null,
 }: RivalBandProps) {
   const { t, charName, settings } = useApp();
   const lastIndex = player.discards.length - 1;
@@ -60,6 +64,9 @@ export function RivalBand({
   const hasDrawn = player.handCount % 3 === 2;
   const backsRef = useRef<HTMLDivElement>(null);
   const riverRef = useRef<HTMLDivElement>(null);
+  const scoreRef = useRef<HTMLSpanElement>(null);
+  const stickRef = useRef<HTMLDivElement>(null);
+  useStickDrop(stickRef, scoreRef, player.riichi);
   const rects = useRef<{ hand: DOMRect[]; drawn: DOMRect | null }>({ hand: [], drawn: null });
   const seen = useRef({ discards: player.discards.length, drawn: hasDrawn });
   useLayoutEffect(() => {
@@ -119,7 +126,7 @@ export function RivalBand({
         <span className={styles.wind} data-dealer={dealer || undefined}>
           {t(`wind_${player.wind}` as StringKey)}
         </span>
-        <span className={styles.score}>{player.score.toLocaleString()}</span>
+        <BandScore seat={player.seat} score={player.score} fx={scoreFx} className={styles.score} scoreRef={scoreRef} />
         {/* In riichi a badge takes the name's place: the first thing to check
             before a dangerous discard. */}
         <span className={styles.name}>{charName(character).split(" ")[0]}</span>
@@ -145,7 +152,13 @@ export function RivalBand({
         {/* Riichi: a 1 000 stick laid in front of the river, as on a real table. */}
         {/* The stick's line is always there (hidden until riichi), so the river
             does not jump down when she declares. */}
-        <div className={riverStyles.riichiLine} data-empty={!player.riichi || undefined} aria-hidden={!player.riichi || undefined}>
+        <div
+          ref={stickRef}
+          className={riverStyles.riichiLine}
+          data-riichi-stick
+          data-empty={!player.riichi || undefined}
+          aria-hidden={!player.riichi || undefined}
+        >
           <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
         </div>
         {player.discards.map((code, i) => (

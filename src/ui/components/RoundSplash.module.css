@@ -1,0 +1,67 @@
+/* Round splash (RoundSplash.tsx): a ribbon across the middle of the table
+   that slides in, holds and fades; it never takes taps. */
+.splash {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 42%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 16px 16px;
+  background: linear-gradient(90deg, transparent, rgba(10, 12, 14, 0.82) 18%, rgba(10, 12, 14, 0.82) 82%, transparent);
+  color: #fff;
+  text-align: center;
+  pointer-events: none;
+  z-index: var(--z-callout);
+  animation: splash 1.4s var(--ease-out) both;
+}
+
+.round {
+  font-family: var(--font-call);
+  font-weight: var(--call-weight);
+  letter-spacing: var(--call-ls);
+  text-shadow: var(--call-shadow);
+  font-size: 34px;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.extras {
+  font-size: 13px;
+  font-weight: var(--fw-semibold, 600);
+  opacity: 0.8;
+}
+
+.dealer {
+  margin-top: 2px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--dealer-bg, var(--primary));
+  color: var(--dealer-text, var(--on-primary));
+  font-size: 13px;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--caps-ls);
+  text-transform: uppercase;
+}
+
+@keyframes splash {
+  0% {
+    opacity: 0;
+    transform: translate(-12%, -50%);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+  78% {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(8%, -50%);
+  }
+}

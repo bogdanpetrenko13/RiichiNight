@@ -22,6 +22,7 @@ import { emptyStats, newlyEarned, type Stats } from "../game/stats";
 import { music, voice } from "../game/audio";
 import { sfx } from "../game/sfx";
 import { setMotionSpeed } from "../ui/motion";
+import { setTableFx } from "../ui/tableFx";
 import type { CharacterDef } from "../game/characters";
 
 export type Translate = (key: StringKey, vars?: Record<string, string | number>) => string;
@@ -86,13 +87,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     sfx.volume = settings.sfxVolume;
     sfx.surface = settings.tableStyle === "felt" ? "felt" : "wood";
     setMotionSpeed(settings.aiDelay);
+    setTableFx(settings.tableFx);
     music.setVolume(settings.musicVolume);
     const root = document.documentElement;
     root.lang = settings.lang;
     root.dataset.tileset = settings.tileset;
     if (settings.tileBack === "auto") delete root.dataset.tileBack;
     else root.dataset.tileBack = settings.tileBack;
-  }, [settings.voiceVolume, settings.sfxVolume, settings.tableStyle, settings.musicVolume, settings.lang, settings.tileset, settings.tileBack, settings.aiDelay]);
+  }, [settings.voiceVolume, settings.sfxVolume, settings.tableStyle, settings.musicVolume, settings.lang, settings.tileset, settings.tileBack, settings.aiDelay, settings.tableFx]);
 
   // Audio may only start after a user gesture (Android / Chrome). The first
   // tap anywhere unlocks it; every button press then gives a soft click

@@ -25,7 +25,7 @@ The owner writes in Russian; reply in Russian.
 | `public/py/ai.py` | Heroine AI: level (mistakes) + style (`STYLES`: folding, calls, dama, flush, value); each heroine's `style` is in `src/game/characters.ts` and matches her bio |
 | `public/py/yakufix.py` | Fixes to pyriichi: ryanpeikou vs chiitoitsu, chanta without sequences, dora counting (melds; tsumo tile counted twice) |
 | `public/py/calcinfo.py` | Score explanation for the result screen (fu parts, dora split, payments) + open-hand ron 30 fu minimum |
-| `public/py/scenarios.py` | Rigged first deals for tests (`?scenario=tsumo`, `redfive`, `riichi`, `myriichi`, `rivalpon`, `mypon`, `mychi`, `rinshan`) |
+| `public/py/scenarios.py` | Rigged first deals for tests (`?scenario=tsumo`, `redfive`, `riichi`, `myriichi`, `rivalpon`, `mypon`, `mychi`, `rinshan`, `riichitsumo`) |
 | `public/py/fastpatch.py` | Speed-up of pyriichi's tenpai search |
 | `public/py/rulefix.py` | Game-flow and scoring fixes to pyriichi found against Mortal's rules (kan wall, kuikae, furiten, ippatsu, double riichi, dora after 7z, mangan cap, waits, chi/riichi red fives, no calls on the last discard, a winning kan replacement tile offers Tsumo instead of winning unpaid, ...) |
 | `public/py/mjai.py` | The game as mjai events (`MjaiLog` on `Game.mjai`, `masked()` per seat) |
@@ -40,6 +40,7 @@ The owner writes in Russian; reply in Russian.
 | `src/ui/useLayout.ts` | Tile / band sizes from the viewport and the measured bands area (fixed sizes from `src/ui/metrics.ts`) |
 | `src/ui/components/Band.module.css` | Band layout; rivers in `River.module.css`, plaques and bubbles in `BandOverlay.module.css`, dead wall / counters / table centre in `TableInfo.module.css` |
 | `src/ui/motion.ts` | FLIP and discard flight animations |
+| `src/ui/tableFx.ts` | Table animations (Settings → «Анимации стола»: full / short / off, `fxMs`): new dora turns over (`DeadWall.tsx`), riichi stick goes down / is swept to the winner, points change hands before the result card (`BandScore.tsx`, timing in `Table.tsx`), round splash (`RoundSplash.tsx`); e2e in `tests/e2e/test_table_fx.py` |
 | `src/ui/usePeek.ts` | Long press on a tile: its visible copies light up, a chip counts them (`data-kind` on face tiles) |
 | `src/ui/components/QuickSettings.tsx` | Settings in the table menu (speed, volumes, hints, talk); the rivals wait while the menu is open (`setPaused`) |
 | `src/i18n/strings.ts` | en + ru strings (both must have the same keys) |

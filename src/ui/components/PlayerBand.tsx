@@ -7,6 +7,8 @@ import type { StringKey } from "../../i18n/strings";
 import { Tile } from "./Tile";
 import { Tenbo } from "./Tenbo";
 import { TableCounters } from "./TableCenter";
+import { DeadWall } from "./DeadWall";
+import { BandScore, useStickDrop, type ScoreFx } from "./BandScore";
 import styles from "./Band.module.css";
 import overlay from "./BandOverlay.module.css";
 import riverStyles from "./River.module.css";
@@ -26,8 +28,11 @@ export function PlayerBand({
   riverCols = 6,
   callout = null,
   calloutFrom = null,
+  scoreFx = null,
 }: {
   view: GameView;
+  /** Points changing hands at the end of the hand (Table.tsx). */
+  scoreFx?: ScoreFx | null;
   active: boolean;
   /** Waits / furiten chip: under the score (portrait), top right of the column (landscape). */
   waits?: ReactNode;
@@ -39,12 +44,13 @@ export function PlayerBand({
 }) {
   const { t, settings } = useApp();
   const me = view.players[0];
-  // Dora indicators face up, the rest of the dead-wall row as backs (5 total).
-  const hidden = Math.max(0, 5 - view.dora.length);
   // Landscape: the dead wall a little smaller than the river tiles (it is information, not play).
   const doraBig = { ["--tw" as string]: "calc(var(--band-river, 24px) * 0.62)" };
   // The newest discard flies in from the hand.
   const riverRef = useRef<HTMLDivElement>(null);
+  const scoreRef = useRef<HTMLSpanElement>(null);
+  const stickRef = useRef<HTMLDivElement>(null);
+  useStickDrop(stickRef, scoreRef, me.riichi);
   const count = me.discards.length;
   const lastCount = useRef(count);
   useLayoutEffect(() => {
@@ -53,14 +59,7 @@ export function PlayerBand({
   }, [count]);
   const deadWall = (
     <div className={info.table}>
-      <div className={info.dora} aria-label={t("dora")}>
-        {view.dora.map((d, i) => (
-          <Tile key={i} code={d} size="river" style={doraBig} />
-        ))}
-        {Array.from({ length: hidden }, (_, i) => (
-          <Tile key={`b${i}`} back size="river" style={doraBig} />
-        ))}
-      </div>
+      <DeadWall dora={view.dora} round={view.round.index} tileStyle={doraBig} className={info.dora} label={t("dora")} />
       <TableCounters view={view} compact />
     </div>
   );
@@ -70,7 +69,7 @@ export function PlayerBand({
         <span className={styles.wind} data-dealer={view.round.dealer === 0 || undefined}>
           {t(`wind_${me.wind}` as StringKey)}
         </span>
-        <span className={styles.score}>{me.score.toLocaleString()}</span>
+        <BandScore seat={0} score={me.score} fx={scoreFx} className={styles.score} scoreRef={scoreRef} />
         {/* Landscape: a name line like the rivals', so every column's header
             is the same height and all rivers start on one line. */}
         {riverCols !== 9 && <span className={styles.name}>{t("you")}</span>}
@@ -88,7 +87,13 @@ export function PlayerBand({
       >
         {/* The stick's line is always there (hidden until riichi), so the river
             does not jump down when she declares. */}
-        <div className={riverStyles.riichiLine} data-empty={!me.riichi || undefined} aria-hidden={!me.riichi || undefined}>
+        <div
+          ref={stickRef}
+          className={riverStyles.riichiLine}
+          data-riichi-stick
+          data-empty={!me.riichi || undefined}
+          aria-hidden={!me.riichi || undefined}
+        >
           <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
         </div>
         {me.discards.map((code, i) => (

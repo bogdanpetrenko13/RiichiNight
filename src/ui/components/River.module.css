@@ -72,3 +72,8 @@
 .river[data-flight] > * {
   animation: none;
 }
+
+/* The winner has swept the riichi sticks up (Table.tsx, data-sticks-taken). */
+:global([data-sticks-taken]) .riichiLine > * {
+  visibility: hidden;
+}

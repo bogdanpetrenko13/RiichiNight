@@ -22,6 +22,9 @@ a few moves instead of waiting for it to happen by chance:
            holds 2356s, so Chi offers three choices (the chooser)
   myriichi the player alone starts tenpai (same hand as "riichi"): the
            player's riichi flow, the sideways tile in the player's river
+  riichitsumo the player deals tenpai (as "myriichi"), declares riichi with
+           the junk tile and draws a winning 1z next: the riichi stick
+           going down and swept up by the winner
   rinshan  the player deals with four 1m and waits on 25s; the replacement
            tile after the closed kan is the 2s (Tsumo offered, rinshan kaihou)
 
@@ -87,6 +90,12 @@ SCENARIOS: Dict[str, dict] = {
     "myriichi": {
         "hand": "555z 666z 777z 1122z",
         "junk": "9s",
+        "dora": "9p",
+    },
+    "riichitsumo": {
+        "hand": "555z 666z 777z 1122z",
+        "junk": "9s",
+        "draws": ["1z"],
         "dora": "9p",
     },
     "rinshan": {
