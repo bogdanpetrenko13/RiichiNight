@@ -60,6 +60,9 @@ export interface PlayerView {
   riichi: boolean;
   riichiIndex: number | null;
   discards: TileCode[];
+  /** Per river tile: thrown right after drawing it (tsumogiri). Older
+   *  builds' saves may lack it. */
+  tsumogiri?: boolean[];
   melds: Meld[];
   handCount: number;
   /** Only for the human seat, or a winner when the round is over. */
@@ -69,6 +72,9 @@ export interface PlayerView {
   furiten?: boolean;
   /** Human seat only: tiles that complete the hand right now (13-tile hand). */
   waits?: TileCode[];
+  /** Human seat only, while a rival is in riichi: tile kinds none of them can
+   *  ron (genbutsu: her discards and everything let pass after her riichi). */
+  safe?: TileCode[];
 }
 
 export interface WaitHint {

@@ -49,7 +49,7 @@ export function RivalBand({
   riverCols = 6,
   tsumogiri = false,
 }: RivalBandProps) {
-  const { t, charName } = useApp();
+  const { t, charName, settings } = useApp();
   const lastIndex = player.discards.length - 1;
   const backStyle = { ["--tw" as string]: "var(--band-back, 14px)" };
 
@@ -154,6 +154,7 @@ export function RivalBand({
             code={code}
             size="river"
             sideways={player.riichiIndex === i}
+            tsumogiri={settings.markTsumogiri && Boolean(player.tsumogiri?.[i])}
             highlight={i === lastIndex && claimed === code}
             marked={i === lastIndex && claimed === code}
           />

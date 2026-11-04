@@ -2,8 +2,6 @@ import { useApp } from "../../app/AppContext";
 import { LANGS, type StringKey } from "../../i18n/strings";
 import type { GameRules } from "../../engine/protocol";
 import {
-  AI_DELAY_MAX,
-  AI_DELAY_MIN,
   FELT_COLORS,
   FELT_SWATCH,
   RING_SWATCH,
@@ -21,6 +19,7 @@ import { lookAttrs } from "../tableLook";
 import { TileRow } from "../components/TileRow";
 import { Tile } from "../components/Tile";
 import { AppBar, Group, Row, Segmented, Switch } from "../components/Primitives";
+import { SpeedSlider } from "../components/QuickSettings";
 import styles from "./SettingsScreen.module.css";
 
 /** The app is AGPL: whoever gets it can get the source (see NOTICE.md). */
@@ -33,8 +32,8 @@ type BoolKey = { [K in keyof Settings]-?: Settings[K] extends boolean ? K : neve
 export function SettingsScreen({ onBack }: { onBack: () => void }) {
   const { t, settings, updateSettings } = useApp();
 
-  const toggle = (key: BoolKey, label: StringKey) => (
-    <Row label={t(label)}>
+  const toggle = (key: BoolKey, label: StringKey, hint?: StringKey) => (
+    <Row label={t(label)} hint={hint ? t(hint) : undefined}>
       <Switch label={t(label)} checked={settings[key]} onChange={(v) => updateSettings({ [key]: v })} />
     </Row>
   );
@@ -168,26 +167,12 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
 
         <Group title={t("gameplay")}>
           <Row label={t("aiSpeed")} hint={t("aiDelayValue", { s: (settings.aiDelay / 1000).toFixed(1) })} stacked>
-            <div className={styles.speed}>
-              <input
-                className={styles.slider}
-                type="range"
-                // Right = faster: the slider runs over the inverted delay.
-                min={AI_DELAY_MIN}
-                max={AI_DELAY_MAX}
-                step={50}
-                value={AI_DELAY_MAX + AI_DELAY_MIN - settings.aiDelay}
-                onChange={(e) => updateSettings({ aiDelay: AI_DELAY_MAX + AI_DELAY_MIN - Number(e.target.value) })}
-                aria-label={t("aiSpeed")}
-              />
-              <div className={styles.speedEnds}>
-                <span>{t("speed_slow")}</span>
-                <span>{t("speed_fast")}</span>
-              </div>
-            </div>
+            <SpeedSlider />
           </Row>
           {toggle("showWaitHints", "waitHints")}
           {toggle("autoDiscardRiichi", "autoDiscardRiichi")}
+          {toggle("markTsumogiri", "markTsumogiri", "markTsumogiriHint")}
+          {toggle("safeTiles", "safeTiles", "safeTilesHint")}
           {toggle("dealAnimation", "dealAnimation")}
           <Row label={t("speechFreq")} stacked>
             <Segmented

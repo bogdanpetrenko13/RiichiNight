@@ -185,6 +185,7 @@ export function PlayerHand({
                 dimmed={pick === false || (pick === null && canDiscard && !allowed(code))}
                 eligible={pick === true}
                 hint={pick === null && showsWait}
+                safe={settings.safeTiles && contains(player.safe, code)}
                 onClick={canDiscard || riichiMode || chiMode ? () => tap(i) : undefined}
                 button
                 style={{

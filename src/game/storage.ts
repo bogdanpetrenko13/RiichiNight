@@ -110,6 +110,10 @@ export interface Settings {
   tileBack: TileBack;
   /** Corner index on tiles: none, man + winds, or all. */
   tileHints: TileHints;
+  /** Shade river tiles thrown straight after the draw (tsumogiri). */
+  markTsumogiri: boolean;
+  /** Shield on hand tiles that are safe against every rival in riichi. */
+  safeTiles: boolean;
   /** Result screen: "How it's scored" section expanded. */
   scoreDetails?: boolean;
   theme: ThemeMode;
@@ -160,6 +164,8 @@ export function defaultSettings(): Settings {
     turnRingStyle: "line",
     dealerChip: "auto",
     tileHints: "man",
+    markTsumogiri: true,
+    safeTiles: false,
     tileBack: "auto",
     theme: "system",
     styleVersion: STYLE_VERSION,

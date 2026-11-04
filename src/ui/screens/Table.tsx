@@ -20,6 +20,8 @@ import { WaitsChip } from "../components/WaitsChip";
 import { IconButton, Sheet } from "../components/Primitives";
 import { Icon } from "../icons";
 import { lookAttrs } from "../tableLook";
+import { usePeek, visibleCopies } from "../usePeek";
+import { QuickSettings } from "../components/QuickSettings";
 import styles from "./Table.module.css";
 
 interface TableProps {
@@ -50,6 +52,11 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const [chiFirst, setChiFirst] = useState<number | null>(null);
   const [ackRound, setAckRound] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const peek = usePeek();
+  // Rivals wait while the menu is open.
+  useEffect(() => {
+    gameRef.current.setPaused(menuOpen);
+  }, [menuOpen]);
 
   // Rivers are sized from the real size of the bands area.
   const bandsRef = useRef<HTMLDivElement>(null);
@@ -199,6 +206,8 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
     <WaitsChip player={me} prompt={prompt} selectedCode={selectedTile} riichiMode={riichiMode} />
   );
 
+  const peekSeen = peek.kind ? visibleCopies(view, peek.kind) : 0;
+
   const showRound =
     !holding &&
     view.result !== null &&
@@ -206,7 +215,19 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
   const showGameOver = view.status === "game_over" && !showRound && !holding;
 
   return (
-    <div className={styles.table} data-orientation={layout.orientation} data-style={settings.tableStyle} {...lookAttrs(settings)} style={layout.vars}>
+    <div
+      className={styles.table}
+      data-orientation={layout.orientation}
+      data-style={settings.tableStyle}
+      data-peek={peek.kind ?? undefined}
+      {...lookAttrs(settings)}
+      {...peek.handlers}
+      style={layout.vars}
+    >
+      {/* Long press on a tile: its copies stay lit, the rest of the table dims. */}
+      {peek.kind && (
+        <style>{`[data-peek="${peek.kind}"] [data-kind="${peek.kind}"][data-kind] { filter: none; outline: 3px solid var(--pointer); outline-offset: 1px; z-index: var(--z-local); }`}</style>
+      )}
       <header className={styles.topBar} data-zone>
         <IconButton icon="menu" label={t("menu")} onClick={() => setMenuOpen(true)} />
         <div className={styles.roundInfo}>
@@ -281,6 +302,11 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
             else if (matches.length > 1) setChiFirst(i);
           }}
         />
+        {peek.kind && (
+          <div className={styles.peekChip} role="status" data-peek-chip>
+            {t("peekCount", { seen: peekSeen, left: Math.max(0, 4 - peekSeen) })}
+          </div>
+        )}
         {/* Portrait: a reserved row under the hand; landscape: a column of
             fixed height to its right. Either way the hand and the bands keep
             their size when buttons appear (the waits live in the player band). */}
@@ -295,6 +321,7 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
             <Icon name="play" />
             {t("resume")}
           </button>
+          <QuickSettings />
           <button className="btn btn-lg" onClick={() => onOpen("learn")}>
             <Icon name="book" />
             {t("learn")}

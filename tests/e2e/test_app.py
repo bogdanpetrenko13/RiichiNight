@@ -548,3 +548,113 @@ def test_a_heroine_can_be_the_first_east(make_app):
     for _ in range(8):
         app.step()
     assert not app.errors, app.errors
+
+
+def test_long_press_lights_up_the_visible_copies_of_a_tile(make_app):
+    """Holding a tile lights its copies on the table (hand, rivers, melds,
+    dora), counts them in a chip, and does not lift or discard the tile."""
+    app = make_app().open("?scenario=tsumo&seed=5").start_game()
+    app.wait_my_turn()
+    page = app.page
+    tile = page.locator("[class*=dock] button[aria-label='4s']").first
+    box = tile.bounding_box()
+    hand_before = page.locator("[class*=dock] button[aria-label]").count()
+    page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+    page.mouse.down()
+    page.wait_for_timeout(700)
+    chip = page.locator("[data-peek-chip]")
+    assert chip.count() == 1, "no chip while holding"
+    seen = page.evaluate("() => document.querySelectorAll('[data-kind=\"4s\"]').length")
+    assert seen >= 3, seen  # the scenario deals 444s
+    assert chip.inner_text() == f"Видно {seen} · осталось {4 - seen}", chip.inner_text()
+    lit = page.evaluate(
+        """() => [...document.querySelectorAll('[data-kind]')].map((e) =>
+             [e.getAttribute('data-kind'), getComputedStyle(e).outlineStyle, getComputedStyle(e).filter])"""
+    )
+    assert all(o == "solid" and f == "none" for k, o, f in lit if k == "4s"), lit
+    assert all(o != "solid" and f != "none" for k, o, f in lit if k != "4s"), lit
+    app.shot("peek_hold")
+    page.mouse.up()
+    page.wait_for_timeout(400)
+    assert chip.count() == 0
+    # The held tile was neither lifted nor discarded.
+    assert page.locator("[class*=dock] button[aria-label]").count() == hand_before
+    assert not page.locator("[class*=dock] [class*=selected]").count()
+    assert not app.errors, app.errors
+
+
+@pytest.mark.parametrize("mark", [True, False])
+def test_tsumogiri_tiles_are_shaded_in_the_river(make_app, mark):
+    """The player deals in this scenario and cuts the junk tile, which is
+    the 14th tile, the drawn one: a tsumogiri, shaded unless switched off."""
+    app = make_app().open("?scenario=tsumo&seed=5", {"markTsumogiri": mark}).start_game()
+    app.wait_my_turn()
+    app.discard("1z")
+    river = app.page.locator("section[class*=band]:not([aria-label]) [class*=river] [data-kind='1z']")
+    river.wait_for(timeout=10_000)
+    app.page.wait_for_timeout(600)
+    assert (river.get_attribute("data-tsumogiri") == "true") is mark
+    shaded = app.page.evaluate("(e) => getComputedStyle(e).filter", river.element_handle())
+    assert ("brightness" in shaded) is mark, shaded
+    assert not app.errors, app.errors
+
+
+@pytest.mark.parametrize("on", [True, False])
+def test_safe_tiles_against_a_rival_riichi_get_a_shield(make_app, on):
+    """Scenario riichi: rivals declare riichi early; with the setting on,
+    hand tiles of a kind in her river get a shield (and none before)."""
+    app = make_app().open("?scenario=riichi&seed=3", {"safeTiles": on, "aiDelay": 150}).start_game()
+    shown = False
+    for _ in range(600):
+        riichi = app.page.locator("[class*=river] [class*=sideways]").count()
+        if not riichi:
+            assert app.page.locator("[data-safe]").count() == 0
+        elif app.my_turn():
+            app.page.wait_for_timeout(300)
+            shown = app.page.locator("[data-safe]").count() > 0
+            break
+        app.step()
+    assert shown is on
+    if on:
+        safe = app.page.evaluate(
+            "() => [...document.querySelectorAll('[class*=dock] [data-safe]')].map((s) => s.closest('[data-kind]').getAttribute('data-kind'))"
+        )
+        rivers = app.page.evaluate(
+            "() => [...document.querySelectorAll('[class*=river] [data-kind]')].map((e) => e.getAttribute('data-kind'))"
+        )
+        assert safe and all(k in rivers for k in safe), (safe, rivers)
+        app.shot("safe_tiles")
+    assert not app.errors, app.errors
+
+
+def test_table_menu_pauses_the_rivals_and_changes_settings_on_the_spot(make_app):
+    """The table menu holds the quick settings: a switch there changes the
+    table at once and is saved; the rivals do not move while it is open."""
+    app = make_app().open("?seed=9", {"aiDelay": 150, "markTsumogiri": True}).start_game()
+    page = app.page
+    # Right after the player's discard it is the rivals' turn.
+    app.wait_my_turn()
+    app.discard()
+    page.get_by_role("button", name="Меню").click()
+    sheet = page.locator("[data-quick-settings]")
+    sheet.wait_for()
+    rivers = "() => document.querySelectorAll('[class*=river] [data-kind]').length"
+    before = page.evaluate(rivers)
+    page.wait_for_timeout(1500)  # ten rival moves at this speed
+    assert page.evaluate(rivers) == before, "rivals moved while the menu was open"
+    switch = sheet.get_by_role("switch", name="Цумогири в реке")
+    assert switch.get_attribute("aria-checked") == "true"
+    switch.click()
+    assert switch.get_attribute("aria-checked") == "false"
+    assert page.locator("[data-tsumogiri]").count() == 0
+    # Saved (Capacitor prefixes the key in the app, the preview stub does not).
+    page.wait_for_timeout(300)
+    saved = page.evaluate(
+        """() => ['CapacitorStorage.settings.v1', 'settings.v1'].map((k) => localStorage.getItem(k))
+             .filter(Boolean).map((v) => JSON.parse(v).markTsumogiri)"""
+    )
+    assert False in saved, saved
+    app.shot("table_menu")
+    page.get_by_role("button", name="Продолжить").first.click()
+    page.wait_for_function(f"() => ({rivers})() > {before}", timeout=30_000)
+    assert not app.errors, app.errors

@@ -152,6 +152,12 @@ class Game:
         self.round_result = None
         self.round_index += 1
         self.round_start_scores = list(self.engine.game_state.scores)
+        # Per seat, one flag per river tile: thrown right after drawing it.
+        self.tsumogiri_marks = [[] for _ in range(NUM_PLAYERS)]
+        # Every discard of the hand in order, called ones too (seat, kind),
+        # and where in it each riichi was declared (safe tiles, _safe_tiles).
+        self.discard_log = []
+        self.riichi_at = {}
         gs = self.engine.game_state
         self.events.append(
             {
@@ -202,6 +208,14 @@ class Game:
             # Who threw the last discard as a riichi declaration (for _riichi_paid).
             self.last_discard_riichi = seat if action == GameAction.DECLARE_RIICHI else None
             discards = self.engine.get_discards(seat)
+            tsumogiri = drawn_before is not None and tile is not None and tstr(tile) == tstr(drawn_before)
+            self._river_marks(seat, pending=1).append(tsumogiri)
+            thrown = discards[-1] if discards else tile
+            log = getattr(self, "discard_log", None)
+            if log is not None and thrown is not None:
+                log.append((seat, tstr(thrown).lstrip("r")))
+                if action == GameAction.DECLARE_RIICHI:
+                    self.riichi_at[seat] = len(log) - 1
             self.events.append(
                 {
                     "t": "discard",
@@ -209,7 +223,7 @@ class Game:
                     "tile": tstr(discards[-1]) if discards else tstr(tile),
                     "riichi": action == GameAction.DECLARE_RIICHI,
                     # The tile just drawn was thrown (tsumogiri), not one from the hand.
-                    "tsumogiri": drawn_before is not None and tile is not None and tstr(tile) == tstr(drawn_before),
+                    "tsumogiri": tsumogiri,
                 }
             )
         if result.called_action in (GameAction.PON, GameAction.CHI, GameAction.KAN):
@@ -255,6 +269,44 @@ class Game:
             if kind is not None and kind != RyuukyokuType.EXHAUSTIVE_DRAW:
                 settled = engine.handle_ryuukyoku()
                 self._finish_draw(settled.ryuukyoku_type.value if settled.ryuukyoku_type else kind.value)
+
+    def _river_marks(self, seat: int, pending: int = 0) -> List[bool]:
+        """Tsumogiri flags of a seat's river, one per tile still in it (a
+        called tile leaves the river, always the last one); `pending` tiles
+        just thrown have no flag yet. Games saved by older versions have
+        none: their earlier tiles count as from the hand."""
+        marks = getattr(self, "tsumogiri_marks", None)
+        if marks is None:
+            marks = self.tsumogiri_marks = [[] for _ in range(NUM_PLAYERS)]
+        river = len(self.engine.get_discards(seat)) - pending
+        mine = marks[seat]
+        if len(mine) > river:
+            del mine[river:]
+        elif len(mine) < river:
+            mine[:0] = [False] * (river - len(mine))
+        return mine
+
+    def _safe_tiles(self) -> Optional[List[str]]:
+        """Tile kinds no rival in riichi can ron (genbutsu): her own discards
+        (called ones too) and anything thrown after her declaration that she
+        let pass. Several riichi: safe against all of them. None without a
+        rival in riichi. Games saved by older versions have no discard log:
+        only her river as it stands counts."""
+        rivals = [s for s in range(NUM_PLAYERS) if s != HUMAN and self.engine.get_hand(s).is_riichi]
+        if not rivals:
+            return None
+        log = getattr(self, "discard_log", None)
+        at = getattr(self, "riichi_at", {}) if log is not None else {}
+        safe = None
+        for r in rivals:
+            if log is None:
+                kinds = {tstr(t).lstrip("r") for t in self.engine.get_discards(r)}
+            else:
+                kinds = {k for s, k in log if s == r}
+                if r in at:
+                    kinds |= {k for i, (s, k) in enumerate(log) if i > at[r]}
+            safe = kinds if safe is None else safe & kinds
+        return sorted(safe or (), key=lambda c: (tile_index(Tile_from(c)), c))
 
     def _riichi_paid(self, ron_from) -> List[int]:
         """Seats whose riichi stick (1000) went on the table this hand: part
@@ -500,6 +552,7 @@ class Game:
                 "riichi": hand.is_riichi,
                 "riichiIndex": hand.riichi_discard_index,
                 "discards": [tstr(t) for t in discards],
+                "tsumogiri": list(self._river_marks(seat)),
                 "melds": self._melds(seat),
                 "handCount": len(hand.tiles),
             }
@@ -508,6 +561,10 @@ class Game:
                 entry["furiten"] = bool(waits and engine.is_furiten(HUMAN))
                 # Current waits while it is not the player's discard (Kemono-style wait info).
                 entry["waits"] = sorted({tstr(t) for t in waits}, key=lambda c: (tile_index(Tile_from(c)), c))
+                # Kinds safe against every rival in riichi (absent without one).
+                safe = self._safe_tiles()
+                if safe is not None:
+                    entry["safe"] = safe
             show = seat == HUMAN or (self.round_result is not None and seat in self.round_result.get("winnerSeats", []))
             if show:
                 tiles = list(hand.tiles)

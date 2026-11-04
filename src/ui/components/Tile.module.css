@@ -37,6 +37,11 @@
     var(--depth);
   color: var(--honor-ink);
   font-family: var(--font-tile);
+  /* A long press lights up the tile's copies (usePeek): no text selection
+     or callout menu from the system. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   line-height: 1;
   transition:
     transform var(--dur-base) var(--ease-std),
@@ -277,3 +282,46 @@
   display: none;
 }
 
+
+/* River tile thrown straight after the draw (tsumogiri, Settings): shaded
+   like on Tenhou. A claimable discard keeps its full colour. */
+.tile[data-tsumogiri]:not(.highlight) {
+  filter: brightness(0.78) saturate(0.85);
+}
+
+/* Safe against every rival in riichi (genbutsu, Settings): a small shield
+   in the bottom-right corner, apart from the corner index (top-left) and
+   the tenpai bar (under the tile). */
+.safe {
+  position: absolute;
+  right: calc(var(--tw) * 0.04);
+  bottom: calc(var(--tw) * 0.04);
+  width: calc(var(--tw) * 0.32);
+  height: calc(var(--tw) * 0.37);
+  pointer-events: none;
+  z-index: var(--z-local);
+}
+
+.safe svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0.5px 0.5px rgba(0, 0, 0, 0.4));
+}
+
+.safe path:first-child {
+  fill: var(--safe-tile, #2f9e5b);
+  stroke: #fff;
+  stroke-width: 1;
+}
+
+.safe path:last-child {
+  stroke: #fff;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mini .safe {
+  display: none;
+}

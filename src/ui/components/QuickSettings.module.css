@@ -1,0 +1,32 @@
+/* Quick settings in the table menu (QuickSettings.tsx): the same rows as the
+   settings screen, on the sheet's surface. */
+.quick {
+  display: flex;
+  flex-direction: column;
+  margin: 4px 0 6px;
+  border-radius: var(--radius-m, 12px);
+  background: var(--surface-alt);
+  padding: 2px 12px;
+}
+
+.speed {
+  width: 100%;
+}
+
+.slider {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.volume {
+  width: min(180px, 40vw);
+  accent-color: var(--accent);
+}
+
+.speedEnds {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--ink-faint);
+}

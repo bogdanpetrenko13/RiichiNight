@@ -37,7 +37,7 @@ export function PlayerBand({
   callout?: CallKind | null;
   calloutFrom?: string | null;
 }) {
-  const { t } = useApp();
+  const { t, settings } = useApp();
   const me = view.players[0];
   // Dora indicators face up, the rest of the dead-wall row as backs (5 total).
   const hidden = Math.max(0, 5 - view.dora.length);
@@ -92,7 +92,13 @@ export function PlayerBand({
           <Tenbo kind="1000" width="calc(var(--river-tile) * 2)" />
         </div>
         {me.discards.map((code, i) => (
-          <Tile key={`${i}-${code}`} code={code} size="river" sideways={me.riichiIndex === i} />
+          <Tile
+            key={`${i}-${code}`}
+            code={code}
+            size="river"
+            sideways={me.riichiIndex === i}
+            tsumogiri={settings.markTsumogiri && Boolean(me.tsumogiri?.[i])}
+          />
         ))}
       </div>
       {/* Landscape: dora + counters where the rivals have their closed hand. */}

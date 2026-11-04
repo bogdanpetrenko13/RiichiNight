@@ -78,6 +78,8 @@ export interface GameController {
   sayIdle: () => void;
   /** Tap on the banner: hide it and continue without waiting. */
   skipCutaway: () => void;
+  /** Rivals wait while the table menu is open. */
+  setPaused: (paused: boolean) => void;
 }
 
 export interface GameError {
@@ -120,6 +122,7 @@ export function useGameController(): GameController {
   /** Re-schedules the next opponent step (after skipping a banner). */
   const [nudge, setNudge] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [error, setError] = useState<GameError | null>(null);
   /** The last engine call, for "Try again". */
   const lastOp = useRef<(() => Promise<StepResult>) | null>(null);
@@ -426,13 +429,13 @@ export function useGameController(): GameController {
   useEffect(() => {
     // After an engine error the opponents wait for the player's choice in the
     // error dialog (no endless retries in the background).
-    if (!view || view.status !== "ai" || busy || error) return;
+    if (!view || view.status !== "ai" || busy || error || paused) return;
     const delay = settings.aiDelay + pauseRef.current;
     const timer = window.setTimeout(() => {
       void run(() => engine.aiStep());
     }, delay);
     return () => window.clearTimeout(timer);
-  }, [view, busy, error, settings.aiDelay, run, engine, nudge]);
+  }, [view, busy, error, paused, settings.aiDelay, run, engine, nudge]);
 
   const begin = (chars: CharacterDef[], dealIns: number) => {
     castRef.current = chars;
@@ -544,6 +547,7 @@ export function useGameController(): GameController {
     nextRound,
     sayIdle,
     skipCutaway,
+    setPaused,
   };
 }
 

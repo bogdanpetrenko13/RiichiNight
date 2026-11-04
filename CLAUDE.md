@@ -21,7 +21,7 @@ The owner writes in Russian; reply in Russian.
 
 | Path | What |
 |---|---|
-| `public/py/bridge.py` | JSON bridge to pyriichi: `new_game`, `act`, `ai_step`, `next_round`, `save`, `load`; views show only what the player may see |
+| `public/py/bridge.py` | JSON bridge to pyriichi: `new_game`, `act`, `ai_step`, `next_round`, `save`, `load`; views show only what the player may see (incl. per-river-tile `tsumogiri` flags and the player's `safe` kinds against riichi, from its own `discard_log`) |
 | `public/py/ai.py` | Heroine AI: level (mistakes) + style (`STYLES`: folding, calls, dama, flush, value); each heroine's `style` is in `src/game/characters.ts` and matches her bio |
 | `public/py/yakufix.py` | Fixes to pyriichi: ryanpeikou vs chiitoitsu, chanta without sequences, dora counting (melds; tsumo tile counted twice) |
 | `public/py/calcinfo.py` | Score explanation for the result screen (fu parts, dora split, payments) + open-hand ron 30 fu minimum |
@@ -40,6 +40,8 @@ The owner writes in Russian; reply in Russian.
 | `src/ui/useLayout.ts` | Tile / band sizes from the viewport and the measured bands area (fixed sizes from `src/ui/metrics.ts`) |
 | `src/ui/components/Band.module.css` | Band layout; rivers in `River.module.css`, plaques and bubbles in `BandOverlay.module.css`, dead wall / counters / table centre in `TableInfo.module.css` |
 | `src/ui/motion.ts` | FLIP and discard flight animations |
+| `src/ui/usePeek.ts` | Long press on a tile: its visible copies light up, a chip counts them (`data-kind` on face tiles) |
+| `src/ui/components/QuickSettings.tsx` | Settings in the table menu (speed, volumes, hints, talk); the rivals wait while the menu is open (`setPaused`) |
 | `src/i18n/strings.ts` | en + ru strings (both must have the same keys) |
 | `src/game/speech/<id>.ts` | Each heroine's lines per situation (`SpeechKind`, ru + en), chattiness, profile story / play style and bonds with other heroines; `tests/python/test_speech.py` checks they are complete and bonds go both ways |
 | `public/voice/<id>/<kind>.mp3` | Heroines' calls (riichi/pon/chi/kan/ron/tsumo) from VOICEVOX via `scripts/voicevox/` + `voices.json`; credits in `public/voice/CREDITS.md` and Settings → About (each voice requires its `VOICEVOX:<name>` line) |

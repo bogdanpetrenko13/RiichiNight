@@ -324,3 +324,91 @@ def test_kan_replacement_tile_can_be_declined_and_rinshan_ends_with_the_discard(
     assert getattr(engine, "_rinshan_player", None) is None
     assert step["view"]["result"] is None or step["view"]["result"]["type"] != "win" or \
         step["view"]["result"]["winners"][0]["seat"] != 0
+
+
+def test_river_tsumogiri_flags_follow_the_discards():
+    """view players[].tsumogiri: one flag per river tile, equal to the discard
+    events' flags (called tiles leave the river and their flag); a game
+    saved before the flags existed shows its earlier tiles as from the hand."""
+    step = json.loads(bridge.new_game(json.dumps({"seed": 21})))
+    flags = {s: [] for s in range(4)}
+    seen = 0
+    for _ in range(4000):
+        for ev in step["events"]:
+            if ev["t"] == "discard":
+                flags[ev["seat"]].append(ev["tsumogiri"])
+            if ev["t"] == "meld" and ev.get("from") is not None:
+                flags[ev["from"]].pop()
+        view = step["view"]
+        if view["status"] in ("round_over", "game_over"):
+            break
+        for p in view["players"]:
+            assert len(p["tsumogiri"]) == len(p["discards"]), p
+            assert p["tsumogiri"] == flags[p["seat"]], (p["seat"], p["tsumogiri"], flags[p["seat"]])
+            seen += sum(p["tsumogiri"])
+        if view["status"] == "human":
+            pr = view["prompt"]
+            if "pass" in pr["actions"]:
+                step = json.loads(bridge.act(json.dumps({"action": "pass"})))
+            elif "discard" in pr["actions"]:
+                me = view["players"][0]
+                tile = me.get("drawn") if len(flags[0]) % 2 else me["hand"][0]
+                step = json.loads(bridge.act(json.dumps({"action": "discard", "tile": tile or me["hand"][0]})))
+            else:
+                step = json.loads(bridge.act(json.dumps({"action": pr["actions"][0]})))
+        else:
+            step = json.loads(bridge.ai_step())
+    assert seen > 0
+    # An old save: no flags at all -> every tile shows as from the hand.
+    game = bridge._game
+    del game.tsumogiri_marks
+    view = game.view()
+    for p in view["players"]:
+        assert p["tsumogiri"] == [False] * len(p["discards"])
+
+
+def test_safe_tiles_against_riichi_follow_every_discard_of_the_hand():
+    """players[0].safe: kinds no rival in riichi can ron, recomputed from the
+    discard events (her own discards, called ones included, and everything
+    thrown after her riichi); absent while nobody is in riichi."""
+    checked = 0
+    for seed in range(1, 40):
+        step = json.loads(bridge.new_game(json.dumps({"seed": seed})))
+        log, riichi_at = [], {}
+        for _ in range(3000):
+            for ev in step["events"]:
+                if ev["t"] == "discard":
+                    log.append((ev["seat"], ev["tile"].lstrip("r")))
+                    if ev["riichi"]:
+                        riichi_at[ev["seat"]] = len(log) - 1
+            view = step["view"]
+            if view["status"] in ("round_over", "game_over"):
+                break
+            rivals = [p["seat"] for p in view["players"] if p["seat"] and p["riichi"]]
+            me = view["players"][0]
+            if not rivals:
+                assert "safe" not in me
+            else:
+                expect = None
+                for r in rivals:
+                    kinds = {k for s, k in log if s == r} | {k for i, (s, k) in enumerate(log) if i > riichi_at[r]}
+                    expect = kinds if expect is None else expect & kinds
+                assert set(me["safe"]) == expect, (seed, me["safe"], expect)
+                checked += 1
+            if view["status"] == "human":
+                pr = view["prompt"]
+                if "pass" in pr["actions"]:
+                    step = json.loads(bridge.act(json.dumps({"action": "pass"})))
+                elif "discard" in pr["actions"]:
+                    step = json.loads(bridge.act(json.dumps({"action": "discard", "tile": me.get("drawn") or me["hand"][-1]})))
+                else:
+                    step = json.loads(bridge.act(json.dumps({"action": pr["actions"][0]})))
+            else:
+                step = json.loads(bridge.ai_step())
+        if checked > 60:
+            break
+    assert checked > 20, checked
+    # An old save without the log: her river as it stands.
+    game = bridge._game
+    del game.discard_log
+    game.view()
