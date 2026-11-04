@@ -175,6 +175,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
           {toggle("markTsumogiri", "markTsumogiri", "markTsumogiriHint")}
           {toggle("safeTiles", "safeTiles", "safeTilesHint")}
           {toggle("dealAnimation", "dealAnimation")}
+          {toggle("haptics", "hapticsSetting")}
           <Row label={t("tableFx")} hint={t("tableFxHint")} stacked>
             <Segmented
               value={settings.tableFx}

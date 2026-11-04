@@ -124,3 +124,9 @@
   visibility: hidden;
 }
 
+
+/* Swipe up to discard (PlayerHand): the browser must not take the gesture
+   for scrolling. */
+.tiles > button {
+  touch-action: none;
+}

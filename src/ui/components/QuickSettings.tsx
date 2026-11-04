@@ -27,7 +27,7 @@ export function SpeedSlider() {
   );
 }
 
-type BoolKey = "showWaitHints" | "markTsumogiri" | "safeTiles";
+type BoolKey = "showWaitHints" | "markTsumogiri" | "safeTiles" | "haptics";
 type VolumeKey = "musicVolume" | "sfxVolume" | "voiceVolume";
 
 /**
@@ -66,6 +66,7 @@ export function QuickSettings() {
       {toggle("showWaitHints", "waitHints")}
       {toggle("markTsumogiri", "markTsumogiri")}
       {toggle("safeTiles", "safeTiles")}
+      {toggle("haptics", "hapticsSetting")}
       <Row label={t("speechFreq")} stacked>
         <Segmented
           value={settings.speechFreq}

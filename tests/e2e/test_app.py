@@ -1,5 +1,7 @@
 """End-to-end checks of the table on rigged and seeded games."""
 
+import re
+
 import pytest
 
 from conftest import LANDSCAPE, PORTRAIT
@@ -656,4 +658,82 @@ def test_table_menu_pauses_the_rivals_and_changes_settings_on_the_spot(make_app)
     app.shot("table_menu")
     page.get_by_role("button", name="Продолжить").first.click()
     page.wait_for_function(f"() => ({rivers})() > {before}", timeout=30_000)
+    assert not app.errors, app.errors
+
+
+def _swipe(page, tile, up: int, steps: int = 8):
+    box = tile.bounding_box()
+    x, y = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+    page.mouse.move(x, y)
+    page.mouse.down()
+    for i in range(1, steps + 1):
+        page.mouse.move(x + 3 * i / steps, y - up * i / steps)
+        page.wait_for_timeout(16)
+    page.mouse.up()
+    return x + 3, y - up
+
+
+def test_swipe_up_discards_a_tile_from_where_it_is_let_go(make_app):
+    """Swipe a hand tile up: past the threshold it is discarded and its
+    flight to the river starts where the finger let it go; a short swipe
+    puts it back (no discard, not lifted)."""
+    app = make_app().open("?scenario=tsumo&seed=5").start_game()
+    page = app.page
+    app.wait_my_turn()
+    hand = "[class*=dock] button[aria-label]"
+    river = "section[class*=band]:not([aria-label]) [class*=river] [data-kind]"
+    count = page.locator(hand).count()
+    # Short swipe: back in place.
+    tile = page.locator(f"{hand}[aria-label='1z']").first
+    _swipe(page, tile, 20)
+    page.wait_for_timeout(400)
+    assert page.locator(hand).count() == count and page.locator(river).count() == 0
+    assert not page.locator("[class*=dock] [class*=selected]").count()
+    assert page.evaluate(f"() => [...document.querySelectorAll(\"{hand}\")].every((b) => !b.style.transform)")
+    # A real swipe: the junk 1z goes.
+    rx, ry = _swipe(page, page.locator(f"{hand}[aria-label='1z']").first, 120)
+    page.locator(river).first.wait_for(timeout=5_000)
+    k0 = page.evaluate(
+        f"""() => {{
+          const t = document.querySelector("{river}");
+          const a = t.getAnimations().find((x) => !(x instanceof CSSAnimation));
+          return a ? [a.effect.getKeyframes()[0].transform, t.dataset.kind] : null;
+        }}"""
+    )
+    page.wait_for_timeout(700)  # landed: its rect is its own again
+    start = None
+    if k0:
+        m = re.search(r"translate\(([-\d.]+)px, ([-\d.]+)px\)", k0[0])
+        r = page.locator(river).first.bounding_box()
+        start = [r["x"] + r["width"] / 2 + float(m.group(1)), r["y"] + r["height"] / 2 + float(m.group(2)), k0[1]]
+    assert start is not None, "no flight to the river"
+    assert start[2] == "1z"
+    assert abs(start[0] - rx) < 30 and abs(start[1] - ry) < 30, (start, rx, ry)
+    page.wait_for_timeout(600)
+    assert page.locator(f"{hand}[aria-label='1z']").count() == 0
+    assert page.evaluate(f"() => [...document.querySelectorAll(\"{hand}\")].every((b) => !b.style.transform)")
+    assert not app.errors, app.errors
+
+
+@pytest.mark.parametrize("on", [True, False])
+def test_vibration_on_your_discard_and_your_win(make_app, on):
+    """A light tap when you discard, the success pattern on your win (not a
+    call tap for your own Tsumo); nothing when switched off."""
+    app = make_app()
+    app.page.add_init_script("window.__rnHaptics = []")
+    app.open("?scenario=tsumo&seed=5", {"haptics": on}).start_game()
+    page = app.page
+    app.wait_my_turn()
+    app.discard("1z")
+    app.button("Цумо").first.wait_for(timeout=60_000)
+    mine = page.evaluate("() => window.__rnHaptics.slice()")
+    app.button("Цумо").first.click()
+    page.locator("button:has-text('Следующая раздача')").wait_for(timeout=30_000)
+    log = page.evaluate("() => window.__rnHaptics.slice()")
+    if not on:
+        assert log == [], log
+    else:
+        assert mine and mine[0] == "discard", mine
+        after = log[len(mine):]
+        assert after == ["win"], after
     assert not app.errors, app.errors

@@ -4,6 +4,7 @@ import { sameType } from "../tiles";
 import { HAND_UNITS_BASE } from "../useLayout";
 import { DUR, EASE_IN, animate, setHandLocator } from "../motion";
 import { useEffect, useLayoutEffect, useRef } from "react";
+import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
 import { Tile } from "./Tile";
 import styles from "./PlayerHand.module.css";
 
@@ -125,6 +126,18 @@ export function PlayerHand({
     if (!row) return;
     const next = new Map<string, { x: number; y: number }>();
     const nodes = Array.from(row.querySelectorAll<HTMLElement>("[data-k]"));
+    // A swiped tile left the hand; an element React reused for another copy
+    // of it must not keep the swipe's offset.
+    // (A flung tile keeps it until the hand changes: re-renders while the
+    // discard is on its way must not snap it back.)
+    const sig = keys.join(",");
+    if (flung.current && flung.current.sig !== sig) flung.current = null;
+    for (const n of nodes) {
+      if (n.style.transform && drag.current?.el !== n && flung.current?.el !== n) {
+        n.style.transition = "";
+        n.style.transform = "";
+      }
+    }
     for (const n of nodes) next.set(n.dataset.k!, { x: n.offsetLeft, y: n.offsetTop });
     // A new deal (dealId changed):
     // the deal animation shows it, so no slide-ins here. This effect runs
@@ -155,11 +168,96 @@ export function PlayerHand({
     prev.current = next;
   });
 
+  // Swipe up to discard (besides tap + tap): the tile follows the finger;
+  // let go above the threshold and it is discarded from where it is (the
+  // flight to the river starts there), below it the tile slides back.
+  const drag = useRef<{ index: number; key: string; el: HTMLElement; x: number; y: number; on: boolean } | null>(null);
+  const swiped = useRef<string | null>(null);
+  const flung = useRef<{ el: HTMLElement; sig: string } | null>(null);
+  const swallowClick = useRef(false);
+  const canSwipe = (code: TileCode) => !chiMode && (canDiscard || riichiMode) && allowed(code);
+  const onPointerDown = (e: ReactPointerEvent) => {
+    swallowClick.current = false;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    const el = (e.target as Element).closest?.("[data-k]") as HTMLElement | null;
+    if (!el) return;
+    const index = keys.indexOf(el.dataset.k ?? "");
+    if (index < 0 || !canSwipe(all[index])) return;
+    drag.current = { index, key: keys[index], el, x: e.clientX, y: e.clientY, on: false };
+  };
+  const onPointerMove = (e: ReactPointerEvent) => {
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.x;
+    const up = d.y - e.clientY;
+    if (!d.on) {
+      // A swipe starts upwards; sideways or down it is not one.
+      if (Math.abs(dx) > 12 && Math.abs(dx) > up) {
+        drag.current = null;
+        return;
+      }
+      if (up < 8) return;
+      d.on = true;
+      try {
+        d.el.setPointerCapture(e.pointerId);
+      } catch {
+        /* not capturable (synthetic events) */
+      }
+    }
+    d.el.style.transition = "none";
+    d.el.style.transform = `translate(${dx}px, ${-Math.max(0, up)}px)`;
+  };
+  const onPointerUp = (e: ReactPointerEvent) => {
+    const d = drag.current;
+    drag.current = null;
+    if (!d?.on) return;
+    swallowClick.current = true;
+    const up = d.y - e.clientY;
+    const threshold = Math.max(40, d.el.offsetHeight * 0.6);
+    const code = all[d.index];
+    if (up >= threshold && canSwipe(code)) {
+      swiped.current = d.key;
+      const fling = { el: d.el, sig: keys.join(",") };
+      flung.current = fling;
+      (riichiMode ? onRiichi : onDiscard)(code);
+      // If the discard did not go through (the table was busy), the tile
+      // slides back instead of hanging in the air.
+      window.setTimeout(() => {
+        if (flung.current !== fling) return;
+        flung.current = null;
+        d.el.style.transition = `transform ${DUR.base}ms ease-out`;
+        d.el.style.transform = "";
+      }, 1500);
+      return;
+    }
+    d.el.style.transition = `transform ${DUR.base}ms ease-out`;
+    d.el.style.transform = "";
+    window.setTimeout(() => (d.el.style.transition = ""), DUR.base + 20);
+  };
+  const onPointerCancel = () => {
+    const d = drag.current;
+    drag.current = null;
+    if (d?.on) {
+      d.el.style.transition = "";
+      d.el.style.transform = "";
+    }
+  };
+  const onClickCapture = (e: ReactMouseEvent) => {
+    if (!swallowClick.current) return;
+    swallowClick.current = false;
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   // Lets the table find a tile's element when it is discarded (flight to the river).
   useEffect(() => {
     setHandLocator((code) => {
       const row = rowRef.current;
       if (!row) return null;
+      // A swiped tile: the flight starts where the finger let it go.
+      const flung = swiped.current ? row.querySelector(`[data-k="${CSS.escape(swiped.current)}"]`) : null;
+      swiped.current = null;
+      if (flung && flung.getAttribute("data-k")?.startsWith(code)) return flung;
       const sel = selected !== null ? row.querySelector(`[data-k="${CSS.escape(keys[selected] ?? "")}"]`) : null;
       if (sel && sel.getAttribute("data-k")?.startsWith(code)) return sel;
       return row.querySelector(`[data-k^="${CSS.escape(code)}#"]`);
@@ -170,7 +268,15 @@ export function PlayerHand({
   return (
     <div className={styles.wrap}>
       <div className={styles.row} style={rowStyle} ref={rowRef}>
-        <div className={styles.tiles} data-dealing={dealing || undefined}>
+        <div
+          className={styles.tiles}
+          data-dealing={dealing || undefined}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerCancel}
+          onClickCapture={onClickCapture}
+        >
           {all.map((code, i) => {
             const isDrawn = drawn !== null && i === all.length - 1;
             const pick = eligible(code, i);

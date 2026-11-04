@@ -19,6 +19,7 @@ mkdir -p "$OUT/py" "$OUT/pyodide"
   --loader:.module.css=local-css \
   --alias:@capacitor/preferences="$HERE/stubs/preferences.js" \
   --alias:@capacitor/app="$HERE/stubs/app.js" \
+  --alias:@capacitor/haptics="$HERE/stubs/haptics.js" \
   --define:process.env.NODE_ENV='"production"' --define:__APP_VERSION__='"preview"' --log-level=warning
 "$ES" src/engine/engine.worker.ts --bundle --format=esm --outfile="$OUT/engine.worker.ts" --log-level=warning
 cp public/py/*.py public/py/pyriichi.zip "$OUT/py/"

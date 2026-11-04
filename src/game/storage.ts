@@ -119,6 +119,8 @@ export interface Settings {
   safeTiles: boolean;
   /** Table effects: dora flip, riichi sticks, points changing hands, round splash. */
   tableFx: TableFx;
+  /** Vibration on discards, calls and your wins. */
+  haptics: boolean;
   /** Result screen: "How it's scored" section expanded. */
   scoreDetails?: boolean;
   theme: ThemeMode;
@@ -172,6 +174,7 @@ export function defaultSettings(): Settings {
     markTsumogiri: true,
     safeTiles: false,
     tableFx: "full",
+    haptics: true,
     tileBack: "auto",
     theme: "system",
     styleVersion: STYLE_VERSION,

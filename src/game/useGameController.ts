@@ -7,6 +7,7 @@ import { sfx } from "./sfx";
 import { landingMs } from "../ui/motion";
 import { fxScale } from "../ui/tableFx";
 import { PLAYER_VOICE, yakuClips } from "./yakuVoice";
+import { haptics } from "./haptics";
 import { getCharacter, pickLine, rivalsUnlockedBy, type CharacterDef, type Emotion, type SpeechKind } from "./characters";
 import { applyEvents } from "./stats";
 import { SPEECH_FREQ_FACTOR, clearGame, loadGame, saveGame, type SavedGame } from "./storage";
@@ -209,6 +210,7 @@ export function useGameController(): GameController {
         switch (ev.t) {
           case "discard":
             void sfx.play("discard", landingMs()); // the clack when the tile lands
+            if (ev.seat === 0) haptics.discard();
             setTsumogiri((prev) => ({ ...prev, [ev.seat]: Boolean(ev.tsumogiri) }));
             setFreshMeld((s) => (s !== null && s !== ev.seat ? null : s));
             break;
@@ -251,6 +253,8 @@ export function useGameController(): GameController {
             }
             const vid = voiceIdFor(ev.seat);
             if (vid) void voice.play(vid, ev.kind);
+            // Your own Ron / Tsumo vibrates with the win pattern below.
+            if (!(ev.seat === 0 && (ev.kind === "ron" || ev.kind === "tsumo"))) haptics.call();
             // The riichi stick goes down just after the discard; a meld is slapped down.
             if (ev.kind === "riichi") void sfx.play("riichi", 250);
             else if (ev.kind === "pon" || ev.kind === "chi" || ev.kind === "kan") void sfx.play("call");
@@ -270,6 +274,7 @@ export function useGameController(): GameController {
           }
           case "win": {
             const humanWin = ev.winners.includes(0);
+            if (humanWin) haptics.win();
             void sfx.play(humanWin ? "win" : "roundEnd", 600);
             // The winner sweeps up the riichi sticks on the table.
             // (With table animations on, the table plays it as the sticks fly.)
