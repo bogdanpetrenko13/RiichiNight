@@ -135,7 +135,7 @@ export function RivalBand({
             before a dangerous discard. */}
         <span className={styles.name}>{charName(character).split(" ")[0]}</span>
         <div className={styles.portrait}>
-          <Portrait character={character} emotion={emotion} size={88} className={styles.face} />
+          <Portrait character={character} emotion={emotion} size={88} className={styles.face} react />
           {speech && (
             <div key={speech} className={overlay.bubble} role="status">
               {speech}

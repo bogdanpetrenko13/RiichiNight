@@ -7,7 +7,6 @@
   box-shadow:
     0 0 0 2px var(--c),
     var(--shadow-1);
-  transition: transform 200ms var(--ease-out);
 }
 
 .frame img,
@@ -18,19 +17,36 @@
   object-fit: cover;
 }
 
+/* Faces stack: a new one fades in over the old (Portrait.tsx). */
+.frame img {
+  position: absolute;
+  inset: 0;
+}
+
+.enter {
+  animation: faceIn 260ms var(--ease-out);
+}
+
+@keyframes faceIn {
+  from {
+    opacity: 0;
+  }
+}
+
+.frame {
+  transition:
+    transform 200ms var(--ease-out),
+    filter 300ms var(--ease-out);
+}
+
 .frame[data-emotion="happy"] {
   transform: scale(1.05);
 }
 
+/* Troubled: a little greyer and dimmer while it lasts (the flinch is
+   played by Portrait.tsx at the table). */
 .frame[data-emotion="troubled"] {
-  filter: saturate(0.8);
-  animation: jolt 380ms var(--ease-out);
-}
-
-@keyframes jolt {
-  30% {
-    transform: translateY(-4px) scale(1.04);
-  }
+  filter: saturate(0.7) brightness(0.85);
 }
 
 .frame[data-round] {

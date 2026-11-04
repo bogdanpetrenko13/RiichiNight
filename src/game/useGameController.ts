@@ -12,6 +12,9 @@ import { getCharacter, pickLine, rivalsUnlockedBy, type CharacterDef, type Emoti
 import { applyEvents } from "./stats";
 import { SPEECH_FREQ_FACTOR, clearGame, loadGame, saveGame, type SavedGame } from "./storage";
 
+/** How long a heroine's happy / troubled face lasts at the table. */
+export const EMOTION_MS = 5000;
+
 export interface Callout {
   id: number;
   seat: number;
@@ -43,6 +46,8 @@ const CALL_PAUSE = 650;
 const CALLOUT_MS = 1600;
 /** Ron / Tsumo / Riichi banner: 0.3 s in, 1.5 s readable, 0.4 s out. */
 export const CUTAWAY_MS = 2200;
+/** A reaction to a riichi plays as its banner slides away. */
+const REACT_AFTER_BANNER = CUTAWAY_MS - 250;
 const SPEECH_MS = 3200;
 const MANGAN = 8000;
 
@@ -137,7 +142,28 @@ export function useGameController(): GameController {
   langRef.current = lang;
 
   const voiceIdFor = (seat: number) => (seat === 0 ? PLAYER_VOICE : castRef.current[seat - 1]?.id);
-  const setEmotion = (seat: number, e: Emotion) => setEmotions((prev) => ({ ...prev, [seat]: e }));
+  // A face lasts a few seconds, then she is calm again (unless it changed since).
+  const emotionTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+  // `delayMs`: shown once a call banner over the table has gone, so her
+  // reaction is seen.
+  const setEmotion = (seat: number, e: Emotion, delayMs = 0) => {
+    clearTimeout(emotionTimers.current[seat]);
+    const show = () => {
+      setEmotions((prev) => ({ ...prev, [seat]: e }));
+      if (e !== "neutral")
+        emotionTimers.current[seat] = setTimeout(
+          () => setEmotions((prev) => (prev[seat] === e ? { ...prev, [seat]: "neutral" } : prev)),
+          EMOTION_MS,
+        );
+    };
+    if (delayMs > 0) emotionTimers.current[seat] = setTimeout(show, delayMs);
+    else show();
+  };
+  const clearEmotions = () => {
+    Object.values(emotionTimers.current).forEach(clearTimeout);
+    emotionTimers.current = {};
+    setEmotions({});
+  };
 
   /** Shows a line in a heroine's bubble (a random one of `kind`, or `text`). */
   const say = useCallback((seat: number, kind: SpeechKind, text?: string) => {
@@ -219,7 +245,7 @@ export function useGameController(): GameController {
             const first = ev.wind === "east" && ev.number === 1 && ev.honba === 0;
             if (first) void sfx.play("shuffle");
             void sfx.play("dice", first ? 900 : 200);
-            setEmotions({});
+            clearEmotions();
             setFreshMeld(null);
             // Going into the final hand last: she says something about it once.
             const v = step.view;
@@ -261,11 +287,11 @@ export function useGameController(): GameController {
             if (ev.seat === 0) {
               // Your riichi worries everyone else; one of them says so.
               if (ev.kind === "riichi") {
-                for (let s = 1; s <= 3; s++) setEmotion(s, "troubled");
+                for (let s = 1; s <= 3; s++) setEmotion(s, "troubled", REACT_AFTER_BANNER);
                 maybeSay(randomRival(), "playerRiichi", 0.55, undefined, 900);
               }
             } else if (ev.kind === "riichi") {
-              setEmotion(ev.seat, "happy");
+              setEmotion(ev.seat, "happy", REACT_AFTER_BANNER);
               maybeSay(ev.seat, "riichi", 0.7);
             } else if (ev.kind === "pon" || ev.kind === "chi" || ev.kind === "kan") {
               maybeSay(ev.seat, "call", 0.35, undefined, 700);
@@ -438,7 +464,7 @@ export function useGameController(): GameController {
     castRef.current = chars;
     matchDealIns.current = dealIns;
     setCast(chars);
-    setEmotions({});
+    clearEmotions();
     setSpeech({});
     setFinale(null);
     lastPlaceSaid.current = false;

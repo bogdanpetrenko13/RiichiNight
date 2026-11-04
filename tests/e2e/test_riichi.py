@@ -200,3 +200,46 @@ def test_a_riichi_tile_flies_into_the_river_already_sideways(make_app):
     # Mid-flight it is wider than tall: lying sideways.
     assert all(f is not None and f > 1.1 for f in fly), fly
     assert not app.errors, app.errors
+
+
+def test_a_rival_reacts_to_her_riichi_and_calms_down(make_app):
+    """Her riichi: the happy face fades in over the old one, she hops with a
+    flash of her colour; a few seconds later she is calm again."""
+    app = make_app(PORTRAIT).open("?scenario=riichi", {"aiDelay": 300}).start_game()
+    page = app.page
+    page.evaluate(
+        """() => {
+          window.__react = [];
+          new MutationObserver(() => {
+            document.querySelectorAll('[data-react][data-emotion=happy]').forEach((f) => {
+              if (f.dataset.seen) return;
+              f.dataset.seen = '1';
+              if (!window.__react.length) f.dataset.probe = '1';
+              window.__react.push({ at: performance.now(), anims: f.getAnimations().length,
+                faces: f.querySelectorAll('img').length, fading: f.querySelectorAll('img[class*=enter]').length });
+            });
+          }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ['data-emotion'] });
+        }"""
+    )
+    for _ in range(600):
+        if page.evaluate("() => window.__react.length") or app.result_shown():
+            break
+        try:
+            app.step()
+        except AssertionError:
+            page.wait_for_timeout(300)
+    seen = page.evaluate("() => window.__react")
+    assert seen, "no rival riichi"
+    r = seen[0]
+    # The hop and the flash, and the new face fading in over the old one.
+    assert r["anims"] >= 2 and r["faces"] == 2 and r["fading"] == 1, r
+    # Calm again after a few seconds (EMOTION_MS), the old face gone.
+    page.wait_for_function(
+        "() => { const f = document.querySelector('[data-probe]'); return !f || f.dataset.emotion === 'neutral'; }",
+        timeout=12_000,
+    )
+    probe = page.locator("[data-probe]")
+    if probe.count():
+        page.wait_for_timeout(400)
+        assert probe.locator("img").count() == 1
+    assert not app.errors, app.errors
