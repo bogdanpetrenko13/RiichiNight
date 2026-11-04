@@ -50,7 +50,9 @@ export function usePeek() {
     start.current = null;
   }, []);
 
-  useEffect(() => clear, [clear]);
+  useEffect(() => {
+    return clear;
+  }, [clear]);
 
   const onPointerDown = (e: ReactPointerEvent) => {
     const el = (e.target as Element).closest?.("[data-kind]");
