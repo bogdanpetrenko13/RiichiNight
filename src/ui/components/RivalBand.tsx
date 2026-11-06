@@ -56,13 +56,20 @@ export function RivalBand({
 }: RivalBandProps) {
   const { t, charName, settings } = useApp();
   const lastIndex = player.discards.length - 1;
-  const backStyle = { ["--tw" as string]: "var(--band-back, 14px)" };
+  const backStyle = { ["--tw" as string]: "var(--rival-back, var(--band-back, 14px))" };
 
   // Her turn: the drawn tile slides in next to her hand (kept apart by a gap).
   // On discard the tile flies to its river spot and turns face up — from the
   // drawn tile if she threw it (tsumogiri), otherwise from inside her hand,
   // after which the drawn tile slides into the hand to close the gap.
   const hasDrawn = player.handCount % 3 === 2;
+  // What her closed hand (with room for a drawn tile) and calls take, for
+  // the landscape column (Band.module.css): tiles, the sideways claimed
+  // tiles, and the gaps between calls.
+  const meldTiles = player.melds.reduce((n, m) => n + m.tiles.length, 0);
+  const sideways = player.melds.filter((m) => m.type !== "closed_kan" && m.from !== null).length;
+  const handUnits = player.handCount - (hasDrawn ? 1 : 0) + 1 + meldTiles + 0.42 * sideways + 0.35;
+  const handGaps = player.handCount + meldTiles + (player.melds.length ? 6 + 4 * (player.melds.length - 1) : 0);
   const backsRef = useRef<HTMLDivElement>(null);
   const riverRef = useRef<HTMLDivElement>(null);
   const scoreRef = useRef<HTMLSpanElement>(null);
@@ -123,7 +130,7 @@ export function RivalBand({
       // In riichi the whole band is tinted (Band.module.css): the first thing
       // to check before a dangerous discard.
       data-riichi={player.riichi || undefined}
-      style={{ ["--c" as string]: character.color }}
+      style={{ ["--c" as string]: character.color, ["--hand-units" as string]: handUnits, ["--hand-gaps" as string]: `${handGaps}px` }}
       aria-label={player.riichi ? `${charName(character)} · ${t("act_riichi")}` : charName(character)}
     >
       <div className={styles.left}>

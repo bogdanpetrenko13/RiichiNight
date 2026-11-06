@@ -225,6 +225,7 @@ export function useGameController(): GameController {
       if (mid) t.hand += 1;
       t.at = now;
       t.seatAt[seat] = now;
+      speechLog({ seat, kind, mid, at: now });
       if (delayMs) window.setTimeout(() => say(seat, kind, text, ctx), delayMs);
       else say(seat, kind, text, ctx);
       return true;
@@ -307,6 +308,7 @@ export function useGameController(): GameController {
             clearEmotions();
             setFreshMeld(null);
             talk.current = { ...talk.current, hand: 0, lateWall: false };
+            speechLog({ seat: -1, kind: "hand", mid: false, at: Date.now() });
             // Going into the final hand last: she says something about it once.
             const v = step.view;
             const final = v.rules.gameLength === "east" ? ev.wind === "east" && ev.number === 4 : ev.wind === "south" && ev.number === 4;
@@ -717,4 +719,10 @@ function bestYaku(w: WinnerInfo, lang: "en" | "ru"): string | undefined {
   const y = [...w.yaku].filter((x) => !/dora/i.test(x.key)).sort((a, b) => b.han - a.han)[0];
   if (!y) return undefined;
   return lang === "ru" ? YAKU_RU[y.key] ?? y.en : y.en;
+}
+
+/** Tests read what was said and when (window.__rnSpeech, set by the test). */
+function speechLog(entry: { seat: number; kind: string; mid: boolean; at: number }) {
+  const log = (window as unknown as { __rnSpeech?: unknown[] }).__rnSpeech;
+  if (Array.isArray(log)) log.push(entry);
 }

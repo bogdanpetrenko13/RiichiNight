@@ -1,6 +1,7 @@
 """Every heroine's lines (src/game/speech/<id>.ts) cover every situation in
-both languages, and bonds only name heroines that exist (with lines both
-ways in both languages)."""
+both languages, placeholders are known and never the only option, story
+beats come in order, and bonds only name heroines that exist (with lines
+both ways in both languages)."""
 
 import os
 import re
@@ -16,6 +17,9 @@ def _kinds():
     return re.findall(r'"(\w+)"', block)
 
 
+PLACEHOLDERS = {"points", "yaku", "name"}
+
+
 def _heroines():
     return sorted(f[:-3] for f in os.listdir(SPEECH) if f.endswith(".ts") and f not in ("types.ts", "index.ts"))
 
@@ -28,7 +32,7 @@ def _section(text, start, end):
 
 def test_every_situation_has_lines_in_both_languages():
     kinds = _kinds()
-    assert len(kinds) >= 16, kinds
+    assert len(kinds) >= 24, kinds
     for hid in _heroines():
         text = open(os.path.join(SPEECH, hid + ".ts"), encoding="utf-8").read()
         lines = _section(text, "  lines: {", "  bonds: {")
@@ -41,6 +45,11 @@ def test_every_situation_has_lines_in_both_languages():
                 items = re.findall(r'"((?:[^"\\]|\\.)+)"', m.group(1))
                 assert len(items) >= 2, (hid, lang, kind, items)
                 assert all(len(x) <= 70 for x in items), (hid, lang, kind, [x for x in items if len(x) > 70])
+                # {points}, {yaku}, {name} only, and a line without any, for
+                # when the situation has no value to fill in.
+                for x in items:
+                    assert set(re.findall(r"\{(\w+)\}", x)) <= PLACEHOLDERS, (hid, lang, kind, x)
+                assert any(not re.search(r"\{\w+\}", x) for x in items), (hid, lang, kind)
         for field in ("chatty:", "story:", "playstyle:"):
             assert field in text, (hid, field)
         chatty = float(re.search(r"chatty: ([0-9.]+)", text).group(1))
@@ -62,7 +71,7 @@ def test_bonds_name_real_heroines_and_go_both_ways():
             part = _section(block, f"    {other}: {{", "\n    },")
             for lang in ("en", "ru"):
                 sub = _section(part, f"      {lang}: {{", "      }")
-                for which in ("greet", "lostTo"):
+                for which in ("greet", "lostTo", "beat", "riichi"):
                     m = re.search(which + r': \[(.*?)\]', sub)
                     assert m and re.findall(r'"[^"]+"', m.group(1)), (hid, other, lang, which)
         bonds[hid] = set(others)
@@ -70,3 +79,29 @@ def test_bonds_name_real_heroines_and_go_both_ways():
     for hid, others in bonds.items():
         for other in others:
             assert hid in bonds[other], f"{hid} knows {other}, but not the other way round"
+
+
+def test_story_beats_are_short_ordered_and_in_both_languages():
+    """Five pieces of her story, told one by one as you keep playing her."""
+    for hid in _heroines():
+        text = open(os.path.join(SPEECH, hid + ".ts"), encoding="utf-8").read()
+        block = _section(text, "  beats: [", "  lines: {")
+        ats = [int(x) for x in re.findall(r"at: (\d+),", block)]
+        assert len(ats) == 5, (hid, ats)
+        assert ats == sorted(set(ats)) and ats[0] >= 1, (hid, ats)
+        for lang in ("en", "ru"):
+            texts = re.findall(lang + r': "((?:[^"\\]|\\.)+)"', block)
+            assert len(texts) == 5, (hid, lang)
+            assert all(len(x) <= 110 for x in texts), (hid, lang, [x for x in texts if len(x) > 110])
+
+
+def test_russian_lines_do_not_give_the_player_a_gender():
+    """The player may be anyone: no "ты выиграл", "сам", "готов" in lines
+    addressed to them (lines to another heroine may use feminine forms)."""
+    gendered = re.compile(r"\bты\s+\w+л\b|\bсам\b|\bготов\b|\bрад\b(?!а)", re.I)
+    for hid in _heroines():
+        text = open(os.path.join(SPEECH, hid + ".ts"), encoding="utf-8").read()
+        ru = _section(_section(text, "  lines: {", "  bonds: {"), "    ru: {", None)
+        beats = re.findall(r'ru: "((?:[^"\\]|\\.)+)"', _section(text, "  beats: [", "  lines: {"))
+        for line in re.findall(r'"((?:[^"\\]|\\.)+)"', ru) + beats:
+            assert not gendered.search(line), (hid, line)

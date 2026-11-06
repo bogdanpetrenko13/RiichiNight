@@ -122,6 +122,16 @@
   gap: 1px;
 }
 
+/* Landscape column: --band-back fits 14 closed tiles; with calls (a claimed
+   tile lies sideways, calls keep gaps) her tiles shrink to stay inside it.
+   useLayout budgets 14.35 tiles + 18 px of gaps. */
+:global([data-orientation="landscape"]) .band {
+  --rival-back: min(
+    var(--band-back, 14px),
+    calc((var(--band-back, 14px) * 14.35 + 18px - var(--hand-gaps, 18px)) / var(--hand-units, 14.35))
+  );
+}
+
 /* A new call slides into place. */
 .meld {
   animation: meldIn var(--dur-slow) var(--ease-in) both;

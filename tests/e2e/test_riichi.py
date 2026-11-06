@@ -243,3 +243,38 @@ def test_a_rival_reacts_to_her_riichi_and_calms_down(make_app):
         page.wait_for_timeout(400)
         assert probe.locator("img").count() == 1
     assert not app.errors, app.errors
+
+
+def test_rivals_react_during_a_hand_without_chattering(make_app):
+    """Riichi everywhere (scenario): the others react, but during a hand at
+    most three reactions, 2.5 s apart, the same heroine not within 8 s."""
+    app = make_app(PORTRAIT).open("?scenario=riichi", {"aiDelay": 300, "speechFreq": "often"})
+    page = app.page
+    page.evaluate("() => { window.__rnSpeech = []; }")
+    app.start_game()
+    for _ in range(800):
+        if app.result_shown():
+            break
+        try:
+            app.step()
+        except AssertionError:
+            page.wait_for_timeout(300)
+    log = page.evaluate("() => window.__rnSpeech")
+    hands, cur = [], []
+    for e in log:
+        if e["kind"] == "hand":
+            hands.append(cur)
+            cur = []
+        elif e["mid"]:
+            cur.append(e)
+    hands.append(cur)
+    assert any(e["kind"] == "hand" for e in log), log
+    for h in hands:
+        assert len(h) <= 3, h
+        for a, b in zip(h, h[1:]):
+            assert b["at"] - a["at"] >= 2400, h
+        for i, a in enumerate(h):
+            for b in h[i + 1:]:
+                if a["seat"] == b["seat"]:
+                    assert b["at"] - a["at"] >= 7900, h
+    assert not app.errors, app.errors

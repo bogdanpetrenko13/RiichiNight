@@ -47,7 +47,7 @@ The owner writes in Russian; reply in Russian.
 | `src/ui/usePeek.ts` | Long press on a tile: its visible copies light up, the rest dims (`data-kind` on face tiles) |
 | `src/ui/components/QuickSettings.tsx` | Settings in the table menu (speed, volumes, hints, talk); the rivals wait while the menu is open (`setPaused`) |
 | `src/i18n/strings.ts` | en + ru strings (both must have the same keys) |
-| `src/game/speech/<id>.ts` | Each heroine's lines per situation (`SpeechKind`, ru + en), chattiness, profile story / play style and bonds with other heroines; `tests/python/test_speech.py` checks they are complete and bonds go both ways |
+| `src/game/speech/<id>.ts` | Each heroine's lines per situation (`SpeechKind`, ru + en; `{points}` / `{yaku}` / `{name}` filled from the hand), story `beats` told once after `at` matches (then in her profile), greetings by acquaintance (`greetKind`, friend from 12 matches), chattiness, profile and bonds (greet / lostTo / beat / riichi, so friends banter); voices and rules in `docs/heroines/voices.md` (no job puns, never gender the player). Reactions during a hand keep to `TALK` in `useGameController.ts`; tests read `window.__rnSpeech`. `tests/python/test_speech.py` checks completeness |
 | `public/voice/<id>/<kind>.mp3` | Heroines' calls (riichi/pon/chi/kan/ron/tsumo) from VOICEVOX via `scripts/voicevox/` + `voices.json`; credits in `public/voice/CREDITS.md` and Settings → About (each voice requires its `VOICEVOX:<name>` line) |
 | `src/game/sfx.ts` | Table sounds: recordings in `public/audio/sfx/` (T-Studio pack, see its README; tiles muffled for the felt table, riichi sticks, dice, shuffle, stick collection) with synthesised fallbacks; win, round end and button tap are synthesised; drawing a tile is silent. The same pack's voice is the player's (`public/voice/player/`, calls + yaku names said on your wins) |
 | `scripts/comfy/gen_emotions.py`, `scripts/import-heroine-art.py` | Heroine art: AI portraits (Animagine XL 4.0 in ComfyUI on the owner's PC), emotion renders via img2img + IP-Adapter, colour match + face crop into `public/characters/<id>/` (see its `CREDITS.md`) |
@@ -176,7 +176,8 @@ emulator screen is 900×1600 (phone-like portrait).
   `--call-*` tokens and `--font-call` (bundled Inter Black, `public/fonts`,
   loaded in `src/main.tsx`; heavy capitals); small capital labels use `--caps-ls`.
 - Rivals' lines: say them through `maybeSay` (chance × her `chatty` × the
-  "Rivals talk" setting); new situations need lines for all 12 heroines.
+  "Rivals talk" setting; `mid` for reactions during a hand); new situations
+  need lines for all 12 heroines, written to `docs/heroines/voices.md`.
   Your record against each heroine is `records.v1` (`addMatch` in storage).
 - Render errors are caught by `ScreenErrorBoundary` (same recovery dialog as
   engine errors); e2e triggers one with `window.__rnCrash = "table"`.

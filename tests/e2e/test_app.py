@@ -1,5 +1,6 @@
 """End-to-end checks of the table on rigged and seeded games."""
 
+import os
 import re
 
 import pytest
@@ -742,4 +743,76 @@ def test_vibration_on_your_discard_and_your_win(make_app, on):
         assert mine and mine[0] == "discard", mine
         after = log[len(mine):]
         assert after == ["win"], after
+    assert not app.errors, app.errors
+
+
+def _speech(kind_or_beat: str, at: int | None = None) -> set[str]:
+    """Russian lines of every heroine for a situation (or her story beat at `at`)."""
+    import glob
+    import json as _json
+
+    out = set()
+    for path in glob.glob(os.path.join(os.path.dirname(__file__), "..", "..", "src", "game", "speech", "*.ts")):
+        text = open(path, encoding="utf-8").read()
+        if "lines: {" not in text:
+            continue
+        if kind_or_beat == "bondGreet":
+            for block in re.findall(r"ru: \{\s*greet: \[(.*?)\],", text[text.index("  bonds: {"):], re.S):
+                out |= {_json.loads(x) for x in re.findall(r'"(?:[^"\\]|\\.)*"', block)}
+            continue
+        if kind_or_beat == "beat":
+            for m in re.finditer(r'at: (\d+),\s*en: "(?:[^"\\]|\\.)*",\s*ru: ("(?:[^"\\]|\\.)*")', text):
+                if int(m.group(1)) == at:
+                    out.add(_json.loads(m.group(2)))
+            continue
+        ru = text[text.index("    ru: {\n      greet"):]
+        m = re.search(r"\b" + kind_or_beat + r": \[(.*?)\],", ru)
+        out |= {_json.loads(x) for x in re.findall(r'"(?:[^"\\]|\\.)*"', m.group(1))}
+    return out
+
+
+def _played(app, matches: int):
+    """Pretend every heroine has played you `matches` times (records.v1)."""
+    app.page.goto(app.base_url + "index.html")
+    app.page.evaluate(
+        """(n) => { const ids = ['nanami','hikari','yuzu','rin','mai','reiko','kaede','sora','akane','midori','yuki','tsukiko'];
+             const rec = Object.fromEntries(ids.map((id) => [id, { matches: n, youFirst: 0, herFirst: 0, herPlaceSum: 2 * n }]));
+             for (const k of ['records.v1', 'CapacitorStorage.records.v1']) localStorage.setItem(k, JSON.stringify(rec)); }""",
+        matches,
+    )
+
+
+def test_a_heroine_tells_a_piece_of_her_story_once_you_know_her(make_app):
+    """After four matches with her she tells the first piece of her story at
+    the start of the match, and it stays in her profile."""
+    app = make_app()
+    _played(app, 4)
+    app.open("?seed=7", {"aiDelay": 600, "speechFreq": "normal"})
+    # Her profile already shows what she will tell (beats at <= matches).
+    app.page.get_by_text("Новая игра").first.click()
+    story = app.page.locator("[data-story] li")
+    story.first.wait_for(timeout=10_000)
+    assert story.first.inner_text().strip() in _speech("beat", 4)
+    app.page.get_by_text("Начать", exact=True).first.click()
+    app.hand().first.wait_for(timeout=120_000)
+    bubble = app.page.locator("section[aria-label] [role=status]").first
+    bubble.wait_for(timeout=8_000)
+    assert bubble.inner_text().strip() in _speech("beat", 4)
+    app.shot("story_beat")
+    assert not app.errors, app.errors
+
+
+def test_old_friends_greet_you_as_one_of_their_own(make_app):
+    """From twelve matches on, the greeting is a friend's (greetFriend), not a stranger's."""
+    app = make_app()
+    _played(app, 12)
+    app.open("?seed=7", {"aiDelay": 600, "speechFreq": "normal"}).start_game()
+    bubble = app.page.locator("section[aria-label] [role=status]").first
+    bubble.wait_for(timeout=8_000)
+    text = bubble.inner_text().strip()
+    friendly = _speech("greetFriend")
+    strangers = _speech("greet") | _speech("greetAgain")
+    assert text not in strangers, text
+    # A friend's greeting, or a line to a friend at the table (bonds).
+    assert text in friendly | _speech("bondGreet"), text
     assert not app.errors, app.errors
