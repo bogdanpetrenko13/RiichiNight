@@ -61,7 +61,9 @@ export function BandScore({ seat, score, fx, className, scoreRef }: {
 
   const delta = fx ? fx.to - fx.from : 0;
   return (
-    <span ref={scoreRef} className={className} data-score-seat={seat} style={{ position: "relative" }}>
+    // As wide as the number: the floating delta sits right after it (in landscape
+    // the score is a grid item that would otherwise span the whole band).
+    <span ref={scoreRef} className={className} data-score-seat={seat} style={{ position: "relative", width: "fit-content" }}>
       {fmt(shown ?? score)}
       {fx && floating === fx.key && delta !== 0 && (
         <b

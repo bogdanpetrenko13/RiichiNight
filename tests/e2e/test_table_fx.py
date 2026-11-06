@@ -5,7 +5,7 @@ Each also checks that "off" leaves the table as before."""
 
 import pytest
 
-from conftest import PORTRAIT
+from conftest import LANDSCAPE, PORTRAIT
 
 RESULT = "button:has-text('Следующая раздача')"
 
@@ -44,9 +44,9 @@ def test_round_splash_rolls_the_dice_and_names_the_first_east(make_app, fx):
     assert not app.errors, app.errors
 
 
-@pytest.mark.parametrize("fx", ["full", "off"])
-def test_points_change_hands_on_the_table_before_the_result_card(make_app, fx):
-    app = make_app(PORTRAIT).open("?scenario=tsumo&seed=5", {"tableFx": fx}).start_game()
+@pytest.mark.parametrize("fx,vp", [("full", PORTRAIT), ("full", LANDSCAPE), ("off", PORTRAIT)])
+def test_points_change_hands_on_the_table_before_the_result_card(make_app, fx, vp):
+    app = make_app(vp).open("?scenario=tsumo&seed=5", {"tableFx": fx}).start_game()
     page = app.page
     _cut_junk(app)
     app.button("Цумо").first.wait_for(timeout=60_000)
@@ -64,6 +64,15 @@ def test_points_change_hands_on_the_table_before_the_result_card(make_app, fx):
         "() => Object.fromEntries([...document.querySelectorAll('[data-delta]')].map((d) => [d.closest('[data-score-seat]').dataset.scoreSeat, Number(d.dataset.delta)]))"
     )
     assert len(deltas) == 4 and sum(deltas.values()) == 0 and deltas["0"] > 0, deltas
+    # Each change floats right after its own score, inside its own band.
+    geo = page.evaluate(
+        """() => [...document.querySelectorAll('[data-delta]')].map((d) => {
+          const s = d.closest('[data-score-seat]'), sec = s.closest('section') || s.parentElement;
+          const a = d.getBoundingClientRect(), b = s.getBoundingClientRect(), c = sec.getBoundingClientRect();
+          return { gap: a.left - b.right, inBand: a.left >= c.left && a.left < c.right - 20 };
+        })"""
+    )
+    assert all(0 <= g["gap"] <= 16 and g["inBand"] for g in geo), geo
     app.shot("points_transfer")
     page.locator(RESULT).wait_for(timeout=10_000)
     after = page.evaluate("() => [0,1,2,3].map((s) => Number(document.querySelector(`[data-score-seat='${s}']`).firstChild.textContent.replace(/\\D/g, '')))")
