@@ -223,6 +223,30 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Her story so far: each piece as a quote in her colour. */
+.beats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.beats li {
+  padding: 2px 0 2px 10px;
+  border-left: 2px solid var(--c);
+  font-size: 13.5px;
+  line-height: 1.45;
+  font-style: italic;
+}
+
+.beatsNext {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
 .friends {
   display: flex;
   flex-wrap: wrap;

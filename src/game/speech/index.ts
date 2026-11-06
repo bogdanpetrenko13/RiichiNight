@@ -15,8 +15,8 @@ import { tsukiko } from "./tsukiko";
 import { yuki } from "./yuki";
 import { yuzu } from "./yuzu";
 
-export type { BondLines, HeroineSpeech, SpeechKind } from "./types";
-export { SPEECH_KINDS } from "./types";
+export type { BondLines, HeroineSpeech, LineContext, SpeechKind, StoryBeat } from "./types";
+export { PLACEHOLDERS, SPEECH_KINDS } from "./types";
 
 export const SPEECH: Record<string, HeroineSpeech> = {
   akane,

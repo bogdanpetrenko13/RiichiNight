@@ -5,12 +5,18 @@ import type { Lang } from "../../i18n/strings";
  * results card for the last three).
  */
 export type SpeechKind =
-  /** Match start: first match against her / she has played you before. */
+  /** Match start: first match against her / 1-5 matches before / 6 or more. */
   | "greet"
   | "greetAgain"
+  | "greetFriend"
   /** She wins a hand / a big one (mangan or more). */
   | "pleased"
   | "bigWin"
+  /** She wins off your discard; her second (or later) hand in a row;
+   *  a hand she wins while last in the match. */
+  | "ronYou"
+  | "streak"
+  | "comeback"
   /** She deals into you / a big hand; someone else draws their own win. */
   | "lossRon"
   | "lossBig"
@@ -32,8 +38,12 @@ export type SpeechKind =
 export const SPEECH_KINDS: SpeechKind[] = [
   "greet",
   "greetAgain",
+  "greetFriend",
   "pleased",
   "bigWin",
+  "ronYou",
+  "streak",
+  "comeback",
   "lossRon",
   "lossBig",
   "lossTsumo",
@@ -56,6 +66,25 @@ export interface BondLines {
   lostTo: string[];
 }
 
+/**
+ * Placeholders a line may use (the line is picked only when the situation
+ * has the value): {points} her win in points, {yaku} its best yaku,
+ * {name} the other heroine (the one she dealt into, or who dealt into her).
+ */
+export const PLACEHOLDERS = ["points", "yaku", "name"] as const;
+export type Placeholder = (typeof PLACEHOLDERS)[number];
+export type LineContext = Partial<Record<Placeholder, string>>;
+
+/**
+ * A piece of her story she tells once, at the start of the match after `at`
+ * finished matches against you (then it stays in her profile).
+ */
+export interface StoryBeat {
+  at: number;
+  en: string;
+  ru: string;
+}
+
 export interface HeroineSpeech {
   /** How often she talks: 0.3 (a word now and then) … 1 (chatterbox). */
   chatty: number;
@@ -63,6 +92,8 @@ export interface HeroineSpeech {
   story: Record<Lang, string>;
   /** How she plays, in plain words (profile). */
   playstyle: Record<Lang, string>;
+  /** Her story, told bit by bit as you play her more (ascending `at`). */
+  beats: StoryBeat[];
   lines: Record<Lang, Record<SpeechKind, string[]>>;
   /** Other heroines she knows: id -> lines. */
   bonds: Record<string, Record<Lang, BondLines>>;

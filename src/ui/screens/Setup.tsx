@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useApp } from "../../app/AppContext";
-import { CHARACTERS, getCharacter, isUnlocked, type CharacterDef } from "../../game/characters";
+import { CHARACTERS, beatsKnown, getCharacter, isUnlocked, type CharacterDef } from "../../game/characters";
 import { Portrait } from "../components/Portrait";
 import { AppBar, IconButton, Segmented } from "../components/Primitives";
 import { Icon } from "../icons";
@@ -138,6 +138,10 @@ export function Setup({ initial, onBack, onStart }: SetupProps) {
 function Profile({ c }: { c: CharacterDef }) {
   const { t, lang, rivals, records } = useApp();
   const rec = records[c.id];
+  const played = rec?.matches ?? 0;
+  // What she has told you so far, and when she will say more.
+  const known = beatsKnown(c, played);
+  const next = c.beats.find((b) => b.at > played);
   const friends = Object.keys(c.bonds)
     .map((id) => getCharacter(id))
     .filter((x): x is CharacterDef => Boolean(x));
@@ -171,6 +175,17 @@ function Profile({ c }: { c: CharacterDef }) {
         ) : (
           <p>{t("profileNever")}</p>
         )}
+      </section>
+      <section data-story>
+        <h3>{t("profileHerStory")}</h3>
+        {known.length > 0 ? (
+          <ul className={styles.beats}>
+            {known.map((b) => (
+              <li key={b.at}>{b[lang]}</li>
+            ))}
+          </ul>
+        ) : null}
+        {next ? <p className={styles.beatsNext}>{t("profileStoryNext", { n: next.at + 1 })}</p> : null}
       </section>
       {friends.length > 0 && (
         <section>

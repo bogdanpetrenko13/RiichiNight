@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getEngine } from "../engine/EngineClient";
-import type { CallKind, GameView, HumanCommand, StepResult } from "../engine/protocol";
+import type { CallKind, GameView, HumanCommand, StepResult, WinnerInfo } from "../engine/protocol";
 import { useApp } from "../app/AppContext";
 import { music, voice } from "./audio";
 import { sfx } from "./sfx";
@@ -8,7 +8,18 @@ import { landingMs } from "../ui/motion";
 import { fxScale } from "../ui/tableFx";
 import { PLAYER_VOICE, yakuClips } from "./yakuVoice";
 import { haptics } from "./haptics";
-import { getCharacter, pickLine, rivalsUnlockedBy, type CharacterDef, type Emotion, type SpeechKind } from "./characters";
+import {
+  beatFor,
+  getCharacter,
+  greetKind,
+  pickLine,
+  rivalsUnlockedBy,
+  type CharacterDef,
+  type Emotion,
+  type SpeechKind,
+} from "./characters";
+import type { LineContext } from "./speech";
+import { YAKU_RU } from "../i18n/strings";
 import { applyEvents } from "./stats";
 import { SPEECH_FREQ_FACTOR, clearGame, loadGame, saveGame, type SavedGame } from "./storage";
 
@@ -49,6 +60,8 @@ export const CUTAWAY_MS = 2200;
 /** A reaction to a riichi plays as its banner slides away. */
 const REACT_AFTER_BANNER = CUTAWAY_MS - 250;
 const SPEECH_MS = 3200;
+/** A longer line stays up longer (a story beat can run two or three lines). */
+const speechMs = (text: string) => Math.min(9000, SPEECH_MS + Math.max(0, text.length - 40) * 55);
 const MANGAN = 8000;
 
 export interface GameController {
@@ -103,6 +116,8 @@ export function useGameController(): GameController {
   const [finale, setFinale] = useState<Finale | null>(null);
   /** The "last place before the final hand" line is said once per match. */
   const lastPlaceSaid = useRef(false);
+  /** Who won the last hand and how many in a row (her "streak" lines). */
+  const streak = useRef<{ seat: number; count: number }>({ seat: -1, count: 0 });
   const rivalsRef = useRef(rivals);
   rivalsRef.current = rivals;
   const engine = getEngine();
@@ -166,11 +181,13 @@ export function useGameController(): GameController {
   };
 
   /** Shows a line in a heroine's bubble (a random one of `kind`, or `text`). */
-  const say = useCallback((seat: number, kind: SpeechKind, text?: string) => {
+  const say = useCallback((seat: number, kind: SpeechKind, text?: string, ctx?: LineContext) => {
     const c = castRef.current[seat - 1];
     if (!c || SPEECH_FREQ_FACTOR[settingsRef.current.speechFreq] <= 0) return;
+    const line = text ?? pickLine(c, langRef.current, kind, ctx);
+    if (!line) return;
     const id = nextId.current++;
-    setSpeech((prev) => ({ ...prev, [seat]: { id, text: text ?? pickLine(c, langRef.current, kind) } }));
+    setSpeech((prev) => ({ ...prev, [seat]: { id, text: line } }));
     window.setTimeout(
       () =>
         setSpeech((prev) => {
@@ -179,19 +196,19 @@ export function useGameController(): GameController {
           delete next[seat];
           return next;
         }),
-      SPEECH_MS,
+      speechMs(line),
     );
   }, []);
 
   /** Says it with probability base × her chattiness × the speech setting. */
   const maybeSay = useCallback(
-    (seat: number, kind: SpeechKind, base: number, text?: string, delayMs = 0) => {
+    (seat: number, kind: SpeechKind, base: number, text?: string, delayMs = 0, ctx?: LineContext) => {
       const c = castRef.current[seat - 1];
       if (!c) return;
       const p = base * c.chatty * SPEECH_FREQ_FACTOR[settingsRef.current.speechFreq];
       if (Math.random() >= p) return;
-      if (delayMs) window.setTimeout(() => say(seat, kind, text), delayMs);
-      else say(seat, kind, text);
+      if (delayMs) window.setTimeout(() => say(seat, kind, text, ctx), delayMs);
+      else say(seat, kind, text, ctx);
     },
     [say],
   );
@@ -204,16 +221,29 @@ export function useGameController(): GameController {
     return pool?.length ? pool[Math.floor(Math.random() * pool.length)] : null;
   };
 
-  /** Match start: one heroine greets (or greets a friend at the table); maybe a second one too. */
+  /** Finished matches against the heroine at `seat`. */
+  const matchesWith = (seat: number) => recordsRef.current[castRef.current[seat - 1]?.id]?.matches ?? 0;
+
+  /**
+   * Match start: a heroine who has a new piece of her story to tell tells it
+   * (once: after exactly `at` matches with you). Otherwise one heroine greets
+   * (or greets a friend at the table); maybe a second one too.
+   */
   const greet = () => {
     const n = castRef.current.length;
     if (!n) return;
     const seats = Array.from({ length: n }, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+    const factor = SPEECH_FREQ_FACTOR[settingsRef.current.speechFreq];
+    if (factor <= 0) return;
+    const teller = seats.find((s) => beatFor(castRef.current[s - 1], matchesWith(s)));
+    if (teller) {
+      const beat = beatFor(castRef.current[teller - 1], matchesWith(teller));
+      if (beat) window.setTimeout(() => say(teller, "greetFriend", beat[langRef.current]), 900);
+      return;
+    }
     const first = seats[0];
     const friend = seats.slice(1).find((s) => bondLine(first, s, "greet"));
-    const factor = SPEECH_FREQ_FACTOR[settingsRef.current.speechFreq];
-    const kindFor = (seat: number): SpeechKind =>
-      (recordsRef.current[castRef.current[seat - 1].id]?.matches ?? 0) > 0 ? "greetAgain" : "greet";
+    const kindFor = (seat: number): SpeechKind => greetKind(matchesWith(seat));
     if (Math.random() >= Math.min(1, factor)) return;
     if (friend && Math.random() < 0.6) {
       window.setTimeout(() => say(first, "greet", bondLine(first, friend, "greet") ?? undefined), 900);
@@ -317,31 +347,61 @@ export function useGameController(): GameController {
             }
             const pointsOf = (seat: number) =>
               result?.type === "win" ? result.winners.find((w) => w.seat === seat)?.points ?? 0 : 0;
+            const nameOf = (seat: number) => {
+              const c = castRef.current[seat - 1];
+              return c ? c.name[langRef.current].split(" ")[0] : undefined;
+            };
+            // What a line may mention: her points, her best yaku, the other heroine.
+            const ctxFor = (seat: number, other: number | null): LineContext => {
+              const w = result?.type === "win" ? result.winners.find((x) => x.seat === seat) : undefined;
+              return {
+                points: w ? w.points.toLocaleString("ru-RU").replace(/\u00a0/g, " ") : undefined,
+                yaku: w ? bestYaku(w, langRef.current) : undefined,
+                name: other !== null && other > 0 ? nameOf(other) : undefined,
+              };
+            };
+            // Scores before this hand: was the winner last?
+            const before =
+              result?.type === "win" ? step.view.players.map((p, i) => p.score - (result.deltas[i] ?? 0)) : [];
+            const wasLast = (seat: number) => before.length === 4 && before[seat] === Math.min(...before) && before.filter((x) => x === before[seat]).length === 1;
+            const solo = ev.winners.length === 1 ? ev.winners[0] : -1;
+            streak.current = solo === streak.current.seat ? { seat: solo, count: streak.current.count + 1 } : { seat: solo, count: solo >= 0 ? 1 : 0 };
             if (humanWin) {
               if (ev.tsumo) {
                 for (let s = 1; s <= 3; s++) setEmotion(s, "troubled");
                 maybeSay(randomRival(), "lossTsumo", 0.8);
               } else if (ev.from !== null && ev.from > 0) {
                 setEmotion(ev.from, "troubled");
-                maybeSay(ev.from, pointsOf(0) >= MANGAN ? "lossBig" : "lossRon", 1);
+                maybeSay(ev.from, pointsOf(0) >= MANGAN ? "lossBig" : "lossRon", 1, undefined, 0, ctxFor(0, null));
               }
             } else if (!ev.tsumo && ev.from !== null && ev.from > 0) {
               setEmotion(ev.from, "troubled");
               // Dealt into a heroine she knows: a line about her.
               const friendLine = ev.winners.map((w) => bondLine(ev.from as number, w, "lostTo")).find(Boolean);
               if (friendLine) maybeSay(ev.from, "lossRon", 0.9, friendLine);
-              else maybeSay(ev.from, "lossRon", 0.6);
+              else maybeSay(ev.from, "lossRon", 0.6, undefined, 0, { name: nameOf(ev.winners[0]) });
             }
             for (const w of ev.winners)
               if (w > 0) {
                 setEmotion(w, "happy");
                 // The loser speaks first when there is one; the winner a moment later.
                 const later = !ev.tsumo && ev.from !== null && ev.from > 0 ? 1500 : 0;
-                maybeSay(w, pointsOf(w) >= MANGAN ? "bigWin" : "pleased", 0.9, undefined, later);
+                const kind: SpeechKind =
+                  wasLast(w)
+                    ? "comeback"
+                    : pointsOf(w) >= MANGAN
+                      ? "bigWin"
+                      : streak.current.seat === w && streak.current.count >= 2
+                        ? "streak"
+                        : !ev.tsumo && ev.from === 0
+                          ? "ronYou"
+                          : "pleased";
+                maybeSay(w, kind, 0.9, undefined, later, ctxFor(w, ev.tsumo ? null : ev.from));
               }
             break;
           }
           case "draw_game":
+            streak.current = { seat: -1, count: 0 };
             void sfx.play("roundEnd", 300);
             if (ev.kind === "exhaustive_draw") maybeSay(randomRival(), "wallGame", 0.6);
             break;
@@ -468,6 +528,7 @@ export function useGameController(): GameController {
     setSpeech({});
     setFinale(null);
     lastPlaceSaid.current = false;
+    streak.current = { seat: -1, count: 0 };
     drawTimer.current = undefined;
     setCutaway(null);
     voice.unlock();
@@ -601,4 +662,11 @@ function shuffled<T>(items: T[]): T[] {
     [out[i], out[j]] = [out[j], out[i]];
   }
   return out;
+}
+
+/** The yaku a heroine would name: her highest-han one that is not dora. */
+function bestYaku(w: WinnerInfo, lang: "en" | "ru"): string | undefined {
+  const y = [...w.yaku].filter((x) => !/dora/i.test(x.key)).sort((a, b) => b.han - a.han)[0];
+  if (!y) return undefined;
+  return lang === "ru" ? YAKU_RU[y.key] ?? y.en : y.en;
 }

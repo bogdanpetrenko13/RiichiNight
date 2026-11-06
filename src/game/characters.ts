@@ -1,6 +1,6 @@
 import type { Level } from "../engine/protocol";
 import type { Lang } from "../i18n/strings";
-import { SPEECH, type HeroineSpeech, type SpeechKind } from "./speech";
+import { SPEECH, type HeroineSpeech, type LineContext, type SpeechKind, type StoryBeat } from "./speech";
 
 /**
  * Character roster.
@@ -46,6 +46,7 @@ export interface CharacterDef {
   chatty: number;
   story: Record<Lang, string>;
   playstyle: Record<Lang, string>;
+  beats: StoryBeat[];
   lines: Record<Lang, Record<SpeechKind, string[]>>;
   bonds: HeroineSpeech["bonds"];
   /**
@@ -279,9 +280,31 @@ export function rivalsUnlockedBy(cast: readonly string[], rivals: readonly strin
   ).map((c) => c.id);
 }
 
-export function pickLine(c: CharacterDef, lang: Lang, kind: SpeechKind): string {
-  const pool = c.lines[lang][kind];
+/** Lines of `kind` whose placeholders the situation can fill, filled in. */
+export function fillLines(pool: readonly string[], ctx: LineContext = {}): string[] {
+  return pool
+    .filter((line) => [...line.matchAll(/\{(\w+)\}/g)].every((m) => ctx[m[1] as keyof LineContext] !== undefined))
+    .map((line) => line.replace(/\{(\w+)\}/g, (_, k: keyof LineContext) => ctx[k] as string));
+}
+
+export function pickLine(c: CharacterDef, lang: Lang, kind: SpeechKind, ctx?: LineContext): string {
+  const pool = fillLines(c.lines[lang][kind] ?? [], ctx);
   return pool[Math.floor(Math.random() * pool.length)] ?? "";
+}
+
+/** Which greeting fits how often you have played her. */
+export function greetKind(matches: number): SpeechKind {
+  return matches >= 6 ? "greetFriend" : matches > 0 ? "greetAgain" : "greet";
+}
+
+/** The story beat she tells at the start of this match (once), if any. */
+export function beatFor(c: CharacterDef, matches: number): StoryBeat | undefined {
+  return c.beats.find((b) => b.at === matches);
+}
+
+/** The beats you have heard (or could have): her profile shows them. */
+export function beatsKnown(c: CharacterDef, matches: number): StoryBeat[] {
+  return c.beats.filter((b) => b.at <= matches);
 }
 
 export function getCharacter(id: string): CharacterDef | undefined {
