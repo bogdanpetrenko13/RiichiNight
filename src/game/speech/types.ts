@@ -5,7 +5,7 @@ import type { Lang } from "../../i18n/strings";
  * results card for the last three).
  */
 export type SpeechKind =
-  /** Match start: first match against her / 1-5 matches before / 6 or more. */
+  /** Match start: first match against her / 1-11 matches before / 12 or more. */
   | "greet"
   | "greetAgain"
   | "greetFriend"
@@ -24,10 +24,18 @@ export type SpeechKind =
   /** Exhaustive draw; you take a long time over a move. */
   | "wallGame"
   | "idle"
-  /** She declares riichi; you declare riichi; she calls Pon / Chi / Kan. */
+  /** She declares riichi; you declare riichi; another heroine ({name}) does. */
   | "riichi"
   | "playerRiichi"
+  | "rivalRiichi"
+  /** She calls Pon / Chi / Kan; someone calls her discard ({name} if a heroine). */
   | "call"
+  | "takenFrom"
+  /** The wall is nearly gone and nobody has won yet. */
+  | "lateWall"
+  /** She watches a big hand (mangan or more) won by someone else, not off her
+   *  ({name} the winner if a heroine, {points}). */
+  | "watchBig"
   /** She is last going into the final hand. */
   | "lastPlace"
   /** End of the match: she wins it / finishes last / you beat everyone. */
@@ -51,19 +59,27 @@ export const SPEECH_KINDS: SpeechKind[] = [
   "idle",
   "riichi",
   "playerRiichi",
+  "rivalRiichi",
   "call",
+  "takenFrom",
+  "lateWall",
+  "watchBig",
   "lastPlace",
   "matchWin",
   "matchLose",
   "defeated",
 ];
 
-/** Lines about another heroine at the same table. */
+/** Lines about another heroine at the same table (what she says to her). */
 export interface BondLines {
   /** Match start with her at the table. */
   greet: string[];
   /** She deals into that heroine. */
   lostTo: string[];
+  /** She wins off that heroine's discard. */
+  beat: string[];
+  /** That heroine declares riichi. */
+  riichi: string[];
 }
 
 /**

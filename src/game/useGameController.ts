@@ -18,7 +18,7 @@ import {
   type Emotion,
   type SpeechKind,
 } from "./characters";
-import type { LineContext } from "./speech";
+import type { BondLines, LineContext } from "./speech";
 import { YAKU_RU } from "../i18n/strings";
 import { applyEvents } from "./stats";
 import { SPEECH_FREQ_FACTOR, clearGame, loadGame, saveGame, type SavedGame } from "./storage";
@@ -63,6 +63,11 @@ const SPEECH_MS = 3200;
 /** A longer line stays up longer (a story beat can run two or three lines). */
 const speechMs = (text: string) => Math.min(9000, SPEECH_MS + Math.max(0, text.length - 40) * 55);
 const MANGAN = 8000;
+/** Reactions during a hand: at most `perHand` lines, `gapMs` between any two,
+ *  `seatGapMs` before the same heroine speaks again. */
+const TALK = { perHand: 3, gapMs: 2500, seatGapMs: 8000 };
+/** With this many tiles left in the wall, someone may feel the end coming. */
+const LATE_WALL = 8;
 
 export interface GameController {
   view: GameView | null;
@@ -118,6 +123,8 @@ export function useGameController(): GameController {
   const lastPlaceSaid = useRef(false);
   /** Who won the last hand and how many in a row (her "streak" lines). */
   const streak = useRef<{ seat: number; count: number }>({ seat: -1, count: 0 });
+  /** Talk budget during a hand (see TALK) and the once-a-hand late-wall line. */
+  const talk = useRef({ hand: 0, at: 0, seatAt: {} as Record<number, number>, lateWall: false });
   const rivalsRef = useRef(rivals);
   rivalsRef.current = rivals;
   const engine = getEngine();
@@ -200,21 +207,33 @@ export function useGameController(): GameController {
     );
   }, []);
 
-  /** Says it with probability base × her chattiness × the speech setting. */
+  /**
+   * Says it with probability base × her chattiness × the speech setting.
+   * `mid`: a reaction during the hand, which keeps to the talk budget (a few
+   * lines a hand, a pause after each, and longer before the same heroine
+   * again), so the table reacts without chattering.
+   */
   const maybeSay = useCallback(
-    (seat: number, kind: SpeechKind, base: number, text?: string, delayMs = 0, ctx?: LineContext) => {
+    (seat: number, kind: SpeechKind, base: number, text?: string, delayMs = 0, ctx?: LineContext, mid = false) => {
       const c = castRef.current[seat - 1];
-      if (!c) return;
+      if (!c) return false;
+      const now = Date.now() + delayMs;
+      const t = talk.current;
+      if (mid && (t.hand >= TALK.perHand || now - t.at < TALK.gapMs || now - (t.seatAt[seat] ?? 0) < TALK.seatGapMs)) return false;
       const p = base * c.chatty * SPEECH_FREQ_FACTOR[settingsRef.current.speechFreq];
-      if (Math.random() >= p) return;
+      if (Math.random() >= p) return false;
+      if (mid) t.hand += 1;
+      t.at = now;
+      t.seatAt[seat] = now;
       if (delayMs) window.setTimeout(() => say(seat, kind, text, ctx), delayMs);
       else say(seat, kind, text, ctx);
+      return true;
     },
     [say],
   );
 
   /** A line from `seat` about the heroine at `otherSeat`, if they know each other. */
-  const bondLine = (seat: number, otherSeat: number, which: "greet" | "lostTo"): string | null => {
+  const bondLine = (seat: number, otherSeat: number, which: keyof BondLines): string | null => {
     const c = castRef.current[seat - 1];
     const other = castRef.current[otherSeat - 1];
     const pool = c && other ? c.bonds[other.id]?.[langRef.current]?.[which] : undefined;
@@ -257,6 +276,11 @@ export function useGameController(): GameController {
   };
 
   const randomRival = () => 1 + Math.floor(Math.random() * Math.max(1, castRef.current.length));
+  /** A heroine's first name, for {name} in a line. */
+  const nameOf = (seat: number): string | undefined => {
+    const c = castRef.current[seat - 1];
+    return c ? c.name[langRef.current].split(" ")[0] : undefined;
+  };
 
   const handleStep = useCallback(
     async (step: StepResult): Promise<void> => {
@@ -269,6 +293,11 @@ export function useGameController(): GameController {
             if (ev.seat === 0) haptics.discard();
             setTsumogiri((prev) => ({ ...prev, [ev.seat]: Boolean(ev.tsumogiri) }));
             setFreshMeld((s) => (s !== null && s !== ev.seat ? null : s));
+            // The last few tiles: someone feels it (once a hand, maybe).
+            if (!talk.current.lateWall && step.view.wall !== null && step.view.wall <= LATE_WALL && !step.view.result) {
+              talk.current.lateWall = true;
+              maybeSay(randomRival(), "lateWall", 0.35, undefined, 500, undefined, true);
+            }
             break;
           case "round_start": {
             // The wall is built (a shuffle at the first hand of the match), then the dice roll.
@@ -277,6 +306,7 @@ export function useGameController(): GameController {
             void sfx.play("dice", first ? 900 : 200);
             clearEmotions();
             setFreshMeld(null);
+            talk.current = { ...talk.current, hand: 0, lateWall: false };
             // Going into the final hand last: she says something about it once.
             const v = step.view;
             const final = v.rules.gameLength === "east" ? ev.wind === "east" && ev.number === 4 : ev.wind === "south" && ev.number === 4;
@@ -292,6 +322,9 @@ export function useGameController(): GameController {
           }
           case "meld":
             setFreshMeld(ev.seat);
+            // Her discard was called: she minds ({name}: the heroine who took it).
+            if (ev.from !== null && ev.from > 0 && ev.from !== ev.seat)
+              maybeSay(ev.from, "takenFrom", 0.35, undefined, 900, { name: ev.seat > 0 ? nameOf(ev.seat) : undefined }, true);
             setCallouts((prev) => prev.map((c) => (c.seat === ev.seat && c.from === undefined ? { ...c, from: ev.from } : c)));
             break;
           case "call": {
@@ -318,13 +351,22 @@ export function useGameController(): GameController {
               // Your riichi worries everyone else; one of them says so.
               if (ev.kind === "riichi") {
                 for (let s = 1; s <= 3; s++) setEmotion(s, "troubled", REACT_AFTER_BANNER);
-                maybeSay(randomRival(), "playerRiichi", 0.55, undefined, 900);
+                maybeSay(randomRival(), "playerRiichi", 0.55, undefined, REACT_AFTER_BANNER, undefined, true);
               }
             } else if (ev.kind === "riichi") {
               setEmotion(ev.seat, "happy", REACT_AFTER_BANNER);
-              maybeSay(ev.seat, "riichi", 0.7);
+              const spoke = maybeSay(ev.seat, "riichi", 0.7);
+              // Another heroine answers it: a friend teases her, anyone else
+              // reacts in her own way.
+              const others = [1, 2, 3].filter((s) => s !== ev.seat && castRef.current[s - 1]).sort(() => Math.random() - 0.5);
+              const friend = others.find((s) => bondLine(s, ev.seat, "riichi"));
+              const who = friend ?? others[0];
+              if (who) {
+                const line = friend ? bondLine(friend, ev.seat, "riichi") ?? undefined : undefined;
+                maybeSay(who, "rivalRiichi", friend ? 0.8 : 0.4, line, REACT_AFTER_BANNER + (spoke ? 1600 : 400), { name: nameOf(ev.seat) }, true);
+              }
             } else if (ev.kind === "pon" || ev.kind === "chi" || ev.kind === "kan") {
-              maybeSay(ev.seat, "call", 0.35, undefined, 700);
+              maybeSay(ev.seat, "call", 0.35, undefined, 700, undefined, true);
             }
             break;
           }
@@ -347,10 +389,6 @@ export function useGameController(): GameController {
             }
             const pointsOf = (seat: number) =>
               result?.type === "win" ? result.winners.find((w) => w.seat === seat)?.points ?? 0 : 0;
-            const nameOf = (seat: number) => {
-              const c = castRef.current[seat - 1];
-              return c ? c.name[langRef.current].split(" ")[0] : undefined;
-            };
             // What a line may mention: her points, her best yaku, the other heroine.
             const ctxFor = (seat: number, other: number | null): LineContext => {
               const w = result?.type === "win" ? result.winners.find((x) => x.seat === seat) : undefined;
@@ -396,8 +434,18 @@ export function useGameController(): GameController {
                         : !ev.tsumo && ev.from === 0
                           ? "ronYou"
                           : "pleased";
-                maybeSay(w, kind, 0.9, undefined, later, ctxFor(w, ev.tsumo ? null : ev.from));
+                // Off a friend's discard: what she says to her.
+                const toFriend = !ev.tsumo && ev.from !== null && ev.from > 0 && kind !== "comeback" ? bondLine(w, ev.from, "beat") : null;
+                maybeSay(w, kind, 0.9, toFriend ?? undefined, later, ctxFor(w, ev.tsumo ? null : ev.from));
               }
+            // A big hand between others: someone watching says something.
+            const big = ev.winners.find((w) => pointsOf(w) >= MANGAN);
+            if (big !== undefined) {
+              const watcher = [1, 2, 3]
+                .sort(() => Math.random() - 0.5)
+                .find((s) => castRef.current[s - 1] && !ev.winners.includes(s) && s !== ev.from);
+              if (watcher) maybeSay(watcher, "watchBig", 0.45, undefined, 3000, { name: big > 0 ? nameOf(big) : undefined, points: ctxFor(big, null).points });
+            }
             break;
           }
           case "draw_game":

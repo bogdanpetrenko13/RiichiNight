@@ -292,9 +292,12 @@ export function pickLine(c: CharacterDef, lang: Lang, kind: SpeechKind, ctx?: Li
   return pool[Math.floor(Math.random() * pool.length)] ?? "";
 }
 
+/** From this many finished matches on she greets you as one of her own. */
+export const FRIEND_AFTER = 12;
+
 /** Which greeting fits how often you have played her. */
 export function greetKind(matches: number): SpeechKind {
-  return matches >= 6 ? "greetFriend" : matches > 0 ? "greetAgain" : "greet";
+  return matches >= FRIEND_AFTER ? "greetFriend" : matches > 0 ? "greetAgain" : "greet";
 }
 
 /** The story beat she tells at the start of this match (once), if any. */
