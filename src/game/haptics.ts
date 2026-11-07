@@ -1,19 +1,45 @@
 // Vibration (Settings -> Vibration): a short buzz when you discard, a firmer
 // one on a call (yours or a rival's), a double buzz on your win.
 //
-// @capacitor/haptics drives the phone's motor on Android. Its impact() and
-// notification() play amplitude-shaped waveforms (a light impact is ~20 ms
-// at a fifth of full strength), which some phones (Xiaomi / Poco on
-// HyperOS among them) scale down to nothing. vibrate({ duration }) is a
-// one-shot at the phone's own default strength, so every buzz here is one
-// of those, a little longer for the firmer kinds. If the plugin fails, the
-// WebView's navigator.vibrate is tried.
-import { Haptics } from "@capacitor/haptics";
+// On Android the game's own plugin (resources/android/java/VibrationPlugin)
+// buzzes the motor. Phones differ in which vibrations they let through
+// (on a Poco with HyperOS neither @capacitor/haptics' impact nor its
+// one-shot could be felt), so the buzz can be tagged several ways
+// (VIBRATION_WAYS, Settings -> "Vibration check"). In a browser, or without
+// the plugin, navigator.vibrate.
+import { Capacitor, registerPlugin } from "@capacitor/core";
+
+export const VIBRATION_WAYS = ["touch", "notification", "alarm", "media", "plain", "legacy", "view"] as const;
+export type VibrationWay = (typeof VIBRATION_WAYS)[number];
+
+export interface VibrationInfo {
+  sdk: number;
+  device: string;
+  hasVibrator: boolean;
+  amplitudeControl: boolean;
+  /** AudioManager ringer mode: 0 silent, 1 vibrate, 2 normal. */
+  ringerMode: number;
+  /** Settings.System.HAPTIC_FEEDBACK_ENABLED: 1 on, 0 off, -1 unknown. */
+  touchFeedback: number;
+}
+
+interface VibrationPlugin {
+  vibrate(o: { duration: number; way: VibrationWay }): Promise<void>;
+  info(): Promise<VibrationInfo>;
+}
+
+const native = registerPlugin<VibrationPlugin>("RNVibration");
+const onDevice = () => Capacitor.isNativePlatform() && Capacitor.isPluginAvailable("RNVibration");
 
 let enabled = true;
+let way: VibrationWay = "touch";
 
 export function setHapticsEnabled(on: boolean) {
   enabled = on;
+}
+
+export function setVibrationWay(w: VibrationWay) {
+  way = VIBRATION_WAYS.includes(w) ? w : "touch";
 }
 
 /** Tests read what fired from window.__rnHaptics when they create it. */
@@ -21,18 +47,29 @@ type HapticKind = "discard" | "call" | "win" | "test";
 
 /** Buzz lengths in ms; a pattern is buzz, pause, buzz, ... */
 const PATTERN: Record<HapticKind, number[]> = {
-  discard: [28],
+  discard: [30],
   call: [55],
   win: [70, 90, 110],
-  test: [120],
+  test: [150],
 };
 
-async function buzz(ms: number): Promise<void> {
+/** One buzz; resolves with an error message if the phone refused it. */
+export async function buzz(ms: number, w: VibrationWay = way): Promise<string | null> {
   try {
-    await Haptics.vibrate({ duration: ms });
+    if (onDevice()) await native.vibrate({ duration: ms, way: w });
+    else if (!navigator.vibrate?.(ms)) return "navigator.vibrate";
+    return null;
+  } catch (e) {
+    return e instanceof Error ? e.message : String(e);
+  }
+}
+
+export async function vibrationInfo(): Promise<VibrationInfo | null> {
+  if (!onDevice()) return null;
+  try {
+    return await native.info();
   } catch {
-    // No plugin (a browser) or it refused: the WebView's own vibration.
-    navigator.vibrate?.(ms);
+    return null;
   }
 }
 

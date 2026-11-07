@@ -22,6 +22,7 @@ import { Tile } from "../components/Tile";
 import { AppBar, Group, Row, Segmented, Switch } from "../components/Primitives";
 import { SpeedSlider } from "../components/QuickSettings";
 import { haptics } from "../../game/haptics";
+import { VibrationCheck } from "../components/VibrationCheck";
 import styles from "./SettingsScreen.module.css";
 
 /** The app is AGPL: whoever gets it can get the source (see NOTICE.md). */
@@ -185,6 +186,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
           {toggle("safeTiles", "safeTiles", "safeTilesHint")}
           {toggle("dealAnimation", "dealAnimation")}
           {toggle("haptics", "hapticsSetting")}
+          {settings.haptics && <VibrationCheck />}
           <Row label={t("tableFx")} hint={t("tableFxHint")} stacked>
             <Segmented
               value={settings.tableFx}

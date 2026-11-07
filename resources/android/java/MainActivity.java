@@ -13,12 +13,15 @@ import com.getcapacitor.BridgeActivity;
  * (immersive; a swipe from the edge shows them for a moment), and the page
  * also draws under the camera cutout, so there is no grey stripe at the
  * side in landscape. The page keeps its controls clear of the cutout with
- * CSS env(safe-area-inset-*). Copied over the generated activity by CI
- * (.github/workflows/android.yml).
+ * CSS env(safe-area-inset-*). Also registers the game's vibration
+ * (VibrationPlugin). Copied over the generated activity by CI, with the
+ * other files of resources/android/java (.github/workflows/android.yml).
  */
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // The game's own vibration (VibrationPlugin), before the bridge starts.
+        registerPlugin(VibrationPlugin.class);
         super.onCreate(savedInstanceState);
         goFullScreen();
     }

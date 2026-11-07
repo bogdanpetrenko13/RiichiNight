@@ -1,6 +1,7 @@
 // Persistence through @capacitor/preferences (SharedPreferences on Android,
 // localStorage on the web). Everything is JSON; the engine snapshot is an
 // opaque base64 string produced by bridge.save().
+import { VIBRATION_WAYS, type VibrationWay } from "./haptics";
 import { Preferences } from "@capacitor/preferences";
 import { DEFAULT_GAME_RULES, type GameRules, type Level } from "../engine/protocol";
 import type { Lang } from "../i18n/strings";
@@ -121,6 +122,8 @@ export interface Settings {
   tableFx: TableFx;
   /** Vibration on discards, calls and your wins. */
   haptics: boolean;
+  /** How the buzz is tagged for Android (Settings -> vibration check). */
+  vibrationWay: VibrationWay;
   /** Result screen: "How it's scored" section expanded. */
   scoreDetails?: boolean;
   theme: ThemeMode;
@@ -175,6 +178,7 @@ export function defaultSettings(): Settings {
     safeTiles: false,
     tableFx: "full",
     haptics: true,
+    vibrationWay: "touch",
     tileBack: "auto",
     theme: "system",
     styleVersion: STYLE_VERSION,
@@ -219,6 +223,7 @@ export async function loadSettings(): Promise<Settings> {
   if (rest.dealerChip !== undefined && !TURN_RINGS.includes(rest.dealerChip)) delete rest.dealerChip;
   if (rest.turnRingStyle !== undefined && !TURN_RING_STYLES.includes(rest.turnRingStyle)) delete rest.turnRingStyle;
   if (rest.tableFx !== undefined && !TABLE_FX.includes(rest.tableFx)) delete rest.tableFx;
+  if (rest.vibrationWay !== undefined && !VIBRATION_WAYS.includes(rest.vibrationWay)) delete rest.vibrationWay;
   if (rest.aiDelay === undefined && oldSpeed) rest.aiDelay = OLD_SPEED[oldSpeed] ?? AI_DELAY_DEFAULT;
   // The old on/off switch for rivals' lines becomes "off" / the default.
   const oldBubbles = (rest as { speechBubbles?: boolean }).speechBubbles;

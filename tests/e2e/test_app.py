@@ -821,3 +821,27 @@ def test_old_friends_greet_you_as_one_of_their_own(make_app):
     # A friend's greeting, or a line to a friend at the table (bonds).
     assert text in friendly | _speech("bondGreet"), text
     assert not app.errors, app.errors
+
+
+def test_vibration_check_picks_the_way_the_phone_lets_through(make_app):
+    """Settings -> Vibration check: a tap on a way buzzes it and makes it the
+    game's (saved); off with vibration switched off."""
+    app = make_app(PORTRAIT).open("", {"haptics": True})
+    page = app.page
+    page.get_by_text("Настройки", exact=True).first.click()
+    check = page.locator("[data-vibration-check]")
+    check.wait_for(timeout=10_000)
+    assert check.locator("[aria-pressed=true]").get_attribute("data-way") == "touch"
+    check.locator("[data-way=alarm]").click()
+    assert check.locator("[aria-pressed=true]").get_attribute("data-way") == "alarm"
+    page.wait_for_timeout(300)
+    saved = page.evaluate(
+        """() => ['CapacitorStorage.settings.v1', 'settings.v1'].map((k) => localStorage.getItem(k))
+             .filter(Boolean).map((v) => JSON.parse(v).vibrationWay)"""
+    )
+    assert "alarm" in saved, saved
+    check.scroll_into_view_if_needed()
+    app.shot("vibration_check")
+    page.get_by_role("switch", name="Вибрация").click()
+    assert check.count() == 0
+    assert not app.errors, app.errors
