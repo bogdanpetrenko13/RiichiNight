@@ -121,6 +121,11 @@ export function useGameController(): GameController {
   const [finale, setFinale] = useState<Finale | null>(null);
   /** The "last place before the final hand" line is said once per match. */
   const lastPlaceSaid = useRef(false);
+  /** Your Pon / Chi / Kan announced on the tap, before the engine answers
+   *  (so the call event does not announce it twice). */
+  const earlyCall = useRef<{ kind: string; at: number } | null>(null);
+  /** Saves run one after another in the background, never holding up a tap. */
+  const saving = useRef<Promise<void>>(Promise.resolve());
   /** Who won the last hand and how many in a row (her "streak" lines). */
   const streak = useRef<{ seat: number; count: number }>({ seat: -1, count: 0 });
   /** Talk budget during a hand (see TALK) and the once-a-hand late-wall line. */
@@ -130,6 +135,8 @@ export function useGameController(): GameController {
   const engine = getEngine();
 
   const [view, setView] = useState<GameView | null>(null);
+  const viewRef = useRef<GameView | null>(null);
+  viewRef.current = view;
   const [cast, setCast] = useState<CharacterDef[]>([]);
   const [emotions, setEmotions] = useState<Record<number, Emotion>>({});
   const [callouts, setCallouts] = useState<Callout[]>([]);
@@ -332,6 +339,11 @@ export function useGameController(): GameController {
           case "call": {
             pause = Math.max(pause, CALL_PAUSE);
             const id = nextId.current++;
+            const early = earlyCall.current;
+            if (ev.seat === 0 && early && early.kind === ev.kind && Date.now() - early.at < 5000) {
+              earlyCall.current = null;
+              break;
+            }
             // Ron / Tsumo / Riichi get the big banner instead of the small callout.
             if (ev.kind !== "ron" && ev.kind !== "tsumo" && ev.kind !== "riichi") {
               setCallouts((prev) => [...prev, { id, seat: ev.seat, kind: ev.kind }]);
@@ -523,15 +535,17 @@ export function useGameController(): GameController {
       if (status === "game_over") {
         await clearGame();
       } else if (status === "human" || status === "round_over") {
-        const blob = await engine.save();
-        await saveGame({
-          version: 1,
-          savedAt: Date.now(),
-          cast: castRef.current.map((c) => c.id),
-          levels: step.view.levels,
-          dealIns: matchDealIns.current,
-          blob,
-        });
+        // In the background: on a phone the save takes a moment, and a tap
+        // made meanwhile (a discard right after your Pon) must not be lost.
+        // The worker answers requests in order, so the save is of this state.
+        const cast = castRef.current.map((c) => c.id);
+        const dealIns = matchDealIns.current;
+        const blobP = engine.save();
+        saving.current = saving.current
+          .then(async () => {
+            await saveGame({ version: 1, savedAt: Date.now(), cast, levels: step.view.levels, dealIns, blob: await blobP });
+          })
+          .catch((err) => console.warn("[save]", err));
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -630,6 +644,20 @@ export function useGameController(): GameController {
       voice.unlock();
       music.resume();
       pauseRef.current = 0;
+      // Your Pon / Chi / Kan sounds, buzzes and shows its plaque on the tap;
+      // the hand rebuilds when the engine answers (a moment later on a phone).
+      const kind = command.action;
+      if ((kind === "pon" || kind === "chi" || kind === "kan") && !busyRef.current) {
+        earlyCall.current = { kind, at: Date.now() };
+        const id = nextId.current++;
+        // "from <name>": the seat whose discard you are claiming.
+        const from = viewRef.current?.prompt?.claim?.from;
+        setCallouts((prev) => [...prev, { id, seat: 0, kind, from }]);
+        window.setTimeout(() => setCallouts((prev) => prev.filter((c) => c.id !== id)), CALLOUT_MS);
+        void voice.play(PLAYER_VOICE, kind);
+        void sfx.play("call");
+        haptics.call();
+      }
       await run(() => engine.act(command));
     },
     [run, engine],

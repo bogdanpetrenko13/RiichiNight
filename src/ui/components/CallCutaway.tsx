@@ -8,12 +8,30 @@ import styles from "./CallCutaway.module.css";
 const ROMAJI = { ron: "RON", tsumo: "TSUMO", riichi: "RIICHI" } as const;
 
 /** Slanted banner that sweeps across the table on Ron / Tsumo / Riichi. */
-export function CallCutaway({ cutaway, cast, onSkip }: { cutaway: Cutaway; cast: CharacterDef[]; onSkip: () => void }) {
+export function CallCutaway({
+  cutaway,
+  cast,
+  onSkip,
+  passThrough,
+}: {
+  cutaway: Cutaway;
+  cast: CharacterDef[];
+  onSkip: () => void;
+  /** You can call her riichi tile (Pon / Chi / Ron...): taps reach your buttons. */
+  passThrough?: boolean;
+}) {
   const { t } = useApp();
   const character = cutaway.seat > 0 ? cast[cutaway.seat - 1] : undefined;
   const color = character?.color ?? "var(--sakura)";
   return (
-    <div className={styles.layer} aria-live="assertive" onClick={onSkip} role="button" aria-label={t(`act_${cutaway.kind}` as StringKey)}>
+    <div
+      className={styles.layer}
+      aria-live="assertive"
+      onClick={onSkip}
+      role="button"
+      aria-label={t(`act_${cutaway.kind}` as StringKey)}
+      data-pass-through={passThrough || undefined}
+    >
       <div className={styles.band} data-kind={cutaway.kind} style={{ ["--c" as string]: color }}>
         <div className={styles.inner}>
           {character && (

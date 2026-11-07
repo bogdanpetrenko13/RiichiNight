@@ -9,6 +9,9 @@ export const EASE = "cubic-bezier(0.2, 0, 0, 1)";
  *  (0.05, 0.7, 0.1, 1) covered half of a rival's discard flight in the first
  *  frame, which read as a jump; this one moves at most ~1/4 per frame. */
 export const EASE_IN = "cubic-bezier(0.33, 1, 0.68, 1)";
+/** Hand tiles sliding or coming in over a short way (a gap of ~10 px): a
+ *  soft start, so the first frame does not cover half of it (EASE_IN did). */
+export const EASE_SOFT = "cubic-bezier(0.3, 0.1, 0.25, 1)";
 
 let speed = 1;
 /** Opponent speed slider also scales animations (0.6–1.3). */

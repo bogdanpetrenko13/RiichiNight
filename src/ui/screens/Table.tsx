@@ -428,7 +428,15 @@ export function Table({ game, onTitle, onAgain, onOpen }: TableProps) {
 
       {error && <ErrorDialog error={error} onRetry={() => void game.retry()} onRecover={game.recover} onTitle={onTitle} />}
 
-      {cutaway && <CallCutaway key={cutaway.id} cutaway={cutaway} cast={cast} onSkip={holding ? skipHold : game.skipCutaway} />}
+      {cutaway && (
+        <CallCutaway
+          key={cutaway.id}
+          cutaway={cutaway}
+          cast={cast}
+          onSkip={holding ? skipHold : game.skipCutaway}
+          passThrough={Boolean(view?.prompt?.actions.some((a) => a !== "discard"))}
+        />
+      )}
       {holding && !cutaway && <button className={styles.skipLayer} onClick={skipHold} aria-label={t("continue")} />}
 
       {showRound && (

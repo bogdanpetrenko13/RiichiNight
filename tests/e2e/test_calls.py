@@ -116,7 +116,9 @@ def test_player_pon_uses_the_same_plaque(make_app):
         if app.result_shown():
             break
         if not called and app.button("Пон").count():
-            app.button("Пон").first.click()
+            # At once, even with a rival's riichi banner still on screen
+            # (it lets taps through while a call waits for you).
+            app.button("Пон").first.click(timeout=1_500)
             called = True
             continue
         mine = [a for a in page.evaluate("() => window.__ann") if a["me"]]

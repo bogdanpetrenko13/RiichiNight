@@ -2,7 +2,7 @@ import type { PlayerView, Prompt, TileCode } from "../../engine/protocol";
 import { useApp } from "../../app/AppContext";
 import { sameType } from "../tiles";
 import { HAND_UNITS_BASE } from "../useLayout";
-import { DUR, EASE_IN, animate, flyFrom, setHandLocator, takeClaim } from "../motion";
+import { DUR, EASE_SOFT, animate, flyFrom, setHandLocator, takeClaim } from "../motion";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent } from "react";
 import { Tile } from "./Tile";
@@ -129,6 +129,8 @@ export function PlayerHand({
   const prevMelds = useRef(0);
   const prevDeal = useRef(dealId);
   const prevWidth = useRef(0);
+  /** Where the row itself was on screen: it moves when the hand gets shorter. */
+  const prevRowX = useRef<number | null>(null);
   useLayoutEffect(() => {
     const row = rowRef.current;
     if (!row) return;
@@ -158,6 +160,11 @@ export function PlayerHand({
     // The row changed width (the phone turned, the window resized): every
     // tile moved because of that, not because of play; no slides.
     const width = row.clientWidth;
+    // The row may sit elsewhere now (one tile fewer and the hand re-centres):
+    // that shift is part of every tile's slide, or it would jump.
+    const rowX = row.getBoundingClientRect().left;
+    const rowShift = prevRowX.current === null ? 0 : prevRowX.current - rowX;
+    prevRowX.current = rowX;
     const resized = Math.abs(width - prevWidth.current) > 2;
     prevWidth.current = width;
     if (!dealing && !newDeal && !resized && prev.current.size) {
@@ -166,8 +173,10 @@ export function PlayerHand({
         const now = next.get(n.dataset.k!)!;
         if (old) {
           // Place and size: after a call the tiles get a little bigger or
-          // smaller (the row fits the melds), so both glide.
-          const dx = old.x - now.x;
+          // smaller (the row fits the melds), so both glide, with a soft
+          // start (EASE_SOFT): the quick-start curves moved a tile half its
+          // way in the first frame, which read as a jerk.
+          const dx = old.x - now.x + rowShift;
           const s = now.w ? old.w / now.w : 1;
           if (Math.abs(dx) > 1 || Math.abs(s - 1) > 0.01)
             animate(
@@ -176,7 +185,8 @@ export function PlayerHand({
                 { transform: `translateX(${dx}px) scale(${s})`, transformOrigin: "left bottom" },
                 { transform: "translateX(0) scale(1)", transformOrigin: "left bottom" },
               ],
-              DUR.base + 40,
+              DUR.base + 60,
+              EASE_SOFT,
             );
         } else {
           animate(
@@ -186,7 +196,7 @@ export function PlayerHand({
               { transform: "translate(0, 0)", opacity: 1 },
             ],
             DUR.base + 60,
-            EASE_IN,
+            EASE_SOFT,
           );
         }
       }

@@ -8,6 +8,11 @@
   cursor: pointer;
 }
 
+/* A call is waiting for you: the banner plays, taps go to your buttons. */
+.layer[data-pass-through] {
+  pointer-events: none;
+}
+
 /* Centred on the screen (absolute + translate), so the wide band overflows
    both sides equally and the portrait + word sit in the middle. */
 .band {
