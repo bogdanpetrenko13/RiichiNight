@@ -230,8 +230,11 @@ export function useGameController(): GameController {
       const p = base * c.chatty * SPEECH_FREQ_FACTOR[settingsRef.current.speechFreq];
       if (Math.random() >= p) return false;
       if (mid) t.hand += 1;
-      t.at = now;
-      t.seatAt[seat] = now;
+      // A line said now must not move back the time of one already
+      // scheduled later (a reaction waiting for a banner), or the next
+      // reaction would count its pause from too early.
+      t.at = Math.max(t.at, now);
+      t.seatAt[seat] = Math.max(t.seatAt[seat] ?? 0, now);
       speechLog({ seat, kind, mid, at: now });
       if (delayMs) window.setTimeout(() => say(seat, kind, text, ctx), delayMs);
       else say(seat, kind, text, ctx);
