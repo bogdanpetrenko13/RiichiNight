@@ -9,7 +9,11 @@
 // the plugin, navigator.vibrate.
 import { Capacitor, registerPlugin } from "@capacitor/core";
 
-export const VIBRATION_WAYS = ["touch", "notification", "alarm", "media", "plain", "legacy", "view"] as const;
+// Media first: the default. On the owner's Poco (HyperOS) media, notification,
+// alarm and the view's feedback were felt, touch / plain / legacy were not;
+// media follows the phone's media vibration and, unlike alarm, not through
+// Do Not Disturb.
+export const VIBRATION_WAYS = ["media", "notification", "alarm", "view", "touch", "plain", "legacy"] as const;
 export type VibrationWay = (typeof VIBRATION_WAYS)[number];
 
 export interface VibrationInfo {
@@ -32,14 +36,14 @@ const native = registerPlugin<VibrationPlugin>("RNVibration");
 const onDevice = () => Capacitor.isNativePlatform() && Capacitor.isPluginAvailable("RNVibration");
 
 let enabled = true;
-let way: VibrationWay = "touch";
+let way: VibrationWay = "media";
 
 export function setHapticsEnabled(on: boolean) {
   enabled = on;
 }
 
 export function setVibrationWay(w: VibrationWay) {
-  way = VIBRATION_WAYS.includes(w) ? w : "touch";
+  way = VIBRATION_WAYS.includes(w) ? w : "media";
 }
 
 /** Tests read what fired from window.__rnHaptics when they create it. */

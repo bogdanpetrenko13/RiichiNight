@@ -831,7 +831,7 @@ def test_vibration_check_picks_the_way_the_phone_lets_through(make_app):
     page.get_by_text("Настройки", exact=True).first.click()
     check = page.locator("[data-vibration-check]")
     check.wait_for(timeout=10_000)
-    assert check.locator("[aria-pressed=true]").get_attribute("data-way") == "touch"
+    assert check.locator("[aria-pressed=true]").get_attribute("data-way") == "media"
     check.locator("[data-way=alarm]").click()
     assert check.locator("[aria-pressed=true]").get_attribute("data-way") == "alarm"
     page.wait_for_timeout(300)

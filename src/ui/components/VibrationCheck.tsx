@@ -26,7 +26,7 @@ export function VibrationCheck() {
   }, []);
 
   const tryWay = async (w: VibrationWay) => {
-    updateSettings({ vibrationWay: w });
+    updateSettings({ vibrationWay: w, vibrationPicked: true });
     setError(await buzz(150, w));
   };
 

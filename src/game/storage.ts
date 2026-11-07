@@ -124,6 +124,8 @@ export interface Settings {
   haptics: boolean;
   /** How the buzz is tagged for Android (Settings -> vibration check). */
   vibrationWay: VibrationWay;
+  /** The way was picked in the vibration check (not just the default). */
+  vibrationPicked: boolean;
   /** Result screen: "How it's scored" section expanded. */
   scoreDetails?: boolean;
   theme: ThemeMode;
@@ -178,7 +180,8 @@ export function defaultSettings(): Settings {
     safeTiles: false,
     tableFx: "full",
     haptics: true,
-    vibrationWay: "touch",
+    vibrationWay: "media",
+    vibrationPicked: false,
     tileBack: "auto",
     theme: "system",
     styleVersion: STYLE_VERSION,
@@ -224,6 +227,8 @@ export async function loadSettings(): Promise<Settings> {
   if (rest.turnRingStyle !== undefined && !TURN_RING_STYLES.includes(rest.turnRingStyle)) delete rest.turnRingStyle;
   if (rest.tableFx !== undefined && !TABLE_FX.includes(rest.tableFx)) delete rest.tableFx;
   if (rest.vibrationWay !== undefined && !VIBRATION_WAYS.includes(rest.vibrationWay)) delete rest.vibrationWay;
+  // An earlier build saved "touch" as the default, which some phones never feel.
+  if (rest.vibrationWay === "touch" && !rest.vibrationPicked) delete rest.vibrationWay;
   if (rest.aiDelay === undefined && oldSpeed) rest.aiDelay = OLD_SPEED[oldSpeed] ?? AI_DELAY_DEFAULT;
   // The old on/off switch for rivals' lines becomes "off" / the default.
   const oldBubbles = (rest as { speechBubbles?: boolean }).speechBubbles;

@@ -59,7 +59,7 @@ public class VibrationPlugin extends Plugin {
     @PluginMethod
     public void vibrate(PluginCall call) {
         int ms = call.getInt("duration", 40);
-        String way = call.getString("way", "touch");
+        String way = call.getString("way", "media");
         try {
             if ("view".equals(way)) {
                 View view = getBridge().getWebView();
