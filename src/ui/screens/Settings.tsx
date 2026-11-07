@@ -21,6 +21,7 @@ import { TileRow } from "../components/TileRow";
 import { Tile } from "../components/Tile";
 import { AppBar, Group, Row, Segmented, Switch } from "../components/Primitives";
 import { SpeedSlider } from "../components/QuickSettings";
+import { haptics } from "../../game/haptics";
 import styles from "./SettingsScreen.module.css";
 
 /** The app is AGPL: whoever gets it can get the source (see NOTICE.md). */
@@ -35,7 +36,15 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
 
   const toggle = (key: BoolKey, label: StringKey, hint?: StringKey) => (
     <Row label={t(label)} hint={hint ? t(hint) : undefined}>
-      <Switch label={t(label)} checked={settings[key]} onChange={(v) => updateSettings({ [key]: v })} />
+      <Switch
+        label={t(label)}
+        checked={settings[key]}
+        onChange={(v) => {
+          updateSettings({ [key]: v });
+          // Switching vibration on buzzes once, so you feel that it works.
+          if (key === "haptics" && v) haptics.test();
+        }}
+      />
     </Row>
   );
   const setRules = (patch: Partial<GameRules>) => updateSettings({ gameRules: { ...settings.gameRules, ...patch } });

@@ -2,6 +2,7 @@ import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { AI_DELAY_MAX, AI_DELAY_MIN, type Settings } from "../../game/storage";
 import { Row, Segmented, Switch } from "./Primitives";
+import { haptics } from "../../game/haptics";
 import styles from "./QuickSettings.module.css";
 
 /** Rivals' speed: right = faster (the slider runs over the inverted delay). */
@@ -38,7 +39,15 @@ export function QuickSettings() {
   const { t, settings, updateSettings } = useApp();
   const toggle = (key: BoolKey, label: StringKey) => (
     <Row label={t(label)}>
-      <Switch label={t(label)} checked={settings[key]} onChange={(v) => updateSettings({ [key]: v } as Partial<Settings>)} />
+      <Switch
+        label={t(label)}
+        checked={settings[key]}
+        onChange={(v) => {
+          updateSettings({ [key]: v } as Partial<Settings>);
+          // Switching vibration on buzzes once, so you feel that it works.
+          if (key === "haptics" && v) haptics.test();
+        }}
+      />
     </Row>
   );
   const volume = (key: VolumeKey, label: StringKey) => (

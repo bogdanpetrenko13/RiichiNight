@@ -5,4 +5,5 @@ export const NotificationType = { Success: "SUCCESS", Warning: "WARNING", Error:
 export const Haptics = {
   async impact() {},
   async notification() {},
+  async vibrate() {},
 };

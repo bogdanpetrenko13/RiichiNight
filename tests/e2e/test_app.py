@@ -739,6 +739,11 @@ def test_vibration_on_your_discard_and_your_win(make_app, on):
     log = page.evaluate("() => window.__rnHaptics.slice()")
     if not on:
         assert log == [], log
+        # Switching it on in the table menu buzzes once, to feel it works.
+        page.locator("button:has-text('Следующая раздача')").click()
+        page.get_by_role("button", name="Меню").click()
+        page.locator("[data-quick-settings]").get_by_role("switch", name="Вибрация").click()
+        assert page.evaluate("() => window.__rnHaptics.slice()") == ["test"]
     else:
         assert mine and mine[0] == "discard", mine
         after = log[len(mine):]
