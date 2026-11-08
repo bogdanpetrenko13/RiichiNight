@@ -127,14 +127,12 @@
     var(--depth);
 }
 
-/* Traditional sets: a thicker tile with a light bevel along the bottom of
+/* Bone, the traditional set: a thicker tile with a light bevel along the bottom of
    the face. */
-:global(:root[data-tileset="classic"]) .tile,
 :global(:root[data-tileset="ivory"]) .tile {
   --edge: 0.1;
 }
 
-:global(:root[data-tileset="classic"]) .tile:not(.back),
 :global(:root[data-tileset="ivory"]) .tile:not(.back) {
   box-shadow:
     var(--ring),

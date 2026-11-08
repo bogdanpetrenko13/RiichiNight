@@ -334,18 +334,6 @@
 [data-dealer-chip="lime"] [data-zone] { --dealer-bg: #a5e05a; --dealer-text: #221a0c; }
 
 /* ---- tile sets (data-tileset on <html>) ----------------------------------- */
-/* Traditional look: warm face, amber edge, golden backs. */
-:root[data-tileset="classic"] {
-  --bone-50: #fdfcf8;
-  --bone-100: #f1efe8;
-  --bone-200: #e3e0d7;
-  --bone-300: #f2a93b;
-  --bone-shadow: #b9711b;
-  --tile-back: #e5a92c;
-  --tile-back-hi: #ffe08a;
-  --tile-back-edge: #b9711b;
-}
-
 :root[data-tileset="ivory"] {
   --tile-back-hi: #e9925a;
   --bone-50: #fff8e6;

@@ -138,9 +138,9 @@ def test_landscape_bands_keep_their_size_with_buttons(make_app):
 def test_tile_depth_follows_the_back_colour_and_stays_under_the_riichi_tile(make_app):
     """A tile's edge is its back layer, in the tile back colour (graphite
     here, not the set's amber), and a sideways riichi tile keeps its edge
-    under it in the traditional sets too (it used to jut out to the left);
+    under it in the traditional set too (it used to jut out to the left);
     the face art covers the face like a real tile's (a thin margin)."""
-    settings = {"aiDelay": 200, "tileset": "classic", "tableStyle": "felt", "tileBack": "graphite",
+    settings = {"aiDelay": 200, "tileset": "ivory", "tableStyle": "felt", "tileBack": "graphite",
                 "styleVersion": 3, "theme": "dark"}
     app = make_app(PORTRAIT).open("?scenario=myriichi", settings).start_game()
     _riichi_offered(app)

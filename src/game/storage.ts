@@ -13,11 +13,11 @@ export const AI_DELAY_MAX = 1500;
 export const AI_DELAY_DEFAULT = 700;
 /** Old three-step setting, mapped to the slider on load. */
 const OLD_SPEED: Record<string, number> = { fast: 250, normal: AI_DELAY_DEFAULT, slow: 1100 };
-export type Tileset = "modern" | "classic" | "ivory" | "dark" | "flat";
+export type Tileset = "modern" | "ivory" | "dark" | "flat";
 /** Same choice as in Riichi Trainer: follow the system, or force light/dark. */
 export type ThemeMode = "system" | "light" | "dark";
 
-export const TILESETS: Tileset[] = ["modern", "classic", "ivory", "dark", "flat"];
+export const TILESETS: Tileset[] = ["modern", "ivory", "dark", "flat"];
 export const THEME_MODES: ThemeMode[] = ["system", "light", "dark"];
 
 export type TableStyle = "quiet" | "felt";
@@ -26,7 +26,7 @@ export const TABLE_STYLES: TableStyle[] = ["quiet", "felt"];
 export type TableFx = "full" | "short" | "off";
 export const TABLE_FX: TableFx[] = ["full", "short", "off"];
 
-export const STYLE_TILESET: Record<TableStyle, Tileset> = { quiet: "modern", felt: "classic" };
+export const STYLE_TILESET: Record<TableStyle, Tileset> = { quiet: "modern", felt: "ivory" };
 
 /** Felt colour of the "felt" table style (src/styles/tokens.css). */
 export type FeltColor = "emerald" | "sapphire" | "burgundy" | "graphite" | "amethyst" | "wood";
@@ -225,6 +225,9 @@ export async function loadSettings(): Promise<Settings> {
   if (rest.tileBack !== undefined && !TILE_BACKS.includes(rest.tileBack)) delete rest.tileBack;
   if (rest.dealerChip !== undefined && !TURN_RINGS.includes(rest.dealerChip)) delete rest.dealerChip;
   if (rest.turnRingStyle !== undefined && !TURN_RING_STYLES.includes(rest.turnRingStyle)) delete rest.turnRingStyle;
+  // "Classic" was dropped (it looked like Modern once the edge took the back
+  // colour): its players get Bone, the other traditional set.
+  if ((rest.tileset as string) === "classic") rest.tileset = "ivory";
   if (rest.tableFx !== undefined && !TABLE_FX.includes(rest.tableFx)) delete rest.tableFx;
   if (rest.vibrationWay !== undefined && !VIBRATION_WAYS.includes(rest.vibrationWay)) delete rest.vibrationWay;
   // An earlier build saved "touch" as the default, which some phones never feel.
