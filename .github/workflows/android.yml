@@ -140,6 +140,13 @@ jobs:
         run: |
           set -o pipefail
           chmod +x gradlew
+          # services.gradle.org sometimes answers slowly: a longer wrapper
+          # timeout than the template's 10 s, and up to three attempts.
+          sed -i 's/^networkTimeout=.*/networkTimeout=120000/' gradle/wrapper/gradle-wrapper.properties
+          for attempt in 1 2 3; do
+            ./gradlew --version > /dev/null 2>&1 && break
+            echo "Gradle download failed (attempt $attempt)"; sleep 20
+          done
           # Fixed debug key (signing/debug.keystore, the standard public
           # android/android debug credentials) so every CI build has the same
           # signature and installs over the previous one without uninstalling.
@@ -242,7 +249,9 @@ jobs:
   pages:
     name: Web version (GitHub Pages)
     needs: build
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    # Also when only the APK failed: the web build is uploaded right after the
+    # browser tests pass, and only then.
+    if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     continue-on-error: true
     permissions:
