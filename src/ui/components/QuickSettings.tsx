@@ -2,7 +2,7 @@ import { useApp } from "../../app/AppContext";
 import type { StringKey } from "../../i18n/strings";
 import { AI_DELAY_MAX, AI_DELAY_MIN, type Settings } from "../../game/storage";
 import { Row, Segmented, Switch } from "./Primitives";
-import { haptics } from "../../game/haptics";
+import { haptics, vibrationSupported } from "../../game/haptics";
 import styles from "./QuickSettings.module.css";
 
 /** Rivals' speed: right = faster (the slider runs over the inverted delay). */
@@ -75,7 +75,7 @@ export function QuickSettings() {
       {toggle("showWaitHints", "waitHints")}
       {toggle("markTsumogiri", "markTsumogiri")}
       {toggle("safeTiles", "safeTiles")}
-      {toggle("haptics", "hapticsSetting")}
+      {vibrationSupported() && toggle("haptics", "hapticsSetting")}
       <Row label={t("speechFreq")} stacked>
         <Segmented
           value={settings.speechFreq}

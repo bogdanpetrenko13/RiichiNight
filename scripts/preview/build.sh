@@ -25,9 +25,13 @@ mkdir -p "$OUT/py" "$OUT/pyodide"
 "$ES" src/engine/engine.worker.ts --bundle --format=esm --outfile="$OUT/engine.worker.ts" --log-level=warning
 cp public/py/*.py public/py/pyriichi.zip "$OUT/py/"
 cp -r public/characters public/audio public/fonts public/voice public/tiles public/mortal "$OUT/" 2>/dev/null || true
+cp public/manifest.webmanifest public/icon-192.png public/icon-512.png public/favicon.png "$OUT/"
 cp "$PYO"/{pyodide.mjs,pyodide.asm.js,pyodide.asm.wasm,python_stdlib.zip,pyodide-lock.json} "$OUT/pyodide/"
 cat > "$OUT/index.html" <<'H'
 <!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="./manifest.webmanifest"><meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="main.css"></head><body><div id="root"></div><script type="module" src="main.js"></script></body></html>
 H
+# The web version's service worker, as the Vite build writes it.
+node -e 'import(process.argv[1]).then((m) => m.writeServiceWorker(process.argv[2]))' "$HERE/../web/pwa.mjs" "$OUT"
 echo "preview built in $OUT"

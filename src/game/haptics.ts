@@ -35,6 +35,15 @@ interface VibrationPlugin {
 const native = registerPlugin<VibrationPlugin>("RNVibration");
 const onDevice = () => Capacitor.isNativePlatform() && Capacitor.isPluginAvailable("RNVibration");
 
+/**
+ * Whether this phone can vibrate for the game at all: the APK always can; a
+ * browser only with navigator.vibrate (Safari on iPhone has none, so the
+ * web version there hides the vibration settings).
+ */
+export function vibrationSupported(): boolean {
+  return onDevice() || typeof navigator.vibrate === "function";
+}
+
 let enabled = true;
 let way: VibrationWay = "media";
 

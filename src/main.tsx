@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { AppProvider } from "./app/AppContext";
 import App from "./App";
 import "./styles/global.css";
+import { registerServiceWorker } from "./web/pwa";
 
 // The heavy lettering of every call (Riichi! Pon! ...): Inter Black, bundled
 // (public/fonts, OFL) so it looks the same on every phone; system fonts often
@@ -15,6 +16,8 @@ if (typeof FontFace !== "undefined") {
     .then((f) => document.fonts.add(f))
     .catch(() => {});
 }
+
+registerServiceWorker();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
