@@ -140,13 +140,17 @@ jobs:
         run: |
           set -o pipefail
           chmod +x gradlew
-          # services.gradle.org sometimes answers slowly: a longer wrapper
-          # timeout than the template's 10 s, and up to three attempts.
-          sed -i 's/^networkTimeout=.*/networkTimeout=120000/' gradle/wrapper/gradle-wrapper.properties
-          for attempt in 1 2 3; do
-            ./gradlew --version > /dev/null 2>&1 && break
-            echo "Gradle download failed (attempt $attempt)"; sleep 20
-          done
+          # services.gradle.org sometimes times out: fetch the Gradle the
+          # wrapper wants ourselves (retries, then Gradle's own mirror on
+          # GitHub) and point the wrapper at the local file.
+          props=gradle/wrapper/gradle-wrapper.properties
+          dist=$(sed -n 's/^distributionUrl=.*\/\(gradle-[^/]*\.zip\)$/\1/p' "$props")
+          ver=$(echo "$dist" | sed 's/^gradle-\(.*\)-\(all\|bin\)\.zip$/\1/')
+          zip="$RUNNER_TEMP/$dist"
+          curl -fsSL --retry 3 --retry-all-errors --connect-timeout 30 -o "$zip" "https://services.gradle.org/distributions/$dist" \
+            || curl -fsSL --retry 3 --retry-all-errors -o "$zip" "https://github.com/gradle/gradle-distributions/releases/download/v$ver/$dist"
+          sed -i "s|^distributionUrl=.*|distributionUrl=file\\://$zip|" "$props"
+          grep distributionUrl "$props"
           # Fixed debug key (signing/debug.keystore, the standard public
           # android/android debug credentials) so every CI build has the same
           # signature and installs over the previous one without uninstalling.
