@@ -137,6 +137,8 @@ jobs:
       - id: gradle
         name: Build debug APK
         working-directory: android
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -o pipefail
           chmod +x gradlew
@@ -148,7 +150,12 @@ jobs:
           ver=$(echo "$dist" | sed 's/^gradle-\(.*\)-\(all\|bin\)\.zip$/\1/')
           zip="$RUNNER_TEMP/$dist"
           curl -fsSL --retry 3 --retry-all-errors --connect-timeout 30 -o "$zip" "https://services.gradle.org/distributions/$dist" \
-            || curl -fsSL --retry 3 --retry-all-errors -o "$zip" "https://github.com/gradle/gradle-distributions/releases/download/v$ver/$dist"
+            || curl -fsSL --retry 3 --retry-all-errors -o "$zip" "https://github.com/gradle/gradle-distributions/releases/download/v$ver/$dist" \
+            || { api="https://api.github.com/repos/gradle/gradle-distributions/releases"
+                 id=$(curl -fsSL --retry 3 --retry-all-errors -H "Authorization: Bearer $GH_TOKEN" "$api/tags/v$ver" \
+                   | jq -r --arg n "$dist" '.assets[] | select(.name == $n) | .id')
+                 curl -fsSL --retry 3 --retry-all-errors -H "Authorization: Bearer $GH_TOKEN" \
+                   -H "Accept: application/octet-stream" -o "$zip" "$api/assets/$id"; }
           sed -i "s|^distributionUrl=.*|distributionUrl=file\\://$zip|" "$props"
           grep distributionUrl "$props"
           # Fixed debug key (signing/debug.keystore, the standard public
