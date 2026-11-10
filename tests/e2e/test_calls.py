@@ -261,3 +261,37 @@ def test_landscape_chi_chooser_is_a_strip_over_the_hand(make_app, style):
     page.locator("[class*=dock] [data-meld]").first.wait_for(timeout=20_000)
     assert page.locator("[data-chi-option]").count() == 0
     assert not app.errors, app.errors
+
+
+@pytest.mark.parametrize("style", ["quiet", "felt"])
+def test_call_buttons_are_capital_pills(make_app, style):
+    """The buttons at the table look like the seat chips: pills with small
+    capitals; Pon in the call colour (the main green, gold on the felt), Pass
+    on a soft chip."""
+    app = make_app(PORTRAIT).open("?scenario=mypon", {"aiDelay": 300, "tableStyle": style}).start_game()
+    page = app.page
+    for _ in range(300):
+        if app.button("Пон").count():
+            break
+        if app.my_turn():
+            app.discard()
+        page.wait_for_timeout(100)
+    look = page.evaluate(
+        """() => Object.fromEntries([...document.querySelectorAll('[data-actions] button')].map((b) => {
+             const s = getComputedStyle(b);
+             return [b.dataset.kind, { radius: parseFloat(s.borderTopLeftRadius), height: b.offsetHeight,
+                                       caps: s.textTransform, bg: s.backgroundColor, font: s.fontWeight }];
+           }))"""
+    )
+    call, skip = look["call"], look["pass"]
+    for b in (call, skip):
+        assert b["caps"] == "uppercase" and b["font"] == "700", look
+        assert b["radius"] >= b["height"] / 2 - 1, look  # a pill
+    # The main colour of the app's theme (light or dark), gold on the felt.
+    main = page.evaluate(
+        """() => { const p = document.createElement('i'); p.style.color = 'var(--primary)';
+                   document.body.append(p); const c = getComputedStyle(p).color; p.remove(); return c; }"""
+    )
+    assert call["bg"] == ("rgb(242, 193, 78)" if style == "felt" else main), (look, main)
+    assert skip["bg"] != call["bg"], look
+    assert not app.errors, app.errors

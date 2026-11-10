@@ -60,24 +60,25 @@
   text-align: center;
 }
 
+/* Pills with small capitals, like the seat chips (look from the table
+   style's --btn-* tokens in tokens.css). */
 .action {
   min-width: 0;
   min-height: 42px;
-  padding: 0 8px var(--btn-edge);
+  padding: 0 12px;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--btn-radius);
-  border: 1px solid var(--btn-call-bg);
+  border: 2px solid var(--btn-call-bg);
   background: var(--btn-call-bg);
   color: var(--btn-call-text);
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   font-size: 15px;
   letter-spacing: var(--btn-ls);
   text-transform: var(--btn-case);
-  box-shadow: var(--btn-shadow);
   cursor: pointer;
   transition:
     transform var(--dur-fast) var(--ease-std),
@@ -104,8 +105,6 @@
   background: var(--btn-bg);
   border-color: var(--btn-border);
   color: var(--btn-text);
-  box-shadow: var(--btn-pass-shadow);
-  padding-bottom: 0;
 }
 
 /* Two buttons side by side in the landscape column: a smaller label so the
@@ -121,7 +120,7 @@
 
 .action[data-kind="primary"] {
   background: var(--btn-primary-bg);
-  border-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
   color: var(--btn-primary-text);
 }
 

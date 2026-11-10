@@ -106,6 +106,20 @@ button {
   border-radius: var(--radius-m);
 }
 
+/* At the table (its menu, round result, match end and error dialogs too):
+   the same pills with small capitals as the action buttons. */
+[data-style] .btn {
+  border-radius: var(--btn-radius);
+  text-transform: var(--btn-case);
+  letter-spacing: var(--btn-ls);
+  font-weight: var(--fw-bold);
+}
+
+[data-style] .btn-ghost {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .panel {
   background: var(--surface);
   border: 1px solid var(--border);

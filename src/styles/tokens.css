@@ -211,23 +211,22 @@
   --portrait-radius: 22%;
   --active-ring: var(--primary);
   --pointer: var(--accent);
-  --btn-radius: var(--radius-s);
-  --btn-case: none;
-  --btn-ls: 0;
-  --btn-bg: var(--surface);
+  /* Buttons at the table: pills with small capitals, like the seat chips.
+     Calls in the main colour, a win in the accent, the plain main action
+     (discard the selected tile, riichi) outlined, Pass on a soft chip. */
+  --btn-radius: 999px;
+  --btn-case: uppercase;
+  --btn-ls: var(--caps-ls);
+  --btn-bg: var(--chip-bg);
   --btn-text: var(--ink);
-  --btn-border: var(--border-strong);
-  --btn-primary-bg: var(--primary);
-  --btn-primary-text: var(--on-primary);
-  --btn-call-bg: var(--info);
-  --btn-call-text: var(--on-info);
+  --btn-border: transparent;
+  --btn-primary-bg: transparent;
+  --btn-primary-text: var(--primary);
+  --btn-primary-border: var(--primary);
+  --btn-call-bg: var(--primary);
+  --btn-call-text: var(--on-primary);
   --btn-win-bg: var(--accent);
   --btn-win-text: var(--on-accent);
-  /* Button depth: a plain shadow here; the felt table's buttons have a
-     tile-like thick bottom edge (and room for it in the padding). */
-  --btn-shadow: var(--shadow-sm);
-  --btn-pass-shadow: none;
-  --btn-edge: 0px;
 
   /* Motion (see src/ui/motion.ts). */
   --dur-fast: 120ms;
@@ -259,24 +258,17 @@
   --portrait-radius: 50%;
   --active-ring: #f2c14e;
   --pointer: #f2c14e;
-  /* Buttons "like tiles": ivory calls, the main action in the felt's light
-     tone (--felt-accent, per felt colour below), a thick bottom edge. */
-  --felt-accent: #6cc59a;
-  --btn-radius: 10px;
-  --btn-case: uppercase;
-  --btn-ls: 0.04em;
-  --btn-bg: rgba(0, 0, 0, 0.25);
+  /* Buttons: the same pills as on the quiet table, in the felt's colours:
+     calls in the turn gold, a win in red, Pass on a dark chip. The call
+     text is the felt's deep tone (per felt colour below). */
+  --btn-bg: rgba(0, 0, 0, 0.28);
   --btn-text: #f3efe2;
-  --btn-border: transparent;
-  --btn-primary-bg: var(--felt-accent);
-  --btn-primary-text: #12140f;
-  --btn-call-bg: #f5f0e3;
+  --btn-primary-text: #f2c14e;
+  --btn-primary-border: #f2c14e;
+  --btn-call-bg: #f2c14e;
   --btn-call-text: #1a3d2f;
   --btn-win-bg: #d2452f;
   --btn-win-text: #ffffff;
-  --btn-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.22), 0 3px 8px rgba(0, 0, 0, 0.35);
-  --btn-pass-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
-  --btn-edge: 3px;
   color: var(--ink);
 }
 
@@ -288,8 +280,8 @@
 }
 
 /* Felt colours (Settings → Felt colour), set as data-felt next to data-style.
-   Emerald is the base felt above. --btn-call-text is the felt's deep tone,
-   --felt-accent its light tone (the main button). */
+   Emerald is the base felt above. --btn-call-text is the felt's deep tone (the text
+   on the gold call buttons). */
 [data-style="felt"][data-felt="sapphire"] {
   --tbl-bg: radial-gradient(120% 80% at 50% 40%, #2a4f7a 0%, #183354 55%, #0b1b30 100%);
 }
@@ -306,11 +298,11 @@
   --tbl-bg: repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.06) 0 3px, rgba(255, 255, 255, 0.03) 3px 9px, rgba(0, 0, 0, 0.04) 9px 15px),
     radial-gradient(120% 80% at 50% 40%, #7a5434 0%, #55391f 55%, #2c1d10 100%);
 }
-[data-style="felt"][data-felt="sapphire"] [data-zone] { --btn-call-text: #183354; --felt-accent: #79a8e6; }
-[data-style="felt"][data-felt="burgundy"] [data-zone] { --btn-call-text: #4a1a24; --felt-accent: #e38394; }
-[data-style="felt"][data-felt="graphite"] [data-zone] { --btn-call-text: #25282c; --felt-accent: #9ec3e6; }
-[data-style="felt"][data-felt="amethyst"] [data-zone] { --btn-call-text: #2c1f48; --felt-accent: #b49cf0; }
-[data-style="felt"][data-felt="wood"] [data-zone] { --btn-call-text: #55391f; --felt-accent: #e0aa6b; }
+[data-style="felt"][data-felt="sapphire"] [data-zone] { --btn-call-text: #183354; }
+[data-style="felt"][data-felt="burgundy"] [data-zone] { --btn-call-text: #4a1a24; }
+[data-style="felt"][data-felt="graphite"] [data-zone] { --btn-call-text: #25282c; }
+[data-style="felt"][data-felt="amethyst"] [data-zone] { --btn-call-text: #2c1f48; }
+[data-style="felt"][data-felt="wood"] [data-zone] { --btn-call-text: #55391f; }
 
 /* Turn frame colour (Settings → Turn highlight), data-ring next to data-style;
    without it the style's own colour is used.
