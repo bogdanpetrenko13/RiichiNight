@@ -105,3 +105,27 @@ def test_russian_lines_do_not_give_the_player_a_gender():
         beats = re.findall(r'ru: "((?:[^"\\]|\\.)+)"', _section(text, "  beats: [", "  lines: {"))
         for line in re.findall(r'"((?:[^"\\]|\\.)+)"', ru) + beats:
             assert not gendered.search(line), (hid, line)
+
+
+CALL_WORDS = {"pon": "pon", "пон": "pon", "chi": "chi", "чи": "chi", "kan": "kan", "кан": "kan"}
+
+
+def _line_call(line):
+    """The call a line opens with, as lineCall() in src/game/characters.ts."""
+    m = re.match(r"([a-zа-яё]+)", line.strip(), re.I)
+    return CALL_WORDS.get(m.group(1).lower()) if m else None
+
+
+def test_every_call_has_a_fitting_line():
+    """A "call" line naming a call ("Pon!", "Чи.") is said only for that call,
+    so each heroine needs, for Pon, Chi and Kan alike, a line that names it or
+    names none ("Беру!"), in both languages."""
+    for hid in _heroines():
+        text = open(os.path.join(SPEECH, hid + ".ts"), encoding="utf-8").read()
+        lines = _section(text, "  lines: {", "  bonds: {")
+        for lang, block in (("en", _section(lines, "    en: {", "    ru: {")), ("ru", _section(lines, "    ru: {", None))):
+            items = re.findall(r'"((?:[^"\\]|\\.)+)"', re.search(r"\bcall: \[(.*?)\],", block).group(1))
+            for call in ("pon", "chi", "kan"):
+                assert any(_line_call(x) in (None, call) for x in items), (hid, lang, call, items)
+            assert _line_call("Pon! Mine!") == "pon" and _line_call("Чи. Так быстрее.") == "chi"
+            assert _line_call("Беру-беру!") is None and _line_call("Чистая рука") is None

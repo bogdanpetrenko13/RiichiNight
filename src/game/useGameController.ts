@@ -383,7 +383,7 @@ export function useGameController(): GameController {
                 maybeSay(who, "rivalRiichi", friend ? 0.8 : 0.4, line, REACT_AFTER_BANNER + (spoke ? 1600 : 400), { name: nameOf(ev.seat) }, true);
               }
             } else if (ev.kind === "pon" || ev.kind === "chi" || ev.kind === "kan") {
-              maybeSay(ev.seat, "call", 0.35, undefined, 700, undefined, true);
+              maybeSay(ev.seat, "call", 0.35, undefined, 700, { call: ev.kind }, true);
             }
             break;
           }

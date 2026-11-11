@@ -89,7 +89,10 @@ export interface BondLines {
  */
 export const PLACEHOLDERS = ["points", "yaku", "name"] as const;
 export type Placeholder = (typeof PLACEHOLDERS)[number];
-export type LineContext = Partial<Record<Placeholder, string>>;
+/** Which call she just made: a "call" line naming one call ("Pon!", "Chi.")
+ *  is said only for that call; lines that name none fit any. */
+export type CallKind = "pon" | "chi" | "kan";
+export type LineContext = Partial<Record<Placeholder, string>> & { call?: CallKind };
 
 /**
  * A piece of her story she tells once, at the start of the match after `at`

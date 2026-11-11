@@ -287,8 +287,17 @@ export function fillLines(pool: readonly string[], ctx: LineContext = {}): strin
     .map((line) => line.replace(/\{(\w+)\}/g, (_, k: keyof LineContext) => ctx[k] as string));
 }
 
+/** The call a line opens with ("Pon! Mine!" -> "pon"), if any. */
+const CALL_WORDS: Record<string, "pon" | "chi" | "kan"> = { pon: "pon", пон: "pon", chi: "chi", чи: "chi", kan: "kan", кан: "kan" };
+export function lineCall(line: string): "pon" | "chi" | "kan" | undefined {
+  const m = /^([a-zа-яё]+)/i.exec(line.trim());
+  return m ? CALL_WORDS[m[1].toLowerCase()] : undefined;
+}
+
 export function pickLine(c: CharacterDef, lang: Lang, kind: SpeechKind, ctx?: LineContext): string {
-  const pool = fillLines(c.lines[lang][kind] ?? [], ctx);
+  let pool = fillLines(c.lines[lang][kind] ?? [], ctx);
+  // A Pon gets no "Chi!": lines naming another call are left out.
+  if (ctx?.call) pool = pool.filter((line) => (lineCall(line) ?? ctx.call) === ctx.call);
   return pool[Math.floor(Math.random() * pool.length)] ?? "";
 }
 
