@@ -91,7 +91,17 @@ def main():
     ap.add_argument("--pick", action="append", default=[], help="id:emotion:N (render number)")
     ap.add_argument("--preview", help="write a contact sheet instead of the game files")
     ap.add_argument("--only", nargs="*", help="heroine ids")
+    ap.add_argument("--output", help="output character directory (required for square art)")
+    ap.add_argument("--square", action="store_true", help="preserve square framing and colours; lossless WebP")
     args = ap.parse_args()
+    if args.square and not args.output:
+        ap.error("--square requires --output for staged review")
+    def prepare(img, ref, hid):
+        if args.square:
+            if img.width != img.height or img.size != ref.size:
+                raise ValueError(f"{hid}: square renders must match the base dimensions")
+            return img.convert("RGB").resize((SIZE, SIZE), Image.Resampling.LANCZOS)
+        return crop(match_colours(img, ref), hid)
     picks = {}
     for p in args.pick:
         hid, emo, n = p.split(":")
@@ -103,26 +113,26 @@ def main():
         if hid not in CROP or (args.only and hid not in args.only):
             continue
         ref = Image.open(base).convert("RGB")
-        row = [crop(ref, hid)]
+        row = [prepare(ref, ref, hid) if args.square else crop(ref, hid)]
         out = {}
         for emo in EMOTIONS:
             files = renders(args.emotions, num, hid, emo)
             if args.preview:
-                row += [crop(match_colours(Image.open(f), ref), hid) for f in files]
+                row += [prepare(Image.open(f), ref, hid) for f in files]
                 continue
             n = picks.get((hid, emo))
             chosen = [f for f in files if n is None or f.endswith(f"_{n:05d}_.png")]
             if not chosen:
                 raise SystemExit(f"{hid} {emo}: no render")
-            out[emo] = crop(match_colours(Image.open(chosen[0]), ref), hid)
+            out[emo] = prepare(Image.open(chosen[0]), ref, hid)
         rows.append((hid, row))
         if args.preview:
             continue
-        d = os.path.join(ROOT, "public", "characters", hid)
+        d = os.path.join(args.output or os.path.join(ROOT, "public", "characters"), hid)
         os.makedirs(os.path.join(d, "emotions"), exist_ok=True)
         for emo, im in out.items():
-            im.save(os.path.join(d, "emotions", f"{emo}.webp"), quality=86, method=6)
-        out["neutral"].save(os.path.join(d, "portrait.webp"), quality=86, method=6)
+            im.save(os.path.join(d, "emotions", f"{emo}.webp"), quality=86, method=6, lossless=args.square)
+        out["neutral"].save(os.path.join(d, "portrait.webp"), quality=86, method=6, lossless=args.square)
         print(hid, "ok")
 
     if args.preview:
